@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/gutenberg_service.dart';
+import '../services/practice_service.dart';
 import 'package:go_router/go_router.dart';
 
 class ReadingPracticeScreen extends StatefulWidget {
@@ -11,16 +12,17 @@ class ReadingPracticeScreen extends StatefulWidget {
 
 class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
   final TextEditingController _textController = TextEditingController();
-  String _displayedSentence =
-      "Type this sentence to practice your reading skills.";
+  // Store sentences for each source
+  String _booksSentence = "";
+  String _aiSentence = "This is a random sentence from AI.";
+  String _displayedSentence = "";
   String _feedback = "";
-  String? _selectedSource = 'Books'; // Dropdown selection
-  final GutenbergService _gutenbergService =
-      GutenbergService(); // Initialize service
-  bool _isLoading = false; // Add loading state flag
-  String _bookTitle = ""; // Add book title
-  String _bookAuthor = ""; // Add book author
-  String _currentBookId = ""; // Add book ID for navigation
+  String _selectedSource = 'Books';
+  final PracticeService _practiceService = PracticeService();
+  bool _isLoading = false;
+  String _bookTitle = "";
+  String _bookAuthor = "";
+  String _currentBookId = "";
 
   @override
   void initState() {
@@ -38,79 +40,79 @@ class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
   }
 
   void _checkAnswer() {
-    // Normalize both strings by trimming whitespace and comparing case-insensitively
-    final userInput = _textController.text.trim();
-    final targetSentence = _displayedSentence.trim();
+    bool isCorrect =
+        _practiceService.checkAnswer(_textController.text, _displayedSentence);
 
-    print('User input: $userInput');
-    print('Target sentence: $targetSentence');
-    print('User input length: ${userInput.length}');
-    print('Target sentence length: ${targetSentence.length}');
+    setState(() {
+      _feedback = isCorrect ? "Correct!" : "Try again!";
+    });
+  }
 
-    // Print character codes to debug invisible characters
-    print('User input codes: ${userInput.codeUnits}');
-    print('Target sentence codes: ${targetSentence.codeUnits}');
-
-    // Try a more flexible comparison
-    final normalizedUserInput =
-        userInput.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
-    final normalizedTarget =
-        targetSentence.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
-
-    print('Normalized equal: ${normalizedUserInput == normalizedTarget}');
-
-    if (normalizedUserInput == normalizedTarget) {
+  void _fetchRandomSentence() async {
+    // Only fetch if we don't already have content for this source
+    if ((_selectedSource == 'Books' && _booksSentence.isEmpty) ||
+        (_selectedSource == 'AI' && _aiSentence.isEmpty)) {
       setState(() {
-        _feedback = "Correct!";
+        _isLoading = true;
+        _feedback = "";
+        _textController.clear();
       });
+
+      final result = await _practiceService.fetchRandomContent(
+          _selectedSource, _isLoading);
+
+      if (mounted) {
+        setState(() {
+          if (_selectedSource == 'Books') {
+            _booksSentence = result['content'];
+          } else {
+            _aiSentence = result['content'];
+          }
+
+          _displayedSentence =
+              _selectedSource == 'Books' ? _booksSentence : _aiSentence;
+          _bookTitle = result['bookTitle'];
+          _bookAuthor = result['bookAuthor'];
+          _currentBookId = result['currentBookId'];
+          _isLoading = false;
+        });
+      }
     } else {
+      // Just switch to the existing content
       setState(() {
-        _feedback = "Try again!";
+        _displayedSentence =
+            _selectedSource == 'Books' ? _booksSentence : _aiSentence;
+        _feedback = "";
+        _textController.clear();
       });
     }
   }
 
-  void _fetchRandomSentence() async {
+  void _fetchNewSentence() async {
     setState(() {
-      _isLoading = true; // Set loading to true when starting fetch
-      _feedback = ""; // Clear previous feedback
-      _textController.clear(); // Clear text input
+      _isLoading = true;
+      _feedback = "";
+      _textController.clear();
     });
 
-    if (_selectedSource == 'AI') {
-      // Fetch a random sentence from AI
+    final result =
+        await _practiceService.fetchRandomContent(_selectedSource, _isLoading);
+
+    if (mounted) {
       setState(() {
-        _displayedSentence = "This is a random sentence from AI.";
-        _bookTitle = "AI Generated";
-        _bookAuthor = "AI";
-        _currentBookId = ""; // No book ID for AI
-        _isLoading = false; // Set loading to false when done
-      });
-    } else {
-      // Fetch a random sentence from Books using GutenbergService
-      try {
-        var result = await _gutenbergService.fetchRandomSentence();
-        setState(() {
-          // Clean the sentence by replacing all whitespace sequences with a single space
-          _displayedSentence = (result['sentence'] ?? "No sentence found")
-              .replaceAll(RegExp(r'\s+'), ' ')
-              .trim();
-          _bookTitle = result['title'] ?? "Unknown Title";
-          _bookAuthor = result['author'] ?? "Unknown Author";
-          _currentBookId = result['bookId'] ?? ""; // Store book ID
-          _isLoading = false; // Set loading to false when done
-        });
-      } catch (e) {
-        if (mounted && context.mounted) {
-          setState(() {
-            _displayedSentence = "Error fetching sentence: $e";
-            _bookTitle = "";
-            _bookAuthor = "";
-            _currentBookId = "";
-            _isLoading = false; // Set loading to false even on error
-          });
+        if (_selectedSource == 'Books') {
+          _booksSentence = result['content'];
+        } else {
+          _aiSentence = result['content'];
         }
-      }
+
+        _displayedSentence =
+            _selectedSource == 'Books' ? _booksSentence : _aiSentence;
+        _bookTitle = result['bookTitle'];
+        _bookAuthor = result['bookAuthor'];
+        _currentBookId = result['currentBookId'];
+        _isLoading = false;
+      });
     }
   }
 
@@ -137,70 +139,31 @@ class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      DropdownButton<String>(
-                        value: _selectedSource,
-                        items: <String>['AI', 'Books'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
+                      // Use shared source selector
+                      _practiceService.buildSourceSelector(
+                        _selectedSource,
+                        (newSource) {
                           setState(() {
-                            _selectedSource = newValue;
-                            _fetchRandomSentence(); // Fetch new sentence when changed
+                            _selectedSource = newSource;
+                            // This will use cached content if available
+                            _fetchRandomSentence();
                           });
                         },
                       ),
                       const SizedBox(height: 32),
                       _isLoading
-                          ? const CircularProgressIndicator() // Show loading indicator
+                          ? const CircularProgressIndicator()
                           : Column(
                               children: [
-                                if (_bookTitle.isNotEmpty ||
-                                    _bookAuthor.isNotEmpty)
-                                  InkWell(
-                                    onTap: _currentBookId.isNotEmpty
-                                        ? _navigateToBookDetail
-                                        : null,
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 16.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              'From: $_bookTitle${_bookAuthor.isNotEmpty ? ' by $_bookAuthor' : ''}',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium
-                                                  ?.copyWith(
-                                                    decoration: _currentBookId
-                                                            .isNotEmpty
-                                                        ? TextDecoration
-                                                            .underline
-                                                        : null,
-                                                    color: _currentBookId
-                                                            .isNotEmpty
-                                                        ? Theme.of(context)
-                                                            .colorScheme
-                                                            .primary
-                                                        : null,
-                                                  ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                          if (_currentBookId.isNotEmpty)
-                                            const SizedBox(width: 4),
-                                          if (_currentBookId.isNotEmpty)
-                                            const Icon(Icons.open_in_new,
-                                                size: 16),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                // Use shared book source info widget
+                                _practiceService.buildBookSourceInfo(
+                                  context,
+                                  _bookTitle,
+                                  _bookAuthor,
+                                  _currentBookId,
+                                  _navigateToBookDetail,
+                                  _selectedSource,
+                                ),
                                 Card(
                                   elevation: 4,
                                   child: Padding(
@@ -257,15 +220,8 @@ class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
                         onPressed: _checkAnswer,
                         child: const Text('Check'),
                       ),
-                      Text(
-                        _feedback,
-                        style: TextStyle(
-                          color: _feedback == "Correct!"
-                              ? Colors.green
-                              : Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      // Use shared feedback widget
+                      _practiceService.buildFeedbackText(_feedback),
                     ],
                   ),
                 ],
@@ -275,7 +231,7 @@ class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _isLoading ? null : _fetchRandomSentence,
+        onPressed: _isLoading ? null : _fetchNewSentence,
         tooltip: 'Get New Sentence',
         heroTag: 'reading_fab',
         child: const Icon(Icons.refresh),

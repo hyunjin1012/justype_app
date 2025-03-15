@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../models/book.dart';
 import '../services/gutenberg_service.dart';
+import '../widgets/book_practice_modal.dart';
 
 class BookDetailScreen extends StatefulWidget {
   final String bookId;
@@ -53,6 +55,28 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         SnackBar(content: Text('Error loading book: $e')),
       );
     }
+  }
+
+  void _showPracticeModal(BuildContext context) {
+    if (_book == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => BookPracticeModal(
+          book: _book!,
+          scrollController: scrollController,
+        ),
+      ),
+    );
   }
 
   @override
@@ -107,6 +131,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: Colors.grey[700],
                                 ),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => _showPracticeModal(context),
+                        icon: const Icon(Icons.school),
+                        label: const Text('Practice with this Book'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primaryContainer,
+                        ),
                       ),
                       const Divider(height: 24),
                       Expanded(

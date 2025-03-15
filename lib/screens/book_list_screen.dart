@@ -94,6 +94,29 @@ class _BookListScreenState extends State<BookListScreen> {
       appBar: AppBar(
         title: const Text('Book Library'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('About'),
+                  content: const Text(
+                    'This app displays books from Project Gutenberg, a library of over 60,000 free eBooks. '
+                    'Project Gutenberg offers free eBooks of classic literature that have expired copyright protection.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: _isLoading && _booksResponse == null
           ? const Center(child: CircularProgressIndicator())
