@@ -6,8 +6,11 @@ import '../services/progress_service.dart';
 class PracticeContent extends StatefulWidget {
   final String title;
   final Widget Function(String sentence) sentenceDisplay;
-  final Widget Function(TextEditingController controller,
-      Function() checkAnswer, String feedback) inputArea;
+  final Widget Function(
+      TextEditingController controller,
+      Function() checkAnswer,
+      String feedback,
+      bool isCheckButtonEnabled) inputArea;
   final Function() onRefresh;
   final String heroTag;
   final SentenceManager sentenceManager;
@@ -35,6 +38,7 @@ class _PracticeContentState extends State<PracticeContent> {
   final ProgressService _progressService = ProgressService();
   String _feedback = "";
   bool _isLoading = false;
+  bool _isCheckButtonEnabled = true;
 
   // Add tracking variables
   int _correctAnswers = 0;
@@ -69,6 +73,11 @@ class _PracticeContentState extends State<PracticeContent> {
       final practiceType =
           widget.title.contains('Reading') ? 'reading' : 'listening';
       _progressService.completeExercise(practiceType: practiceType);
+
+      // Disable check button when answer is correct
+      setState(() {
+        _isCheckButtonEnabled = false;
+      });
     }
 
     setState(() {
@@ -82,6 +91,8 @@ class _PracticeContentState extends State<PracticeContent> {
     setState(() {
       _isLoading = true;
       _feedback = "";
+      _isCheckButtonEnabled =
+          true; // Reset button state when fetching new sentence
     });
 
     await widget.sentenceManager.fetchContent(
@@ -236,8 +247,9 @@ class _PracticeContentState extends State<PracticeContent> {
                 ),
               ),
             ),
-            // Input area using the provided builder
-            widget.inputArea(_textController, _checkAnswer, _feedback),
+            // Input area using the provided builder - pass the button state
+            widget.inputArea(_textController, _checkAnswer, _feedback,
+                _isCheckButtonEnabled),
           ],
         ),
       ),

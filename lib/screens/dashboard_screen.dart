@@ -18,12 +18,14 @@ class _DashboardScreenState extends State<DashboardScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _progressService.addListener(_onProgressUpdated);
     _loadProgress(); // Load progress when the screen is initialized
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _progressService.removeListener(_onProgressUpdated);
     super.dispose();
   }
 
@@ -42,6 +44,15 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (_needsRefresh) {
       _loadProgress();
       _needsRefresh = false;
+    }
+  }
+
+  // Called when progress is updated
+  void _onProgressUpdated() {
+    if (mounted) {
+      setState(() {
+        // This will trigger a rebuild with the latest progress data
+      });
     }
   }
 

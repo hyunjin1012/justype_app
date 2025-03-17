@@ -7,6 +7,7 @@ import '../widgets/sentence_display_card.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/practice_mode_selector.dart';
 import '../services/book_sentence_manager.dart';
+import '../services/progress_service.dart';
 
 class BookPracticeModal extends StatefulWidget {
   final Book book;
@@ -31,6 +32,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   final PracticeService _practiceService = PracticeService();
   String _feedback = "";
   String _currentSentence = "";
+  bool _isCheckButtonEnabled = true;
+  final ProgressService _progressService = ProgressService();
 
   @override
   void initState() {
@@ -79,7 +82,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     });
   }
 
-  void _checkAnswer() {
+  void _checkAnswer() async {
     final userInput = _textController.text;
     if (userInput.isEmpty) return;
 
@@ -87,12 +90,27 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     print("Checking answer: '$userInput' against '$currentSentence'");
 
     final isCorrect = _practiceService.checkAnswer(userInput, currentSentence);
+    print("Answer is correct: $isCorrect");
 
     setState(() {
       _feedback = isCorrect
           ? "Correct! Great job."
           : "Not quite right. Try again or get a new sentence.";
+      _isCheckButtonEnabled = !isCorrect; // Disable button if answer is correct
     });
+
+    // Record progress when the answer is correct
+    if (isCorrect) {
+      // Determine the practice type based on the current mode
+      final practiceType = _isListeningMode ? 'listening' : 'reading';
+      print("Recording exercise completion: $practiceType");
+
+      // Update progress using the completeExercise method
+      await _progressService.completeExercise(practiceType: practiceType);
+
+      print(
+          "Progress updated. Total exercises: ${_progressService.getTotalExercises()}");
+    }
 
     print("Feedback after check: $_feedback");
   }
@@ -102,6 +120,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     setState(() {
       _currentSentence = _sentenceManager.currentSentence;
       _feedback = "";
+      _isCheckButtonEnabled = true; // Re-enable the check button
     });
     _textController.clear();
     if (_isListeningMode) {
@@ -181,6 +200,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
                     onCheck: _checkAnswer,
                     feedback: _feedback,
                     labelText: 'Type what you see/hear',
+                    isCheckButtonEnabled: _isCheckButtonEnabled,
                   ),
                 ],
               ),
@@ -188,10 +208,11 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: _getNextSentence,
         tooltip: 'Next Sentence',
-        child: const Icon(Icons.skip_next),
+        icon: const Icon(Icons.arrow_forward),
+        label: const Text('Next'),
       ),
     );
   }

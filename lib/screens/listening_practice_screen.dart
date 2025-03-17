@@ -87,12 +87,14 @@ class _ListeningPracticeScreenState extends State<ListeningPracticeScreen> {
             ],
           );
         },
-        // Use the shared input area widget
-        inputArea: (controller, checkAnswer, feedback) => PracticeInputArea(
+        // Use the shared input area widget with button state
+        inputArea: (controller, checkAnswer, feedback, isCheckButtonEnabled) =>
+            PracticeInputArea(
           controller: controller,
           onCheck: checkAnswer,
           feedback: feedback,
           labelText: 'Type what you hear',
+          isCheckButtonEnabled: isCheckButtonEnabled,
         ),
         onRefresh: () {
           // Stop speaking if a new sentence is fetched

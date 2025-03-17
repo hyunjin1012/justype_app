@@ -3,6 +3,17 @@ import 'package:flutter/foundation.dart';
 
 /// Service for tracking and managing user progress
 class ProgressService extends ChangeNotifier {
+  // Singleton instance
+  static final ProgressService _instance = ProgressService._internal();
+
+  // Factory constructor to return the same instance
+  factory ProgressService() {
+    return _instance;
+  }
+
+  // Private constructor for singleton
+  ProgressService._internal();
+
   // Example properties to track progress
   int _totalExercises = 0;
   int _readingExercises = 0;
@@ -11,9 +22,12 @@ class ProgressService extends ChangeNotifier {
   int _currentStreak = 0;
   int _dailyGoal = 5; // Example daily goal
   List<String> _recentAchievements = []; // List to store recent achievements
+  bool _isInitialized = false;
 
   // Load progress from persistent storage
   Future<void> loadProgress() async {
+    if (_isInitialized) return;
+
     final prefs = await SharedPreferences.getInstance();
     _totalExercises = prefs.getInt('totalExercises') ?? 0;
     _readingExercises = prefs.getInt('readingExercises') ?? 0;
@@ -24,6 +38,9 @@ class ProgressService extends ChangeNotifier {
 
     // Load recent achievements if stored
     _recentAchievements = prefs.getStringList('recentAchievements') ?? [];
+
+    _isInitialized = true;
+    notifyListeners();
   }
 
   // Save progress to persistent storage
@@ -47,12 +64,16 @@ class ProgressService extends ChangeNotifier {
   }
 
   // Example methods to update progress
-  void completeExercise({String practiceType = 'general'}) {
+  Future<void> completeExercise({String practiceType = 'general'}) async {
+    print("ProgressService: Recording exercise completion - $practiceType");
+    print("ProgressService: Before - Total: $_totalExercises");
+
     _totalExercises++;
 
     // Track specific exercise types
     if (practiceType == 'reading') {
       _readingExercises++;
+      print("ProgressService: Reading exercises: $_readingExercises");
 
       // Check for reading-specific achievements
       if (_readingExercises == 10) {
@@ -62,6 +83,7 @@ class ProgressService extends ChangeNotifier {
       }
     } else if (practiceType == 'listening') {
       _listeningExercises++;
+      print("ProgressService: Listening exercises: $_listeningExercises");
 
       // Check for listening-specific achievements
       if (_listeningExercises == 10) {
@@ -79,7 +101,10 @@ class ProgressService extends ChangeNotifier {
     // Update streak logic
     _updateStreak();
 
-    saveProgress(); // Save progress after completing an exercise
+    print("ProgressService: After - Total: $_totalExercises");
+    print("ProgressService: Saving progress and notifying listeners");
+
+    await saveProgress(); // Save progress after completing an exercise
   }
 
   // Update the streak counter
@@ -87,16 +112,58 @@ class ProgressService extends ChangeNotifier {
     // Get the current date
     final today = DateTime.now().day;
 
-    // In a real app, you'd compare with the last practice date
-    // For this example, we'll just increment the streak
-    _currentStreak++;
+    // Get the last practice date from SharedPreferences
+    SharedPreferences.getInstance().then((prefs) {
+      final lastPracticeDay = prefs.getInt('lastPracticeDay') ?? 0;
+      final lastPracticeMonth = prefs.getInt('lastPracticeMonth') ?? 0;
+      final lastPracticeYear = prefs.getInt('lastPracticeYear') ?? 0;
 
-    // Check for streak achievements
-    if (_currentStreak == 3) {
-      _recentAchievements.add('streak_3');
-    } else if (_currentStreak == 7) {
-      _recentAchievements.add('streak_7');
-    }
+      final currentDay = DateTime.now().day;
+      final currentMonth = DateTime.now().month;
+      final currentYear = DateTime.now().year;
+
+      // If this is the first practice ever
+      if (lastPracticeDay == 0) {
+        _currentStreak = 1;
+      }
+      // If practiced today already, don't change streak
+      else if (lastPracticeDay == currentDay &&
+          lastPracticeMonth == currentMonth &&
+          lastPracticeYear == currentYear) {
+        // Streak remains the same
+      }
+      // If practiced yesterday, increment streak
+      else if (_isConsecutiveDay(
+          lastPracticeDay, lastPracticeMonth, lastPracticeYear)) {
+        _currentStreak++;
+      }
+      // If missed a day, reset streak
+      else {
+        _currentStreak = 1;
+      }
+
+      // Save the current date as the last practice date
+      prefs.setInt('lastPracticeDay', currentDay);
+      prefs.setInt('lastPracticeMonth', currentMonth);
+      prefs.setInt('lastPracticeYear', currentYear);
+
+      // Check for streak achievements
+      if (_currentStreak == 3) {
+        _recentAchievements.add('streak_3');
+      } else if (_currentStreak == 7) {
+        _recentAchievements.add('streak_7');
+      }
+    });
+  }
+
+  // Helper method to check if the last practice was yesterday
+  bool _isConsecutiveDay(int lastDay, int lastMonth, int lastYear) {
+    final today = DateTime.now();
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    return lastDay == yesterday.day &&
+        lastMonth == yesterday.month &&
+        lastYear == yesterday.year;
   }
 
   // Getters for progress metrics

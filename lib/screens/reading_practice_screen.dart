@@ -34,12 +34,14 @@ class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
           sentence: sentence,
           textStyle: Theme.of(context).textTheme.titleLarge,
         ),
-        // Use the shared input area widget
-        inputArea: (controller, checkAnswer, feedback) => PracticeInputArea(
+        // Use the shared input area widget with button state
+        inputArea: (controller, checkAnswer, feedback, isCheckButtonEnabled) =>
+            PracticeInputArea(
           controller: controller,
           onCheck: checkAnswer,
           feedback: feedback,
           labelText: 'Type the sentence above',
+          isCheckButtonEnabled: isCheckButtonEnabled,
         ),
         onRefresh: () {
           // Nothing special needed for reading practice refresh

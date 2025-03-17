@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/achievement_banner.dart';
 import '../services/progress_service.dart';
+import '../widgets/shimmer_loading_effect.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,7 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onProgressUpdated() {
     if (mounted) {
       setState(() {
-        // Refresh UI with latest data
+        // This will trigger a rebuild with the latest progress data
+        _needsRefresh =
+            false; // We've just refreshed, so no need to refresh again
       });
     }
   }
@@ -338,16 +341,39 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(
-                  book['coverUrl'],
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey.shade200,
-                      child: const Center(
-                        child: Icon(Icons.book, size: 40),
-                      ),
+                child: FutureBuilder(
+                  // Force a delay to show the skeleton loader
+                  future: Future.delayed(const Duration(milliseconds: 1500),
+                      () async {
+                    // Preload the image to avoid the blank state
+                    final imageProvider = NetworkImage(book['coverUrl']);
+                    try {
+                      // This will start loading the image
+                      await precacheImage(imageProvider, context);
+                      return imageProvider;
+                    } catch (e) {
+                      // Return null if there's an error loading the image
+                      return null;
+                    }
+                  }),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting ||
+                        !snapshot.hasData) {
+                      return _buildSkeletonLoader();
+                    }
+
+                    return Image(
+                      image: snapshot.data as ImageProvider,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey.shade200,
+                          child: const Center(
+                            child: Icon(Icons.book, size: 40),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -372,6 +398,19 @@ class _HomeScreenState extends State<HomeScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonLoader() {
+    return ShimmerLoadingEffect(
+      child: Container(
+        color: Colors.grey.shade200,
+        width: double.infinity,
+        height: double.infinity,
+        child: const Center(
+          child: Icon(Icons.book, size: 30, color: Colors.grey),
         ),
       ),
     );

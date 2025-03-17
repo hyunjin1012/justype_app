@@ -5,6 +5,7 @@ class PracticeInputArea extends StatefulWidget {
   final VoidCallback onCheck;
   final String feedback;
   final String labelText;
+  final bool isCheckButtonEnabled;
 
   const PracticeInputArea({
     super.key,
@@ -12,6 +13,7 @@ class PracticeInputArea extends StatefulWidget {
     required this.onCheck,
     required this.feedback,
     this.labelText = 'Type what you see/hear',
+    this.isCheckButtonEnabled = true,
   });
 
   @override
@@ -61,21 +63,28 @@ class PracticeInputAreaState extends State<PracticeInputArea> {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {
-              widget.onCheck(); // Call the onCheck function
-            },
+            onPressed: widget.isCheckButtonEnabled
+                ? () {
+                    widget.onCheck(); // Call the onCheck function
+                  }
+                : null,
             child: const Text('Check'),
           ),
-          if (widget.feedback.isNotEmpty)
-            Text(
-              widget.feedback,
-              style: TextStyle(
-                color: widget.feedback.toLowerCase().contains('correct')
-                    ? Colors.green
-                    : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          const SizedBox(height: 16), // Consistent spacing
+          SizedBox(
+            height: 24, // Fixed height for feedback area
+            child: widget.feedback.isNotEmpty
+                ? Text(
+                    widget.feedback,
+                    style: TextStyle(
+                      color: widget.feedback.toLowerCase().contains('correct')
+                          ? Colors.green
+                          : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : null, // No widget when empty, but space is reserved
+          ),
         ],
       ),
     );
