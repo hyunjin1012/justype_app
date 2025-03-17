@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/sentence_manager.dart';
 import 'package:go_router/go_router.dart';
+import '../services/progress_service.dart';
 
 class PracticeContent extends StatefulWidget {
   final String title;
@@ -9,6 +10,9 @@ class PracticeContent extends StatefulWidget {
       Function() checkAnswer, String feedback) inputArea;
   final Function() onRefresh;
   final String heroTag;
+  final SentenceManager sentenceManager;
+  final ScrollController? scrollController;
+  final bool showSourceSelector;
 
   const PracticeContent({
     super.key,
@@ -17,6 +21,9 @@ class PracticeContent extends StatefulWidget {
     required this.inputArea,
     required this.onRefresh,
     required this.heroTag,
+    required this.sentenceManager,
+    this.scrollController,
+    this.showSourceSelector = true,
   });
 
   @override
@@ -25,9 +32,13 @@ class PracticeContent extends StatefulWidget {
 
 class _PracticeContentState extends State<PracticeContent> {
   final TextEditingController _textController = TextEditingController();
-  final SentenceManager _sentenceManager = SentenceManager();
+  final ProgressService _progressService = ProgressService();
   String _feedback = "";
   bool _isLoading = false;
+
+  // Add tracking variables
+  int _correctAnswers = 0;
+  int _totalAttempts = 0;
 
   @override
   void initState() {
@@ -45,120 +56,130 @@ class _PracticeContentState extends State<PracticeContent> {
   }
 
   void _checkAnswer() {
-    bool isCorrect = _sentenceManager.checkAnswer(_textController.text);
+    final userInput = _textController.text;
+    if (userInput.isEmpty) return;
+
+    final isCorrect = widget.sentenceManager.checkAnswer(userInput);
+
+    // Track progress
+    _totalAttempts++;
+    if (isCorrect) {
+      _correctAnswers++;
+      // Save progress based on practice type
+      final practiceType =
+          widget.title.contains('Reading') ? 'reading' : 'listening';
+      _progressService.completeExercise(practiceType: practiceType);
+    }
 
     setState(() {
-      _feedback = isCorrect ? "Correct!" : "Try again!";
+      _feedback = isCorrect
+          ? "Correct! Great job."
+          : "Not quite right. Try again or get a new sentence.";
     });
   }
 
-  void _fetchRandomSentence() {
-    _sentenceManager.fetchContent(onLoadingChanged: (isLoading) {
-      setState(() {
-        _isLoading = isLoading;
-        if (isLoading) {
-          _feedback = "";
-          _textController.clear();
-        }
-      });
-    }, onContentUpdated: () {
-      setState(() {});
+  Future<void> _fetchRandomSentence() async {
+    setState(() {
+      _isLoading = true;
+      _feedback = "";
     });
-  }
 
-  void _fetchNewSentence() {
-    _sentenceManager.fetchContent(
-        forceRefresh: true,
-        onLoadingChanged: (isLoading) {
-          setState(() {
-            _isLoading = isLoading;
-            if (isLoading) {
-              _feedback = "";
-              _textController.clear();
-            }
-          });
-        },
-        onContentUpdated: () {
-          setState(() {});
+    await widget.sentenceManager.fetchContent(
+      forceRefresh: true,
+      onLoadingChanged: (isLoading) {
+        setState(() {
+          _isLoading = isLoading;
         });
+      },
+      onContentUpdated: () {
+        setState(() {});
+      },
+    );
+
+    _textController.clear();
   }
 
-  void _navigateToBookDetail() {
-    if (_sentenceManager.currentBookId.isNotEmpty) {
-      GoRouter.of(context).push('/book/${_sentenceManager.currentBookId}');
+  Future<void> _fetchNewSentence() async {
+    await _fetchRandomSentence();
+  }
+
+  void _navigateToBookDetail(String bookId) {
+    if (bookId.isNotEmpty) {
+      GoRouter.of(context).push('/book/$bookId');
     }
   }
 
   Widget _buildSourceSelector(
       String selectedSource, Function(String) onSourceChanged) {
-    return SegmentedButton<String>(
-      segments: const [
-        ButtonSegment<String>(
-          value: 'Books',
-          label: Text('Books'),
-          icon: Icon(Icons.book),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ChoiceChip(
+          label: const Text('Books'),
+          selected: selectedSource == 'Books',
+          onSelected: (selected) {
+            if (selected) onSourceChanged('Books');
+          },
         ),
-        ButtonSegment<String>(
-          value: 'AI',
-          label: Text('AI'),
-          icon: Icon(Icons.psychology),
+        const SizedBox(width: 16),
+        ChoiceChip(
+          label: const Text('AI'),
+          selected: selectedSource == 'AI',
+          onSelected: (selected) {
+            if (selected) onSourceChanged('AI');
+          },
         ),
       ],
-      selected: {selectedSource},
-      onSelectionChanged: (Set<String> newSelection) {
-        onSourceChanged(newSelection.first);
-      },
     );
   }
 
   Widget _buildBookSourceInfo(
-      BuildContext context,
-      String bookTitle,
-      String bookAuthor,
-      String currentBookId,
-      Function() onNavigate,
-      String selectedSource) {
-    // For AI source, don't show book info
-    if (selectedSource == 'AI') {
-      return const Padding(
-        padding: EdgeInsets.only(bottom: 16.0),
-        child: Text(
-          'AI Generated Content',
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      );
-    }
-
-    // For Books source with empty info
-    if (bookTitle.isEmpty && bookAuthor.isEmpty) {
+    BuildContext context,
+    String title,
+    String author,
+    String bookId,
+    Function(String) onTap,
+    String selectedSource,
+  ) {
+    if (selectedSource != 'Books' || title.isEmpty)
       return const SizedBox.shrink();
-    }
 
-    // For Books source with info
-    return InkWell(
-      onTap: currentBookId.isNotEmpty ? onNavigate : null,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
+    return GestureDetector(
+      onTap: () => onTap(bookId),
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        margin: const EdgeInsets.only(bottom: 16.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Flexible(
-              child: Text(
-                'From: $bookTitle${bookAuthor.isNotEmpty ? ' by $bookAuthor' : ''}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      decoration: currentBookId.isNotEmpty
-                          ? TextDecoration.underline
-                          : null,
-                      color: currentBookId.isNotEmpty
-                          ? Theme.of(context).colorScheme.primary
-                          : null,
+            const Icon(Icons.book),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    author,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
-            if (currentBookId.isNotEmpty) const SizedBox(width: 4),
-            if (currentBookId.isNotEmpty)
-              const Icon(Icons.open_in_new, size: 16),
+            const Icon(Icons.arrow_forward_ios, size: 16),
           ],
         ),
       ),
@@ -168,38 +189,37 @@ class _PracticeContentState extends State<PracticeContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
       body: SafeArea(
         child: Column(
           children: [
             // Scrollable content area
             Expanded(
               child: SingleChildScrollView(
+                controller: widget.scrollController,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      // Source selector
-                      _buildSourceSelector(
-                        _sentenceManager.selectedSource,
-                        (newSource) {
-                          _sentenceManager.setSource(newSource);
-                          _fetchRandomSentence();
-                        },
-                      ),
+                      // Source selector (optional)
+                      if (widget.showSourceSelector)
+                        _buildSourceSelector(
+                          widget.sentenceManager.selectedSource,
+                          (newSource) {
+                            widget.sentenceManager.setSource(newSource);
+                            _fetchRandomSentence();
+                          },
+                        ),
                       const SizedBox(height: 32),
-                      // Display book source info
-                      _buildBookSourceInfo(
-                        context,
-                        _sentenceManager.bookTitle,
-                        _sentenceManager.bookAuthor,
-                        _sentenceManager.currentBookId,
-                        _navigateToBookDetail,
-                        _sentenceManager.selectedSource,
-                      ),
+                      // Display book source info (optional)
+                      if (widget.showSourceSelector)
+                        _buildBookSourceInfo(
+                          context,
+                          widget.sentenceManager.bookTitle,
+                          widget.sentenceManager.bookAuthor,
+                          widget.sentenceManager.currentBookId,
+                          _navigateToBookDetail,
+                          widget.sentenceManager.selectedSource,
+                        ),
                       // Loading indicator or sentence display
                       _isLoading
                           ? const Center(
@@ -209,7 +229,7 @@ class _PracticeContentState extends State<PracticeContent> {
                               ),
                             )
                           : widget.sentenceDisplay(
-                              _sentenceManager.currentSentence),
+                              widget.sentenceManager.currentSentence),
                       const SizedBox(height: 32),
                     ],
                   ),

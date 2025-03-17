@@ -6,6 +6,8 @@ import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/practice_mode_selector.dart';
+import '../widgets/practice_content.dart';
+import '../services/book_sentence_manager.dart';
 
 class BookPracticeModal extends StatefulWidget {
   final Book book;
@@ -23,20 +25,27 @@ class BookPracticeModal extends StatefulWidget {
 
 class _BookPracticeModalState extends State<BookPracticeModal> {
   final TextEditingController _textController = TextEditingController();
-  String _currentSentence = "";
-  String _feedback = "";
   bool _isListeningMode = false;
   final TtsService _ttsService = TtsService();
   bool _isTextVisible = true;
-  List<String> _sentences = [];
+  final BookSentenceManager _sentenceManager = BookSentenceManager();
   final PracticeService _practiceService = PracticeService();
+  String _feedback = "";
+  String _currentSentence = "";
 
   @override
   void initState() {
     super.initState();
     _ttsService.initialize();
-    _extractSentences();
-    _getRandomSentence();
+    _initializeBookSentences();
+  }
+
+  Future<void> _initializeBookSentences() async {
+    _sentenceManager.initializeWithBook(widget.book);
+    setState(() {
+      _currentSentence = _sentenceManager.currentSentence;
+    });
+    print("Current sentence after initialization: $_currentSentence");
   }
 
   @override
@@ -46,55 +55,16 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     super.dispose();
   }
 
-  void _extractSentences() {
-    // Split the book content into sentences
-    final content = widget.book.content;
-    final rawSentences = content.split(RegExp(r'(?<=[.!?])\s+'));
-
-    // Filter out empty sentences and very short ones
-    _sentences = rawSentences
-        .where((s) => s.trim().length > 20 && s.trim().length < 200)
-        .map((s) => s.replaceAll(RegExp(r'\s+'), ' ').trim())
-        .toList();
-  }
-
-  void _getRandomSentence() {
-    if (_sentences.isEmpty) {
-      setState(() {
-        _currentSentence = "No suitable sentences found in this book.";
-      });
-      return;
-    }
-
-    setState(() {
-      _feedback = "";
-      _textController.clear();
-      _currentSentence =
-          _sentences[DateTime.now().millisecondsSinceEpoch % _sentences.length];
-    });
-  }
-
-  void _speakSentence() {
-    _ttsService.speak(_currentSentence, onStateChange: () {
-      setState(() {});
-    });
-  }
-
-  void _checkAnswer() {
-    bool isCorrect =
-        _practiceService.checkAnswer(_textController.text, _currentSentence);
-
-    setState(() {
-      _feedback = isCorrect ? "Correct!" : "Try again!";
-    });
-  }
-
   void _toggleMode() {
     setState(() {
       _isListeningMode = !_isListeningMode;
-      _isTextVisible = !_isListeningMode;
-      _feedback = "";
-      _textController.clear();
+      // Reset visibility when switching to listening mode
+      if (_isListeningMode) {
+        _isTextVisible = false;
+      } else {
+        _isTextVisible = true;
+      }
+      _feedback = ""; // Clear feedback when switching modes
     });
   }
 
@@ -102,6 +72,43 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     setState(() {
       _isTextVisible = !_isTextVisible;
     });
+  }
+
+  void _speakSentence() {
+    _ttsService.speak(_sentenceManager.currentSentence, onStateChange: () {
+      setState(() {});
+    });
+  }
+
+  void _checkAnswer() {
+    final userInput = _textController.text;
+    if (userInput.isEmpty) return;
+
+    final currentSentence = _sentenceManager.currentSentence;
+    print("Checking answer: '$userInput' against '$currentSentence'");
+
+    final isCorrect = _practiceService.checkAnswer(userInput, currentSentence);
+
+    setState(() {
+      _feedback = isCorrect
+          ? "Correct! Great job."
+          : "Not quite right. Try again or get a new sentence.";
+    });
+
+    print("Feedback after check: $_feedback");
+  }
+
+  void _getNextSentence() {
+    _sentenceManager.getNextSentence();
+    setState(() {
+      _currentSentence = _sentenceManager.currentSentence;
+      _feedback = "";
+    });
+    _textController.clear();
+    if (_isListeningMode) {
+      _ttsService.stop();
+    }
+    print("New sentence: $_currentSentence");
   }
 
   @override
@@ -129,46 +136,63 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
 
           // Main content
           Expanded(
-            child: SingleChildScrollView(
-              controller: widget.scrollController,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    if (_isListeningMode) ...[
-                      _ttsService.buildSpeakButton(
-                          context, _speakSentence, _ttsService.isSpeaking),
-                      const SizedBox(height: 16),
-                      VisibilityToggle(
-                        isVisible: _isTextVisible,
-                        onToggle: _toggleTextVisibility,
-                      ),
-                    ],
-                    if (_isTextVisible || !_isListeningMode)
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: SentenceDisplayCard(sentence: _currentSentence),
-                      ),
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    _isListeningMode
+                        ? 'Listening Practice'
+                        : 'Reading Practice',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Sentence display section
+                  if (_isListeningMode)
+                    Column(
+                      children: [
+                        _ttsService.buildSpeakButton(
+                            context, _speakSentence, _ttsService.isSpeaking),
+                        const SizedBox(height: 16),
+                        VisibilityToggle(
+                          isVisible: _isTextVisible,
+                          onToggle: _toggleTextVisibility,
+                        ),
+                        if (_isTextVisible)
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: SentenceDisplayCard(
+                                sentence: _sentenceManager.currentSentence),
+                          ),
+                      ],
+                    )
+                  else
+                    SentenceDisplayCard(
+                      sentence: _sentenceManager.currentSentence,
+                      textStyle: Theme.of(context).textTheme.titleLarge,
+                    ),
+
+                  const Spacer(),
+
+                  // Input area
+                  PracticeInputArea(
+                    controller: _textController,
+                    onCheck: _checkAnswer,
+                    feedback: _feedback,
+                    labelText: 'Type what you see/hear',
+                  ),
+                ],
               ),
             ),
-          ),
-
-          // Use the shared PracticeInputArea widget
-          PracticeInputArea(
-            controller: _textController,
-            onCheck: _checkAnswer,
-            feedback: _feedback,
-            labelText: 'Type what you see/hear',
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _getRandomSentence,
-        tooltip: 'Get New Sentence',
-        heroTag: 'book_practice_fab',
-        child: const Icon(Icons.refresh),
+        onPressed: _getNextSentence,
+        tooltip: 'Next Sentence',
+        child: const Icon(Icons.skip_next),
       ),
     );
   }

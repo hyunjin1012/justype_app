@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../widgets/practice_content.dart';
 import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
+import '../services/progress_service.dart';
+import '../services/sentence_manager.dart';
 
 class ReadingPracticeScreen extends StatefulWidget {
   const ReadingPracticeScreen({super.key});
@@ -11,26 +13,38 @@ class ReadingPracticeScreen extends StatefulWidget {
 }
 
 class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
+  final ProgressService _progressService = ProgressService();
+  final TextEditingController _controller = TextEditingController();
+  final SentenceManager _sentenceManager = SentenceManager();
+  final String _feedback = "";
+
   @override
   Widget build(BuildContext context) {
-    return PracticeContent(
-      title: 'Reading Practice',
-      heroTag: 'reading_fab',
-      // Use the reusable SentenceDisplayCard widget
-      sentenceDisplay: (sentence) => SentenceDisplayCard(
-        sentence: sentence,
-        textStyle: Theme.of(context).textTheme.titleLarge,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Reading Practice'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      // Use the shared input area widget
-      inputArea: (controller, checkAnswer, feedback) => PracticeInputArea(
-        controller: controller,
-        onCheck: checkAnswer,
-        feedback: feedback,
-        labelText: 'Type the sentence above',
+      body: PracticeContent(
+        title: 'Reading Practice',
+        heroTag: 'reading_fab',
+        sentenceManager: _sentenceManager,
+        // Use the reusable SentenceDisplayCard widget
+        sentenceDisplay: (sentence) => SentenceDisplayCard(
+          sentence: sentence,
+          textStyle: Theme.of(context).textTheme.titleLarge,
+        ),
+        // Use the shared input area widget
+        inputArea: (controller, checkAnswer, feedback) => PracticeInputArea(
+          controller: controller,
+          onCheck: checkAnswer,
+          feedback: feedback,
+          labelText: 'Type the sentence above',
+        ),
+        onRefresh: () {
+          // Nothing special needed for reading practice refresh
+        },
       ),
-      onRefresh: () {
-        // Any additional refresh logic specific to reading practice
-      },
     );
   }
 }

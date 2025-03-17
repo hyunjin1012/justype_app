@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../screens/reading_practice_screen.dart';
-import '../screens/listening_practice_screen.dart';
-import '../screens/book_list_screen.dart';
+import '../router/app_router.dart';
 
 class ScaffoldWithNavBar extends StatefulWidget {
   final Widget child;
@@ -17,23 +15,23 @@ class ScaffoldWithNavBar extends StatefulWidget {
 }
 
 class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
-  // Keep a list of the pages we want to maintain state for
-  final List<Widget> _pages = [
-    const ReadingPracticeScreen(),
-    const ListeningPracticeScreen(),
-    const BookListScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Use IndexedStack to maintain state of all screens
-      body: IndexedStack(
-        index: _calculateSelectedIndex(context),
-        children: _pages,
-      ),
+      body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        type: BottomNavigationBarType.fixed, // Needed for more than 3 items
+        currentIndex: _calculateSelectedIndex(context),
+        onTap: (index) => _onItemTapped(index, context),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Progress',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book),
             label: 'Reading',
@@ -47,38 +45,59 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
             label: 'Books',
           ),
         ],
-        currentIndex: _calculateSelectedIndex(context),
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        onTap: (int idx) => _onItemTapped(idx, context),
       ),
     );
   }
 
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.toString();
-    if (location.startsWith('/reading')) {
+    if (location.startsWith('/home')) {
       return 0;
     }
-    if (location.startsWith('/listening')) {
+    if (location.startsWith('/dashboard')) {
       return 1;
     }
-    if (location.startsWith('/books')) {
+    if (location.startsWith('/reading')) {
       return 2;
+    }
+    if (location.startsWith('/listening')) {
+      return 3;
+    }
+    if (location.startsWith('/books')) {
+      return 4;
     }
     return 0;
   }
 
   void _onItemTapped(int index, BuildContext context) {
+    // Get the current location
+    final String currentLocation = GoRouterState.of(context).uri.toString();
+    String newLocation;
+
+    // Determine the new location based on the index
     switch (index) {
       case 0:
-        GoRouter.of(context).go('/reading');
+        newLocation = '/home';
         break;
       case 1:
-        GoRouter.of(context).go('/listening');
+        newLocation = '/dashboard';
         break;
       case 2:
-        GoRouter.of(context).go('/books');
+        newLocation = '/reading';
         break;
+      case 3:
+        newLocation = '/listening';
+        break;
+      case 4:
+        newLocation = '/books';
+        break;
+      default:
+        newLocation = '/home';
+    }
+
+    // Only navigate if we're going to a different location
+    if (currentLocation != newLocation) {
+      GoRouter.of(context).go(newLocation);
     }
   }
 }

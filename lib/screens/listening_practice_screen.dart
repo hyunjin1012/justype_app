@@ -4,6 +4,8 @@ import '../widgets/practice_input_area.dart';
 import '../services/tts_service.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/sentence_display_card.dart';
+import '../services/progress_service.dart';
+import '../services/sentence_manager.dart';
 
 class ListeningPracticeScreen extends StatefulWidget {
   const ListeningPracticeScreen({super.key});
@@ -15,8 +17,8 @@ class ListeningPracticeScreen extends StatefulWidget {
 
 class _ListeningPracticeScreenState extends State<ListeningPracticeScreen> {
   final TtsService _ttsService = TtsService();
+  final SentenceManager _sentenceManager = SentenceManager();
   bool _isTextVisible = false;
-  String _currentSentence = "";
 
   @override
   void initState() {
@@ -31,7 +33,7 @@ class _ListeningPracticeScreenState extends State<ListeningPracticeScreen> {
   }
 
   void _speakSentence() {
-    _ttsService.speak(_currentSentence, onStateChange: () {
+    _ttsService.speak(_sentenceManager.currentSentence, onStateChange: () {
       setState(() {});
     });
   }
@@ -44,46 +46,52 @@ class _ListeningPracticeScreenState extends State<ListeningPracticeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PracticeContent(
-      title: 'Listening Practice',
-      heroTag: 'listening_fab',
-      // Define how to display the sentence (with speak button and visibility toggle)
-      sentenceDisplay: (sentence) {
-        _currentSentence = sentence; // Store for TTS
-        return Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _ttsService.buildSpeakButton(
-                    context, _speakSentence, _ttsService.isSpeaking),
-                const SizedBox(width: 16),
-                VisibilityToggle(
-                  isVisible: _isTextVisible,
-                  onToggle: _toggleTextVisibility,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_isTextVisible) SentenceDisplayCard(sentence: sentence),
-          ],
-        );
-      },
-      // Use the shared input area widget
-      inputArea: (controller, checkAnswer, feedback) => PracticeInputArea(
-        controller: controller,
-        onCheck: checkAnswer,
-        feedback: feedback,
-        labelText: 'Type what you hear',
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Listening Practice'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      onRefresh: () {
-        // Stop speaking if a new sentence is fetched
-        _ttsService.stop();
-        // Reset visibility
-        setState(() {
-          _isTextVisible = false;
-        });
-      },
+      body: PracticeContent(
+        title: 'Listening Practice',
+        heroTag: 'listening_fab',
+        sentenceManager: _sentenceManager,
+        // Define how to display the sentence (with speak button and visibility toggle)
+        sentenceDisplay: (sentence) {
+          return Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _ttsService.buildSpeakButton(
+                      context, _speakSentence, _ttsService.isSpeaking),
+                  const SizedBox(width: 16),
+                  VisibilityToggle(
+                    isVisible: _isTextVisible,
+                    onToggle: _toggleTextVisibility,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (_isTextVisible) SentenceDisplayCard(sentence: sentence),
+            ],
+          );
+        },
+        // Use the shared input area widget
+        inputArea: (controller, checkAnswer, feedback) => PracticeInputArea(
+          controller: controller,
+          onCheck: checkAnswer,
+          feedback: feedback,
+          labelText: 'Type what you hear',
+        ),
+        onRefresh: () {
+          // Stop speaking if a new sentence is fetched
+          _ttsService.stop();
+          // Reset visibility
+          setState(() {
+            _isTextVisible = false;
+          });
+        },
+      ),
     );
   }
 }

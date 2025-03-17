@@ -1,7 +1,9 @@
 import '../services/gutenberg_service.dart';
+import 'package:flutter/foundation.dart';
 
-class PracticeService {
+class PracticeService extends ChangeNotifier {
   final GutenbergService _gutenbergService = GutenbergService();
+  int _totalExercises = 0;
 
   // Shared method to fetch random sentences
   Future<Map<String, dynamic>> fetchRandomContent(String selectedSource) async {
@@ -58,4 +60,15 @@ class PracticeService {
         .replaceAll(RegExp(r'\s+'), ' ')
         .replaceAll(RegExp(r'[^\w\s]'), ''); // Remove punctuation
   }
+
+  // Method to complete an exercise
+  void completeExercise({String practiceType = 'general'}) {
+    _totalExercises++;
+    // Add any additional logic for tracking specific types of exercises
+    // For example, you could track reading vs. listening exercises
+    notifyListeners(); // Notify listeners about the change
+  }
+
+  // Getter for total exercises
+  int get totalExercises => _totalExercises;
 }
