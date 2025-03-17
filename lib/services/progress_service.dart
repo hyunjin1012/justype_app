@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
 
 /// Service for tracking and managing user progress
 class ProgressService extends ChangeNotifier {
@@ -27,6 +28,8 @@ class ProgressService extends ChangeNotifier {
   bool _isInitialized = false;
   int _dailyExercises = 0;
   String _lastExerciseDate = '';
+  Map<String, dynamic> _achievementData =
+      {}; // Map of achievement ID to timestamp
 
   // Load progress from persistent storage
   Future<void> loadProgress() async {
@@ -45,8 +48,26 @@ class ProgressService extends ChangeNotifier {
     // Load recent achievements if stored
     _recentAchievements = prefs.getStringList('recentAchievements') ?? [];
 
+    // Load achievement data
+    final achievementDataJson = prefs.getString('achievementData') ?? '{}';
+    try {
+      _achievementData =
+          Map<String, dynamic>.from(json.decode(achievementDataJson) as Map);
+    } catch (e) {
+      _achievementData = {};
+      print('Error loading achievement data: $e');
+    }
+
     // Load all achievements
     _allAchievements = prefs.getStringList('allAchievements') ?? [];
+
+    // Ensure all achievements have timestamps
+    for (final achievement in _allAchievements) {
+      if (!_achievementData.containsKey(achievement)) {
+        // If we have an achievement without timestamp data, add it with current time
+        _achievementData[achievement] = DateTime.now().millisecondsSinceEpoch;
+      }
+    }
 
     // Check if we need to reset daily exercises (new day)
     _checkAndResetDailyExercises();
@@ -68,6 +89,9 @@ class ProgressService extends ChangeNotifier {
     await prefs.setStringList('allAchievements', _allAchievements);
     await prefs.setInt('dailyExercises', _dailyExercises);
     await prefs.setString('lastExerciseDate', _lastExerciseDate);
+
+    // Save achievement data
+    await prefs.setString('achievementData', json.encode(_achievementData));
 
     // Notify listeners that progress has been updated
     notifyListeners();
@@ -96,11 +120,9 @@ class ProgressService extends ChangeNotifier {
 
       // Check for reading-specific achievements
       if (_readingExercises == 10) {
-        _recentAchievements.add('reading_10');
-        _allAchievements.add('reading_10');
+        _addAchievement('reading_10');
       } else if (_readingExercises == 20) {
-        _recentAchievements.add('reading_20');
-        _allAchievements.add('reading_20');
+        _addAchievement('reading_20');
       }
     } else if (practiceType == 'listening') {
       _listeningExercises++;
@@ -108,21 +130,17 @@ class ProgressService extends ChangeNotifier {
 
       // Check for listening-specific achievements
       if (_listeningExercises == 10) {
-        _recentAchievements.add('listening_10');
-        _allAchievements.add('listening_10');
+        _addAchievement('listening_10');
       }
     }
 
     // Check for general achievements
     if (_totalExercises == 5) {
-      _recentAchievements.add('exercises_5');
-      _allAchievements.add('exercises_5');
+      _addAchievement('exercises_5');
     } else if (_totalExercises == 10) {
-      _recentAchievements.add('exercises_10');
-      _allAchievements.add('exercises_10');
+      _addAchievement('exercises_10');
     } else if (_totalExercises == 50) {
-      _recentAchievements.add('exercises_50');
-      _allAchievements.add('exercises_50');
+      _addAchievement('exercises_50');
     }
 
     // Update streak logic
@@ -179,11 +197,9 @@ class ProgressService extends ChangeNotifier {
 
       // Check for streak achievements
       if (_currentStreak == 3) {
-        _recentAchievements.add('streak_3');
-        _allAchievements.add('streak_3');
+        _addAchievement('streak_3');
       } else if (_currentStreak == 7) {
-        _recentAchievements.add('streak_7');
-        _allAchievements.add('streak_7');
+        _addAchievement('streak_7');
       }
     });
   }
@@ -237,6 +253,8 @@ class ProgressService extends ChangeNotifier {
     _dailyExercises = 0;
     _lastExerciseDate = '';
 
+    _achievementData = {};
+
     // Clear data from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('totalExercises');
@@ -249,6 +267,7 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('allAchievements');
     await prefs.remove('dailyExercises');
     await prefs.remove('lastExerciseDate');
+    await prefs.remove('achievementData');
 
     // Clear streak tracking data
     await prefs.remove('lastPracticeDay');
@@ -278,6 +297,20 @@ class ProgressService extends ChangeNotifier {
       _dailyExercises = 0;
       _lastExerciseDate = today;
     }
+  }
+
+  // Helper method to add an achievement with timestamp
+  void _addAchievement(String achievementId) {
+    if (!_allAchievements.contains(achievementId)) {
+      _recentAchievements.add(achievementId);
+      _allAchievements.add(achievementId);
+      _achievementData[achievementId] = DateTime.now().millisecondsSinceEpoch;
+    }
+  }
+
+  // Add a method to get achievement timestamp
+  int getAchievementTimestamp(String achievementId) {
+    return _achievementData[achievementId] ?? 0;
   }
 
   // Other methods to update accuracy, streak, etc.
