@@ -59,6 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get achievements to display
+    final achievements = _progressService.getAchievements();
+    final bool showAchievementBanner = _progressService.hasRecentAchievements();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Language Practice'),
@@ -86,15 +90,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Show achievement banner if there are recent achievements
-                if (_progressService.hasRecentAchievements())
+                if (showAchievementBanner && achievements.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: AchievementBanner(
                       title: 'New Achievement!',
-                      description: 'You\'ve earned a new achievement!',
+                      description: _formatAchievementName(achievements.last),
                       icon: 'assets/animations/achievement.json',
                       backgroundColor: Colors.amber.shade100,
                       textColor: Colors.brown,
+                      onDismiss: () {
+                        // Clear recent achievements when dismissed
+                        _progressService.clearRecentAchievements();
+                        setState(() {});
+                      },
                     ),
                   ),
 
@@ -146,58 +155,67 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDailyGoalCard(BuildContext context) {
-    final progress = _progressService.getDailyGoalProgress();
-    final goalText =
-        '${_progressService.getTotalExercises()}/${_progressService.getDailyGoal()} exercises';
+    final dailyExercises = _progressService.getDailyExercises();
+    final dailyGoal = _progressService.getDailyGoal();
+    final progress = dailyExercises / dailyGoal;
+    final goalText = '$dailyExercises/$dailyGoal exercises';
 
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Daily Goal',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                Text(
-                  goalText,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progress,
-              minHeight: 10,
-              backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                progress >= 1.0 ? Colors.green : Theme.of(context).primaryColor,
+    return GestureDetector(
+      onTap: () {
+        // Navigate to dashboard screen
+        GoRouter.of(context).push('/dashboard');
+      },
+      child: Card(
+        elevation: 4,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Daily Goal',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Text(
+                    goalText,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            if (progress >= 1.0)
-              const Text(
-                'Goal completed! Great job!',
-                style: TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            else
-              Text(
-                'Keep going!',
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: progress > 1.0 ? 1.0 : progress,
+                minHeight: 10,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  progress >= 1.0
+                      ? Colors.green
+                      : Theme.of(context).primaryColor,
                 ),
               ),
-          ],
+              const SizedBox(height: 8),
+              if (progress >= 1.0)
+                const Text(
+                  'Goal completed! Great job!',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              else
+                Text(
+                  'Keep going!',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -414,5 +432,29 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  String _formatAchievementName(String achievementId) {
+    // Convert achievement IDs to readable names
+    switch (achievementId) {
+      case 'exercises_5':
+        return 'Completed 5 exercises';
+      case 'exercises_10':
+        return 'Completed 10 exercises';
+      case 'exercises_50':
+        return 'Completed 50 exercises';
+      case 'streak_3':
+        return '3-day practice streak';
+      case 'streak_7':
+        return '7-day practice streak';
+      case 'reading_10':
+        return 'Completed 10 reading exercises';
+      case 'reading_20':
+        return 'Completed 20 reading exercises';
+      case 'listening_10':
+        return 'Completed 10 listening exercises';
+      default:
+        return achievementId;
+    }
   }
 }

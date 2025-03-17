@@ -6,6 +6,7 @@ class AchievementBanner extends StatelessWidget {
   final String icon;
   final Color backgroundColor;
   final Color textColor;
+  final VoidCallback? onDismiss;
 
   const AchievementBanner({
     super.key,
@@ -14,6 +15,7 @@ class AchievementBanner extends StatelessWidget {
     required this.icon,
     this.backgroundColor = Colors.green,
     this.textColor = Colors.white,
+    this.onDismiss,
   });
 
   @override
@@ -63,10 +65,7 @@ class AchievementBanner extends StatelessWidget {
           // Close button
           IconButton(
             icon: Icon(Icons.close, color: textColor),
-            onPressed: () {
-              // Logic to dismiss the banner
-              // You can use a callback or state management to remove the banner
-            },
+            onPressed: onDismiss,
           ),
         ],
       ),

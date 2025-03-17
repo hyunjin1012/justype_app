@@ -72,24 +72,42 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Get achievements to display
+    final achievements = _progressService.getAchievements();
+    final bool showAchievementBanner = _progressService.hasRecentAchievements();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Progress'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          // Add reset button in the app bar
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            tooltip: 'Reset All Progress',
+            onPressed: _showResetConfirmationDialog,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            // Achievement banner
-            const AchievementBanner(
-              title: 'Congratulations!',
-              description: 'You have completed 10 exercises!',
-              icon: 'assets/animations/achievement.json',
-              backgroundColor: Colors.green,
-              textColor: Colors.white,
-            ),
+            // Achievement banner - only show if there are achievements
+            if (showAchievementBanner && achievements.isNotEmpty)
+              AchievementBanner(
+                title: 'Congratulations!',
+                description: _formatAchievementName(achievements.last),
+                icon: 'assets/animations/achievement.json',
+                backgroundColor: Colors.green,
+                textColor: Colors.white,
+                onDismiss: () {
+                  // Clear recent achievements when dismissed
+                  _progressService.clearRecentAchievements();
+                  setState(() {});
+                },
+              ),
 
             const SizedBox(height: 24),
 
@@ -106,6 +124,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 16),
+                    _buildStatRow('Today\'s Exercises',
+                        '${_progressService.getDailyExercises()}'),
                     _buildStatRow('Total Exercises',
                         '${_progressService.getTotalExercises()}'),
                     _buildStatRow('Reading Exercises',
@@ -113,7 +133,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     _buildStatRow('Listening Exercises',
                         '${_progressService.getListeningExercises()}'),
                     _buildStatRow('Current Streak',
-                        '${_progressService.getCurrentStreak()} days'),
+                        '${_progressService.getCurrentStreak()} ${_progressService.getCurrentStreak() == 1 ? 'day' : 'days'}'),
                     _buildStatRow('Daily Goal',
                         '${_progressService.getDailyGoal()} exercises'),
                   ],
@@ -123,35 +143,11 @@ class _DashboardScreenState extends State<DashboardScreen>
 
             const SizedBox(height: 24),
 
-            // Recent achievements
-            _buildRecentAchievements(),
-          ],
-        ),
-      ),
-    );
-  }
+            // Daily goal progress
+            _buildDailyGoalProgress(),
 
-  Widget _buildProgressStats() {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Your Progress',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            _buildStatRow(
-                'Total Exercises', '${_progressService.getTotalExercises()}'),
-            _buildStatRow(
-                'Accuracy', '${_progressService.getAccuracyPercentage()}%'),
-            _buildStatRow('Current Streak',
-                '${_progressService.getCurrentStreak()} days'),
-            _buildStatRow(
-                'Daily Goal', '${_progressService.getDailyGoal()} exercises'),
+            // Recent achievements
+            _buildAllAchievements(),
           ],
         ),
       ),
@@ -174,8 +170,64 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildRecentAchievements() {
-    final achievements = _progressService.getAchievements();
+  Widget _buildDailyGoalProgress() {
+    final dailyExercises = _progressService.getDailyExercises();
+    final dailyGoal = _progressService.getDailyGoal();
+    final progress = dailyExercises / dailyGoal;
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Today\'s Goal',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(
+                  '$dailyExercises/$dailyGoal exercises',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: progress > 1.0 ? 1.0 : progress,
+              minHeight: 10,
+              backgroundColor: Colors.grey.shade200,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                progress >= 1.0 ? Colors.green : Theme.of(context).primaryColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (progress >= 1.0)
+              const Text(
+                'Daily goal completed! Great job!',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            else
+              Text(
+                'Keep going!',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAllAchievements() {
+    final achievements = _progressService.getAllAchievements();
 
     return Card(
       elevation: 2,
@@ -215,6 +267,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   String _formatAchievementName(String achievementId) {
     // Convert achievement IDs to readable names
     switch (achievementId) {
+      case 'exercises_5':
+        return 'Completed 5 exercises';
       case 'exercises_10':
         return 'Completed 10 exercises';
       case 'exercises_50':
@@ -231,6 +285,54 @@ class _DashboardScreenState extends State<DashboardScreen>
         return 'Completed 10 listening exercises';
       default:
         return achievementId;
+    }
+  }
+
+  Future<void> _showResetConfirmationDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Reset All Progress'),
+          content: const SingleChildScrollView(
+            child: Text(
+              'This will erase all your progress, achievements, and statistics. '
+              'This action cannot be undone. Are you sure you want to continue?',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Reset Everything'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _resetAllProgress();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _resetAllProgress() async {
+    await _progressService.resetAllProgress();
+    if (mounted) {
+      setState(() {
+        // Refresh UI after reset
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All progress has been reset'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 }

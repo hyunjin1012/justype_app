@@ -22,7 +22,11 @@ class ProgressService extends ChangeNotifier {
   int _currentStreak = 0;
   int _dailyGoal = 5; // Example daily goal
   List<String> _recentAchievements = []; // List to store recent achievements
+  List<String> _allAchievements =
+      []; // Add a new field to track all achievements
   bool _isInitialized = false;
+  int _dailyExercises = 0;
+  String _lastExerciseDate = '';
 
   // Load progress from persistent storage
   Future<void> loadProgress() async {
@@ -35,9 +39,17 @@ class ProgressService extends ChangeNotifier {
     _accuracyPercentage = prefs.getDouble('accuracyPercentage') ?? 0.0;
     _currentStreak = prefs.getInt('currentStreak') ?? 0;
     _dailyGoal = prefs.getInt('dailyGoal') ?? 5;
+    _dailyExercises = prefs.getInt('dailyExercises') ?? 0;
+    _lastExerciseDate = prefs.getString('lastExerciseDate') ?? '';
 
     // Load recent achievements if stored
     _recentAchievements = prefs.getStringList('recentAchievements') ?? [];
+
+    // Load all achievements
+    _allAchievements = prefs.getStringList('allAchievements') ?? [];
+
+    // Check if we need to reset daily exercises (new day)
+    _checkAndResetDailyExercises();
 
     _isInitialized = true;
     notifyListeners();
@@ -53,6 +65,9 @@ class ProgressService extends ChangeNotifier {
     await prefs.setInt('currentStreak', _currentStreak);
     await prefs.setInt('dailyGoal', _dailyGoal);
     await prefs.setStringList('recentAchievements', _recentAchievements);
+    await prefs.setStringList('allAchievements', _allAchievements);
+    await prefs.setInt('dailyExercises', _dailyExercises);
+    await prefs.setString('lastExerciseDate', _lastExerciseDate);
 
     // Notify listeners that progress has been updated
     notifyListeners();
@@ -68,7 +83,11 @@ class ProgressService extends ChangeNotifier {
     print("ProgressService: Recording exercise completion - $practiceType");
     print("ProgressService: Before - Total: $_totalExercises");
 
+    // Check if we need to reset daily exercises (new day)
+    _checkAndResetDailyExercises();
+
     _totalExercises++;
+    _dailyExercises++;
 
     // Track specific exercise types
     if (practiceType == 'reading') {
@@ -78,8 +97,10 @@ class ProgressService extends ChangeNotifier {
       // Check for reading-specific achievements
       if (_readingExercises == 10) {
         _recentAchievements.add('reading_10');
+        _allAchievements.add('reading_10');
       } else if (_readingExercises == 20) {
         _recentAchievements.add('reading_20');
+        _allAchievements.add('reading_20');
       }
     } else if (practiceType == 'listening') {
       _listeningExercises++;
@@ -88,18 +109,27 @@ class ProgressService extends ChangeNotifier {
       // Check for listening-specific achievements
       if (_listeningExercises == 10) {
         _recentAchievements.add('listening_10');
+        _allAchievements.add('listening_10');
       }
     }
 
     // Check for general achievements
-    if (_totalExercises == 10) {
+    if (_totalExercises == 5) {
+      _recentAchievements.add('exercises_5');
+      _allAchievements.add('exercises_5');
+    } else if (_totalExercises == 10) {
       _recentAchievements.add('exercises_10');
+      _allAchievements.add('exercises_10');
     } else if (_totalExercises == 50) {
       _recentAchievements.add('exercises_50');
+      _allAchievements.add('exercises_50');
     }
 
     // Update streak logic
     _updateStreak();
+
+    // Update last exercise date
+    _lastExerciseDate = DateTime.now().toString().split(' ')[0];
 
     print("ProgressService: After - Total: $_totalExercises");
     print("ProgressService: Saving progress and notifying listeners");
@@ -150,8 +180,10 @@ class ProgressService extends ChangeNotifier {
       // Check for streak achievements
       if (_currentStreak == 3) {
         _recentAchievements.add('streak_3');
+        _allAchievements.add('streak_3');
       } else if (_currentStreak == 7) {
         _recentAchievements.add('streak_7');
+        _allAchievements.add('streak_7');
       }
     });
   }
@@ -173,6 +205,7 @@ class ProgressService extends ChangeNotifier {
   double getAccuracyPercentage() => _accuracyPercentage;
   int getCurrentStreak() => _currentStreak;
   int getDailyGoal() => _dailyGoal;
+  int getDailyExercises() => _dailyExercises;
 
   // Method to get the daily goal progress as a fraction
   double getDailyGoalProgress() {
@@ -183,6 +216,68 @@ class ProgressService extends ChangeNotifier {
   // Method to get recent achievements
   List<String> getAchievements() {
     return _recentAchievements; // Return the list of recent achievements
+  }
+
+  // Add a method to get all achievements
+  List<String> getAllAchievements() {
+    return _allAchievements;
+  }
+
+  /// Resets all progress data to initial values
+  Future<void> resetAllProgress() async {
+    // Reset all tracked statistics to initial values
+    _totalExercises = 0;
+    _readingExercises = 0;
+    _listeningExercises = 0;
+    _accuracyPercentage = 0.0;
+    _currentStreak = 0;
+    _dailyGoal = 5; // Reset to default value
+    _recentAchievements = []; // Clear recent achievements
+    _allAchievements = []; // Clear all achievements
+    _dailyExercises = 0;
+    _lastExerciseDate = '';
+
+    // Clear data from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('totalExercises');
+    await prefs.remove('readingExercises');
+    await prefs.remove('listeningExercises');
+    await prefs.remove('accuracyPercentage');
+    await prefs.remove('currentStreak');
+    await prefs.remove('dailyGoal');
+    await prefs.remove('recentAchievements');
+    await prefs.remove('allAchievements');
+    await prefs.remove('dailyExercises');
+    await prefs.remove('lastExerciseDate');
+
+    // Clear streak tracking data
+    await prefs.remove('lastPracticeDay');
+    await prefs.remove('lastPracticeMonth');
+    await prefs.remove('lastPracticeYear');
+
+    // Notify listeners that progress has been reset
+    notifyListeners();
+
+    print("ProgressService: All progress has been reset");
+  }
+
+  // Method to clear recent achievements after they've been shown
+  Future<void> clearRecentAchievements() async {
+    _recentAchievements = [];
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('recentAchievements', _recentAchievements);
+    notifyListeners();
+  }
+
+  // Add a method to check and reset daily exercises
+  void _checkAndResetDailyExercises() {
+    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
+
+    if (_lastExerciseDate != today) {
+      // It's a new day, reset daily exercises
+      _dailyExercises = 0;
+      _lastExerciseDate = today;
+    }
   }
 
   // Other methods to update accuracy, streak, etc.
