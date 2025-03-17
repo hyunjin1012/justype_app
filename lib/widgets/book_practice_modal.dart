@@ -6,7 +6,6 @@ import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/practice_mode_selector.dart';
-import '../widgets/practice_content.dart';
 import '../services/book_sentence_manager.dart';
 
 class BookPracticeModal extends StatefulWidget {
@@ -141,13 +140,13 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    _isListeningMode
-                        ? 'Listening Practice'
-                        : 'Reading Practice',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 24),
+                  // Text(
+                  //   _isListeningMode
+                  //       ? 'Listening Practice'
+                  //       : 'Reading Practice',
+                  //   style: Theme.of(context).textTheme.titleLarge,
+                  // ),
+                  // const SizedBox(height: 24),
 
                   // Sentence display section
                   if (_isListeningMode)

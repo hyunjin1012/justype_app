@@ -34,8 +34,16 @@ class _ListeningPracticeScreenState extends State<ListeningPracticeScreen> {
 
   void _speakSentence() {
     _ttsService.speak(_sentenceManager.currentSentence, onStateChange: () {
-      setState(() {});
+      if (mounted) {
+        print(
+            "TTS state changed callback, isSpeaking: ${_ttsService.isSpeaking}");
+        // Force a rebuild of the entire screen
+        setState(() {});
+      }
     });
+
+    // Force an immediate rebuild to show the initial state change
+    setState(() {});
   }
 
   void _toggleTextVisibility() {
@@ -57,6 +65,9 @@ class _ListeningPracticeScreenState extends State<ListeningPracticeScreen> {
         sentenceManager: _sentenceManager,
         // Define how to display the sentence (with speak button and visibility toggle)
         sentenceDisplay: (sentence) {
+          // Force rebuild when this function is called
+          print(
+              "Building sentence display, TTS speaking: ${_ttsService.isSpeaking}");
           return Column(
             children: [
               Row(
