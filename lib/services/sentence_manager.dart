@@ -75,11 +75,37 @@ class SentenceManager {
 
   // Extract sentences from book content
   List<String> extractSentencesFromText(String content) {
-    final rawSentences = content.split(RegExp(r'(?<=[.!?])\s+'));
+    // Handle common abbreviations so they don't split sentences
+    final modifiedContent = content.replaceAllMapped(
+        // Include single-letter abbreviations and handle quotes
+        RegExp(r'(Mr\.|Mrs\.|Ms\.|Dr\.|[A-Z]\.)(\s|"|")'),
+        (match) =>
+            '${match[1].toString().replaceAll('.', '###PERIOD###')}${match[2]}');
 
-    // Filter out empty sentences and very short ones
-    return rawSentences
-        .where((s) => s.trim().length > 20 && s.trim().length < 200)
+    // Also handle periods inside quotation marks
+    final quotesFixed = modifiedContent.replaceAllMapped(
+        RegExp(r'\.("|\")(\s)'),
+        (match) => '###PERIOD###${match[1]}${match[2]}');
+
+    // Split by sentence endings
+    final rawSentences = quotesFixed.split(RegExp(r'(?<=[.!?])\s+'));
+
+    // Restore periods in abbreviations and quotes
+    final processedSentences =
+        rawSentences.map((s) => s.replaceAll('###PERIOD###', '.')).toList();
+
+    // Filter out empty sentences, very short ones, and those with brackets or underscores
+    return processedSentences
+        .where((s) =>
+            s.trim().length > 20 &&
+            s.trim().length < 200 &&
+            !s.contains('(') &&
+            !s.contains(')') &&
+            !s.contains('[') &&
+            !s.contains(']') &&
+            !s.contains('{') &&
+            !s.contains('}') &&
+            !s.contains('_'))
         .map((s) => s.replaceAll(RegExp(r'\s+'), ' ').trim())
         .toList();
   }
