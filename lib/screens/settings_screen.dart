@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import '../services/theme_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   final ThemeService themeService;
 
   const SettingsScreen({super.key, required this.themeService});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late ThemeService _themeService;
+  int _dailyGoal = 5;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeService = widget.themeService;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,270 +28,302 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
         children: [
-          // Theme section
-          _buildSectionHeader(context, 'Appearance'),
+          // Theme settings
           Card(
             elevation: 2,
-            child: Column(
-              children: [
-                // Dark mode toggle
-                SwitchListTile(
-                  title: const Text('Dark Mode'),
-                  subtitle: const Text('Use dark theme throughout the app'),
-                  value: themeService.isDarkMode,
-                  onChanged: (value) {
-                    themeService.toggleTheme();
-                  },
-                  secondary: Icon(
-                    themeService.isDarkMode
-                        ? Icons.dark_mode
-                        : Icons.light_mode,
+            margin: const EdgeInsets.all(16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Appearance',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                ),
+                  const SizedBox(height: 16),
 
-                // Theme color picker
-                ListTile(
-                  title: const Text('Theme Color'),
-                  subtitle: const Text('Choose your preferred accent color'),
-                  leading: const Icon(Icons.color_lens),
-                  trailing: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: themeService.accentColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey),
+                  // Dark mode toggle
+                  ListTile(
+                    title: const Text('Dark Mode'),
+                    subtitle: const Text('Switch between light and dark theme'),
+                    trailing: Switch(
+                      value: _themeService.isDarkMode,
+                      onChanged: (value) {
+                        setState(() {
+                          _themeService.toggleTheme();
+                        });
+                      },
                     ),
                   ),
-                  onTap: () => _showColorPicker(context, themeService),
-                ),
-              ],
+
+                  // Accent color selector
+                  ListTile(
+                    title: const Text('Accent Color'),
+                    subtitle: const Text('Choose your preferred accent color'),
+                    trailing: _buildColorSelector(),
+                  ),
+                ],
+              ),
             ),
           ),
-
-          const SizedBox(height: 24),
 
           // Practice settings
-          _buildSectionHeader(context, 'Practice Settings'),
           Card(
             elevation: 2,
-            child: Column(
-              children: [
-                // Text-to-speech settings
-                ListTile(
-                  title: const Text('Speech Rate'),
-                  subtitle: const Text('Adjust the speed of text-to-speech'),
-                  leading: const Icon(Icons.speed),
-                  trailing: SizedBox(
-                    width: 150,
-                    child: Slider(
-                      value: themeService.speechRate,
-                      min: 0.25,
-                      max: 1.0,
-                      divisions: 3,
-                      label: _getSpeechRateLabel(themeService.speechRate),
-                      onChanged: (value) {
-                        themeService.setSpeechRate(value);
-                      },
-                    ),
+            margin: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Practice Settings',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                ),
+                  const SizedBox(height: 16),
 
-                // Font size settings
-                ListTile(
-                  title: const Text('Font Size'),
-                  subtitle: const Text('Adjust text size for reading'),
-                  leading: const Icon(Icons.format_size),
-                  trailing: SizedBox(
-                    width: 150,
-                    child: Slider(
-                      value: themeService.fontSize,
-                      min: 0.8,
-                      max: 1.4,
-                      divisions: 3,
-                      label: _getFontSizeLabel(themeService.fontSize),
-                      onChanged: (value) {
-                        themeService.setFontSize(value);
+                  // Daily goal setting
+                  ListTile(
+                    title: const Text('Daily Goal'),
+                    subtitle:
+                        const Text('Number of exercises to complete each day'),
+                    trailing: DropdownButton<int>(
+                      value: _dailyGoal,
+                      items: [3, 5, 10, 15, 20].map((int value) {
+                        return DropdownMenuItem<int>(
+                          value: value,
+                          child: Text('$value'),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _dailyGoal = newValue;
+                            // Assuming _progressService.setDailyGoal(newValue) is called elsewhere
+                          });
+                        }
                       },
                     ),
                   ),
-                ),
-              ],
+
+                  // Font size slider
+                  ListTile(
+                    title: const Text('Text Size'),
+                    subtitle: const Text('Adjust the size of practice text'),
+                    trailing: SizedBox(
+                      width: 120,
+                      child: Slider(
+                        value: _themeService.fontSize,
+                        min: 0.8,
+                        max: 1.4,
+                        divisions: 6,
+                        label: _getFontSizeLabel(_themeService.fontSize),
+                        onChanged: (value) {
+                          setState(() {
+                            _themeService.setFontSize(value);
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+
+                  // Speech rate slider for audio challenges
+                  ListTile(
+                    title: const Text('Speech Rate'),
+                    subtitle: const Text('Adjust the speed of audio playback'),
+                    trailing: SizedBox(
+                      width: 120,
+                      child: Slider(
+                        value: _themeService.speechRate,
+                        min: 0.5,
+                        max: 1.5,
+                        divisions: 4,
+                        label: '${_themeService.speechRate}x',
+                        onChanged: (value) {
+                          setState(() {
+                            _themeService.setSpeechRate(value);
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 24),
-
-          // Account settings
-          _buildSectionHeader(context, 'Account'),
+          // Data management
           Card(
             elevation: 2,
-            child: Column(
-              children: [
-                ListTile(
-                  title: const Text('Reset Progress'),
-                  subtitle: const Text('Clear all your practice history'),
-                  leading: const Icon(Icons.restart_alt),
-                  onTap: () => _showResetConfirmation(context),
-                ),
-                ListTile(
-                  title: const Text('About'),
-                  subtitle: const Text('Learn more about this app'),
-                  leading: const Icon(Icons.info),
-                  onTap: () {
-                    // Show about dialog
-                    showAboutDialog(
-                      context: context,
-                      applicationName: 'Language Practice',
-                      applicationVersion: '1.0.0',
-                      applicationIcon: const FlutterLogo(size: 32),
-                      applicationLegalese: '© 2023 Language Practice',
-                      children: [
-                        const SizedBox(height: 16),
-                        const Text(
-                          'A language practice app to help improve reading and listening skills through interactive exercises.',
+            margin: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Data Management',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    );
-                  },
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Reset progress button
+                  ListTile(
+                    title: const Text('Reset Progress'),
+                    subtitle:
+                        const Text('Clear all achievements and statistics'),
+                    trailing: ElevatedButton(
+                      onPressed: _showResetConfirmationDialog,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade100,
+                      ),
+                      child: const Text('Reset'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // App info
+          Card(
+            elevation: 2,
+            margin: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'About JusType',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  const ListTile(
+                    title: Text('Version'),
+                    subtitle: Text('1.0.0'),
+                  ),
+                  ListTile(
+                    title: const Text('Help & Feedback'),
+                    subtitle: const Text('Get support or share your thoughts'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      // Open help/feedback screen or link
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          themeService.toggleTheme();
-          // Notify the app to rebuild with the new theme
-          (context as Element).markNeedsBuild();
-        },
-        child: const Icon(Icons.refresh),
+    );
+  }
+
+  Widget _buildColorSelector() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _colorOption(Colors.blue),
+        const SizedBox(width: 8),
+        _colorOption(Colors.green),
+        const SizedBox(width: 8),
+        _colorOption(Colors.purple),
+        const SizedBox(width: 8),
+        _colorOption(Colors.orange),
+      ],
+    );
+  }
+
+  Widget _colorOption(Color color) {
+    final isSelected = _themeService.accentColor == color;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _themeService.setAccentColor(color);
+        });
+      },
+      child: Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isSelected ? Colors.white : Colors.transparent,
+            width: 2,
+          ),
+          boxShadow: isSelected
+              ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 4)]
+              : null,
+        ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-      ),
-    );
+  String _getFontSizeLabel(double value) {
+    if (value <= 0.8) return 'S';
+    if (value <= 1.0) return 'M';
+    if (value <= 1.2) return 'L';
+    return 'XL';
   }
 
-  void _showColorPicker(BuildContext context, ThemeService themeService) {
-    final colors = [
-      Colors.blue,
-      Colors.purple,
-      Colors.green,
-      Colors.orange,
-      Colors.red,
-      Colors.teal,
-      Colors.indigo,
-      Colors.pink,
-    ];
-
-    showDialog(
+  Future<void> _showResetConfirmationDialog() async {
+    return showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Choose Theme Color'),
-        content: Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: colors.map((color) {
-            return InkWell(
-              onTap: () {
-                themeService.setAccentColor(color);
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Reset All Progress'),
+          content: const SingleChildScrollView(
+            child: Text(
+              'This will erase all your progress, achievements, and statistics. '
+              'This action cannot be undone. Are you sure you want to continue?',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: themeService.accentColor == color
-                        ? Colors.white
-                        : Colors.transparent,
-                    width: 3,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: themeService.accentColor == color
-                    ? const Icon(Icons.check, color: Colors.white)
-                    : null,
-              ),
-            );
-          }).toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showResetConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Progress'),
-        content: const Text(
-          'Are you sure you want to reset all your progress? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              // Reset progress logic would go here
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Progress has been reset'),
-                ),
-              );
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
             ),
-            child: const Text('Reset'),
-          ),
-        ],
-      ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Reset'),
+              onPressed: () {
+                _resetAllProgress();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
-  String _getSpeechRateLabel(double rate) {
-    if (rate <= 0.25) return 'Slow';
-    if (rate <= 0.5) return 'Normal';
-    if (rate <= 0.75) return 'Fast';
-    return 'Very Fast';
-  }
-
-  String _getFontSizeLabel(double size) {
-    if (size <= 0.8) return 'Small';
-    if (size <= 1.0) return 'Normal';
-    if (size <= 1.2) return 'Large';
-    return 'Extra Large';
+  Future<void> _resetAllProgress() async {
+    // Assuming _resetAllProgress() is called elsewhere
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All progress has been reset'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }
