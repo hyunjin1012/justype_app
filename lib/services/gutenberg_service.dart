@@ -14,7 +14,7 @@ class GutenbergService {
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       return BooksResponse.fromJson(data);
     } else {
       throw Exception('Failed to load books: ${response.statusCode}');
@@ -34,7 +34,7 @@ class GutenbergService {
             'Failed to load book metadata: ${metadataResponse.statusCode}');
       }
 
-      metadataData = json.decode(metadataResponse.body);
+      metadataData = json.decode(utf8.decode(metadataResponse.bodyBytes));
       final results = metadataData?['results'] as List;
 
       if (results.isEmpty) {
@@ -65,7 +65,7 @@ class GutenbergService {
             'Failed to load book content: ${contentResponse.statusCode}');
       }
 
-      String content = contentResponse.body;
+      String content = utf8.decode(contentResponse.bodyBytes);
 
       // Clean up the content (optional)
       content = _cleanupContent(content);
@@ -170,15 +170,17 @@ class GutenbergService {
     return contentLines.join('\n');
   }
 
-  Future<List<BookItem>> searchBooks(String query, {int page = 1}) async {
-    final response = await http.get(
-      Uri.parse('$apiUrl/books?search=$query&page=$page'),
-    );
+  Future<BooksResponse> searchBooks(String query, {int page = 1}) async {
+    final url = '$apiUrl/books?search=$query&page=$page';
+
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final booksResponse = BooksResponse.fromJson(data);
-      return booksResponse.results;
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      return BooksResponse.fromJson(data);
+    } else if (response.statusCode == 404) {
+      // Return an empty response instead of throwing an exception
+      return BooksResponse(count: 0, next: null, previous: null, results: []);
     } else {
       throw Exception('Failed to search books: ${response.statusCode}');
     }
@@ -189,7 +191,7 @@ class GutenbergService {
     final response = await http.get(Uri.parse('$apiUrl/books?search='));
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       final results = data['results'] as List;
 
       if (results.isNotEmpty) {
@@ -212,8 +214,16 @@ class GutenbergService {
             await http.get(Uri.parse('$baseUrl/files/$bookId/$bookId-0.txt'));
 
         if (contentResponse.statusCode == 200) {
-          final content = contentResponse.body;
-          final sentence = _extractRandomSentence(content);
+          final content = utf8.decode(contentResponse.bodyBytes);
+
+          // Use the improved _extractSentences method instead of _extractRandomSentence
+          final sentences = _extractSentences(content);
+          String sentence = "No suitable sentence found.";
+
+          if (sentences.isNotEmpty) {
+            final randomSentenceIndex = random.nextInt(sentences.length);
+            sentence = sentences[randomSentenceIndex];
+          }
 
           return {
             'sentence': sentence,
@@ -233,25 +243,117 @@ class GutenbergService {
     }
   }
 
-  String _extractRandomSentence(String content) {
-    // Split the content into sentences
-    final sentences = content.split(RegExp(r'(?<=[.!?])\s+'));
+  Future<Map<String, dynamic>> getProcessedSentence({String? bookId}) async {
+    Map<String, dynamic> result = {
+      'sentence': '',
+      'title': '',
+      'author': '',
+      'bookId': '',
+    };
 
-    // Filter out empty sentences and very short ones
-    final validSentences = sentences
-        .where((s) =>
-            s.trim().length > 20 &&
-            !s.contains('*** START OF') &&
-            !s.contains('*** END OF'))
-        .toList();
+    try {
+      if (bookId != null) {
+        // Get sentence from a specific book
+        final book = await fetchBook(bookId);
+        final sentences = _extractSentences(book.content);
 
-    // Return a random sentence
-    if (validSentences.isNotEmpty) {
-      final random = Random();
-      final randomIndex = random.nextInt(validSentences.length);
-      return validSentences[randomIndex].trim();
-    } else {
-      return 'No suitable sentence found.';
+        if (sentences.isNotEmpty) {
+          final random = Random();
+          result['sentence'] = sentences[random.nextInt(sentences.length)];
+          result['title'] = book.title;
+          result['author'] = book.author;
+          result['bookId'] = bookId;
+        }
+      } else {
+        // Get a random sentence from a random book
+        result = await fetchRandomSentence();
+      }
+
+      return result;
+    } catch (e) {
+      return result;
     }
+  }
+
+  List<String> _extractSentences(String content) {
+    // Preprocess content to handle abbreviations
+    String preprocessed = content;
+
+    // Handle common abbreviations
+    final abbreviations = [
+      'Mr.',
+      'Mrs.',
+      'Ms.',
+      'Dr.',
+      'Prof.',
+      'St.',
+      'Jr.',
+      'Sr.'
+    ];
+    for (var abbr in abbreviations) {
+      preprocessed = preprocessed.replaceAllMapped(
+        RegExp('$abbr (\\w)'),
+        (match) =>
+            '${abbr.substring(0, abbr.length - 1)}###PERIOD### ${match.group(1)}',
+      );
+    }
+
+    // Handle single-letter abbreviations
+    preprocessed = preprocessed.replaceAllMapped(
+      RegExp(r'([A-Z])\. ([A-Z])'),
+      (match) => '${match.group(1)}###PERIOD### ${match.group(2)}',
+    );
+
+    // Split by sentence endings
+    final rawSentences = preprocessed.split(RegExp(r'(?<=[.!?])\s+'));
+
+    // Process and filter sentences
+    return rawSentences
+        .map((s) => s
+            .replaceAll('###PERIOD###', '.')
+            .replaceAll(RegExp(r'\s+'), ' ')
+            .trim())
+        .where((s) {
+      // More thorough filtering
+      if (s.length < 20 || s.length > 200) return false;
+
+      // Check for any brackets, parentheses, or other unwanted characters
+      if (s.contains('(') ||
+          s.contains(')') ||
+          s.contains('[') ||
+          s.contains(']') ||
+          s.contains('{') ||
+          s.contains('}') ||
+          s.contains('<') ||
+          s.contains('>') ||
+          s.contains('*') ||
+          s.contains('_') ||
+          s.contains('...') ||
+          s.contains('--') ||
+          s.contains('©') ||
+          s.contains('®') ||
+          s.contains('™') ||
+          s.contains('§')) {
+        return false;
+      }
+
+      // Filter out sentences with Roman numerals
+      // This regex matches common Roman numeral patterns
+      if (RegExp(r'\b[IVXLCDM]+\b').hasMatch(s)) {
+        return false;
+      }
+
+      // Ensure proper ending punctuation
+      if (!s.endsWith('.') && !s.endsWith('!') && !s.endsWith('?')) {
+        return false;
+      }
+
+      // Check for chapter headings or all-caps text
+      if (s.toUpperCase() == s && s.length > 10) {
+        return false;
+      }
+
+      return true;
+    }).toList();
   }
 }

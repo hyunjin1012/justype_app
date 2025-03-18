@@ -55,7 +55,6 @@ class ProgressService extends ChangeNotifier {
           Map<String, dynamic>.from(json.decode(achievementDataJson) as Map);
     } catch (e) {
       _achievementData = {};
-      print('Error loading achievement data: $e');
     }
 
     // Load all achievements
@@ -104,9 +103,6 @@ class ProgressService extends ChangeNotifier {
 
   // Example methods to update progress
   Future<void> completeExercise({String practiceType = 'general'}) async {
-    print("ProgressService: Recording exercise completion - $practiceType");
-    print("ProgressService: Before - Total: $_totalExercises");
-
     // Check if we need to reset daily exercises (new day)
     _checkAndResetDailyExercises();
 
@@ -116,7 +112,6 @@ class ProgressService extends ChangeNotifier {
     // Track specific exercise types
     if (practiceType == 'reading') {
       _readingExercises++;
-      print("ProgressService: Reading exercises: $_readingExercises");
 
       // Check for reading-specific achievements
       if (_readingExercises == 10) {
@@ -126,7 +121,6 @@ class ProgressService extends ChangeNotifier {
       }
     } else if (practiceType == 'listening') {
       _listeningExercises++;
-      print("ProgressService: Listening exercises: $_listeningExercises");
 
       // Check for listening-specific achievements
       if (_listeningExercises == 10) {
@@ -149,16 +143,13 @@ class ProgressService extends ChangeNotifier {
     // Update last exercise date
     _lastExerciseDate = DateTime.now().toString().split(' ')[0];
 
-    print("ProgressService: After - Total: $_totalExercises");
-    print("ProgressService: Saving progress and notifying listeners");
-
     await saveProgress(); // Save progress after completing an exercise
   }
 
   // Update the streak counter
   void _updateStreak() {
     // Get the current date
-    final today = DateTime.now().day;
+    // final today = DateTime.now().day;
 
     // Get the last practice date from SharedPreferences
     SharedPreferences.getInstance().then((prefs) {
@@ -276,8 +267,6 @@ class ProgressService extends ChangeNotifier {
 
     // Notify listeners that progress has been reset
     notifyListeners();
-
-    print("ProgressService: All progress has been reset");
   }
 
   // Method to clear recent achievements after they've been shown

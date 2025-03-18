@@ -1,8 +1,10 @@
 import 'dart:math';
 import '../services/practice_service.dart';
+import '../services/gutenberg_service.dart';
 
 class SentenceManager {
   final PracticeService _practiceService = PracticeService();
+  final GutenbergService _gutenbergService = GutenbergService();
   String _booksSentence = "";
   String _aiSentence = "This is a random sentence from AI.";
   String _currentSentence = "";
@@ -40,19 +42,24 @@ class SentenceManager {
         onLoadingChanged(true);
       }
 
-      final result = await _practiceService.fetchRandomContent(_selectedSource);
-
       if (_selectedSource == 'Books') {
-        _booksSentence = result['content'];
+        // Use the shared method from GutenbergService
+        final result = await _gutenbergService.getProcessedSentence();
+        _booksSentence = result['sentence'] ?? "";
+        _bookTitle = result['title'] ?? "";
+        _bookAuthor = result['author'] ?? "";
+        _currentBookId = result['bookId'] ?? "";
       } else {
+        // For AI, use the dedicated AI content method
+        final result = await _practiceService.fetchAIContent();
         _aiSentence = result['content'];
+        _bookTitle = result['bookTitle'];
+        _bookAuthor = result['bookAuthor'];
+        _currentBookId = result['currentBookId'];
       }
 
       _currentSentence =
           _selectedSource == 'Books' ? _booksSentence : _aiSentence;
-      _bookTitle = result['bookTitle'];
-      _bookAuthor = result['bookAuthor'];
-      _currentBookId = result['currentBookId'];
       _isLoading = false;
 
       if (onLoadingChanged != null) {
@@ -73,41 +80,84 @@ class SentenceManager {
     }
   }
 
-  // Extract sentences from book content
+  // Extract sentences from book content - keep this for compatibility
   List<String> extractSentencesFromText(String content) {
-    // Handle common abbreviations so they don't split sentences
-    final modifiedContent = content.replaceAllMapped(
-        // Include single-letter abbreviations and handle quotes
-        RegExp(r'(Mr\.|Mrs\.|Ms\.|Dr\.|[A-Z]\.)(\s|"|")'),
+    // First, preprocess the content to handle abbreviations
+    // This ensures we don't split sentences at abbreviations like "Mr."
+    String preprocessed = content;
+
+    // Handle common abbreviations
+    final abbreviations = [
+      'Mr.',
+      'Mrs.',
+      'Ms.',
+      'Dr.',
+      'Prof.',
+      'St.',
+      'Jr.',
+      'Sr.'
+    ];
+    for (var abbr in abbreviations) {
+      preprocessed = preprocessed.replaceAllMapped(
+        RegExp('$abbr (\\w)'),
         (match) =>
-            '${match[1].toString().replaceAll('.', '###PERIOD###')}${match[2]}');
+            '${abbr.substring(0, abbr.length - 1)}###PERIOD### ${match.group(1)}',
+      );
+    }
 
-    // Also handle periods inside quotation marks
-    final quotesFixed = modifiedContent.replaceAllMapped(
-        RegExp(r'\.("|\")(\s)'),
-        (match) => '###PERIOD###${match[1]}${match[2]}');
+    // Handle single-letter abbreviations (like initials)
+    preprocessed = preprocessed.replaceAllMapped(
+      RegExp(r'([A-Z])\. ([A-Z])'),
+      (match) => '${match.group(1)}###PERIOD### ${match.group(2)}',
+    );
 
-    // Split by sentence endings
-    final rawSentences = quotesFixed.split(RegExp(r'(?<=[.!?])\s+'));
+    // Handle periods inside quotation marks
+    preprocessed = preprocessed.replaceAllMapped(
+      RegExp(r'\.("|\")(\s)'),
+      (match) => '###PERIOD###${match[1]}${match[2]}',
+    );
 
-    // Restore periods in abbreviations and quotes
-    final processedSentences =
-        rawSentences.map((s) => s.replaceAll('###PERIOD###', '.')).toList();
+    // Split by sentence endings (period, exclamation mark, or question mark followed by space)
+    final rawSentences = preprocessed.split(RegExp(r'(?<=[.!?])\s+'));
 
-    // Filter out empty sentences, very short ones, and those with brackets or underscores
-    return processedSentences
-        .where((s) =>
-            s.trim().length > 20 &&
-            s.trim().length < 200 &&
-            !s.contains('(') &&
-            !s.contains(')') &&
-            !s.contains('[') &&
-            !s.contains(']') &&
-            !s.contains('{') &&
-            !s.contains('}') &&
-            !s.contains('_'))
-        .map((s) => s.replaceAll(RegExp(r'\s+'), ' ').trim())
-        .toList();
+    // Process each sentence
+    final processedSentences = rawSentences.map((sentence) {
+      // Restore periods in abbreviations
+      String processed = sentence.replaceAll('###PERIOD###', '.');
+      // Normalize whitespace
+      processed = processed.replaceAll(RegExp(r'\s+'), ' ').trim();
+      return processed;
+    }).toList();
+
+    // Filter out unsuitable sentences
+    return processedSentences.where((sentence) {
+      // Check length (not too short, not too long)
+      if (sentence.trim().length < 20 || sentence.trim().length > 200) {
+        return false;
+      }
+
+      // Check for unwanted characters or patterns
+      if (sentence.contains('(') ||
+          sentence.contains(')') ||
+          sentence.contains('[') ||
+          sentence.contains(']') ||
+          sentence.contains('{') ||
+          sentence.contains('}') ||
+          sentence.contains('_') ||
+          sentence.contains('...') ||
+          sentence.contains('--')) {
+        return false;
+      }
+
+      // Ensure the sentence has proper ending punctuation
+      if (!sentence.trim().endsWith('.') &&
+          !sentence.trim().endsWith('!') &&
+          !sentence.trim().endsWith('?')) {
+        return false;
+      }
+
+      return true;
+    }).toList();
   }
 
   // Get a random sentence from a list

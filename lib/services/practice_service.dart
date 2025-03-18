@@ -1,44 +1,16 @@
-import '../services/gutenberg_service.dart';
 import 'package:flutter/foundation.dart';
 
 class PracticeService extends ChangeNotifier {
-  final GutenbergService _gutenbergService = GutenbergService();
   int _totalExercises = 0;
 
-  // Shared method to fetch random sentences
-  Future<Map<String, dynamic>> fetchRandomContent(String selectedSource) async {
+  // Renamed method to clarify it's for AI content only
+  Future<Map<String, dynamic>> fetchAIContent() async {
     Map<String, dynamic> result = {
-      'content': '',
-      'bookTitle': '',
-      'bookAuthor': '',
+      'content': 'This is a random sentence from AI.',
+      'bookTitle': 'AI Generated',
+      'bookAuthor': 'AI',
       'currentBookId': '',
     };
-
-    if (selectedSource == 'AI') {
-      // Fetch content from AI
-      result['content'] = "This is a random sentence from AI.";
-      result['bookTitle'] = "AI Generated";
-      result['bookAuthor'] = "AI";
-      result['currentBookId'] = ""; // No book ID for AI
-    } else {
-      // Fetch content from Books using GutenbergService
-      try {
-        var apiResult = await _gutenbergService.fetchRandomSentence();
-
-        // Clean the sentence by replacing all whitespace sequences with a single space
-        result['content'] = (apiResult['sentence'] ?? "No sentence found")
-            .replaceAll(RegExp(r'\s+'), ' ')
-            .trim();
-        result['bookTitle'] = apiResult['title'] ?? "Unknown Title";
-        result['bookAuthor'] = apiResult['author'] ?? "Unknown Author";
-        result['currentBookId'] = apiResult['bookId'] ?? "";
-      } catch (e) {
-        result['content'] = "Error fetching sentence: $e";
-        result['bookTitle'] = "";
-        result['bookAuthor'] = "";
-        result['currentBookId'] = "";
-      }
-    }
 
     return result;
   }
@@ -54,7 +26,10 @@ class PracticeService extends ChangeNotifier {
 
   // Helper method to normalize text for comparison
   String _normalizeText(String text) {
-    return text
+    // Restore any temporarily replaced periods before normalization
+    String restored = text.replaceAll('###', '.');
+
+    return restored
         .trim()
         .toLowerCase()
         .replaceAll(RegExp(r'\s+'), ' ')
@@ -65,7 +40,6 @@ class PracticeService extends ChangeNotifier {
   void completeExercise({String practiceType = 'general'}) {
     _totalExercises++;
     // Add any additional logic for tracking specific types of exercises
-    // For example, you could track reading vs. listening exercises
     notifyListeners(); // Notify listeners about the change
   }
 

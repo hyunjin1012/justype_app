@@ -34,6 +34,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   String _currentSentence = "";
   bool _isCheckButtonEnabled = true;
   final ProgressService _progressService = ProgressService();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -43,11 +44,16 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   }
 
   Future<void> _initializeBookSentences() async {
-    _sentenceManager.initializeWithBook(widget.book);
+    setState(() {
+      _isLoading = true;
+    });
+
+    await _sentenceManager.initializeWithBook(widget.book);
+
     setState(() {
       _currentSentence = _sentenceManager.currentSentence;
+      _isLoading = false;
     });
-    print("Current sentence after initialization: $_currentSentence");
   }
 
   @override
@@ -115,18 +121,20 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     print("Feedback after check: $_feedback");
   }
 
-  void _getNextSentence() {
-    _sentenceManager.getNextSentence();
+  Future<void> _getNextSentence() async {
+    setState(() {
+      _isLoading = true;
+      _textController.clear();
+      _feedback = "";
+    });
+
+    await _sentenceManager.getNextSentence();
+
     setState(() {
       _currentSentence = _sentenceManager.currentSentence;
-      _feedback = "";
-      _isCheckButtonEnabled = true; // Re-enable the check button
+      _isLoading = false;
+      _isCheckButtonEnabled = true;
     });
-    _textController.clear();
-    if (_isListeningMode) {
-      _ttsService.stop();
-    }
-    print("New sentence: $_currentSentence");
   }
 
   @override
