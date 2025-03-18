@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'reading_practice_screen.dart';
-import 'listening_practice_screen.dart';
+import 'text_challenge_screen.dart';
+import 'audio_challenge_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,8 +13,8 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   static final List<Widget> _screens = [
-    const ReadingPracticeScreen(),
-    const ListeningPracticeScreen(),
+    const TextChallengeScreen(),
+    const AudioChallengeScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -31,11 +31,11 @@ class _MainScreenState extends State<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book),
-            label: 'Reading',
+            label: 'Text',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.hearing),
-            label: 'Listening',
+            label: 'Audio',
           ),
         ],
         currentIndex: _selectedIndex,

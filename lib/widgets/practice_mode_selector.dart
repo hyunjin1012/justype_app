@@ -18,12 +18,12 @@ class PracticeModeSelector extends StatelessWidget {
         segments: const [
           ButtonSegment<bool>(
             value: false,
-            label: Text('Reading'),
+            label: Text('Text Mode'),
             icon: Icon(Icons.menu_book),
           ),
           ButtonSegment<bool>(
             value: true,
-            label: Text('Listening'),
+            label: Text('Audio Mode'),
             icon: Icon(Icons.hearing),
           ),
         ],

@@ -5,14 +5,14 @@ import '../widgets/sentence_display_card.dart';
 import '../services/progress_service.dart';
 import '../services/sentence_manager.dart';
 
-class ReadingPracticeScreen extends StatefulWidget {
-  const ReadingPracticeScreen({super.key});
+class TextChallengeScreen extends StatefulWidget {
+  const TextChallengeScreen({super.key});
 
   @override
-  State<ReadingPracticeScreen> createState() => _ReadingPracticeScreenState();
+  State<TextChallengeScreen> createState() => _TextChallengeScreenState();
 }
 
-class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
+class _TextChallengeScreenState extends State<TextChallengeScreen> {
   final ProgressService _progressService = ProgressService();
   final TextEditingController _controller = TextEditingController();
   final SentenceManager _sentenceManager = SentenceManager();
@@ -22,7 +22,7 @@ class _ReadingPracticeScreenState extends State<ReadingPracticeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reading Practice'),
+        title: const Text('Text Challenge'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: PracticeContent(

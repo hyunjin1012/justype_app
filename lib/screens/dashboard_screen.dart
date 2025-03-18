@@ -78,7 +78,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Progress'),
+        title: const Text('Your Stats'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           // Add reset button in the app bar
@@ -128,10 +128,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                         '${_progressService.getDailyExercises()}'),
                     _buildStatRow('Total Exercises',
                         '${_progressService.getTotalExercises()}'),
-                    _buildStatRow('Reading Exercises',
-                        '${_progressService.getReadingExercises()}'),
-                    _buildStatRow('Listening Exercises',
-                        '${_progressService.getListeningExercises()}'),
+                    _buildStatRow('Text Challenges',
+                        '${_progressService.getTextChallenges()}'),
+                    _buildStatRow('Audio Challenges',
+                        '${_progressService.getAudioChallenges()}'),
                     _buildStatRow('Current Streak',
                         '${_progressService.getCurrentStreak()} ${_progressService.getCurrentStreak() == 1 ? 'day' : 'days'}'),
                     _buildStatRow('Daily Goal',
@@ -416,24 +416,24 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   String _formatAchievementName(String achievementId) {
-    // Convert achievement IDs to readable names
+    // Convert achievement IDs to more fun names
     switch (achievementId) {
       case 'exercises_5':
-        return 'Completed 5 exercises';
+        return 'Completed 5 challenges';
       case 'exercises_10':
-        return 'Completed 10 exercises';
+        return 'Completed 10 challenges';
       case 'exercises_50':
-        return 'Completed 50 exercises';
+        return 'Completed 50 challenges';
       case 'streak_3':
-        return '3-day practice streak';
+        return '3-day streak';
       case 'streak_7':
-        return '7-day practice streak';
+        return '7-day streak';
       case 'reading_10':
-        return 'Completed 10 reading exercises';
+        return 'Completed 10 text challenges';
       case 'reading_20':
-        return 'Completed 20 reading exercises';
+        return 'Completed 20 text challenges';
       case 'listening_10':
-        return 'Completed 10 listening exercises';
+        return 'Completed 10 audio challenges';
       default:
         return achievementId;
     }

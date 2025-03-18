@@ -12,7 +12,7 @@ class PracticeInputArea extends StatefulWidget {
     required this.controller,
     required this.onCheck,
     required this.feedback,
-    this.labelText = 'Type what you see/hear',
+    this.labelText = 'Type what you see/hear to score points',
     this.isCheckButtonEnabled = true,
   });
 

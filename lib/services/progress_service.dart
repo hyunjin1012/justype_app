@@ -17,8 +17,8 @@ class ProgressService extends ChangeNotifier {
 
   // Example properties to track progress
   int _totalExercises = 0;
-  int _readingExercises = 0;
-  int _listeningExercises = 0;
+  int _textChallenges = 0;
+  int _audioChallenges = 0;
   double _accuracyPercentage = 0.0;
   int _currentStreak = 0;
   int _dailyGoal = 5; // Example daily goal
@@ -37,8 +37,8 @@ class ProgressService extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     _totalExercises = prefs.getInt('totalExercises') ?? 0;
-    _readingExercises = prefs.getInt('readingExercises') ?? 0;
-    _listeningExercises = prefs.getInt('listeningExercises') ?? 0;
+    _textChallenges = prefs.getInt('textChallenges') ?? 0;
+    _audioChallenges = prefs.getInt('audioChallenges') ?? 0;
     _accuracyPercentage = prefs.getDouble('accuracyPercentage') ?? 0.0;
     _currentStreak = prefs.getInt('currentStreak') ?? 0;
     _dailyGoal = prefs.getInt('dailyGoal') ?? 5;
@@ -79,8 +79,8 @@ class ProgressService extends ChangeNotifier {
   Future<void> saveProgress() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('totalExercises', _totalExercises);
-    await prefs.setInt('readingExercises', _readingExercises);
-    await prefs.setInt('listeningExercises', _listeningExercises);
+    await prefs.setInt('textChallenges', _textChallenges);
+    await prefs.setInt('audioChallenges', _audioChallenges);
     await prefs.setDouble('accuracyPercentage', _accuracyPercentage);
     await prefs.setInt('currentStreak', _currentStreak);
     await prefs.setInt('dailyGoal', _dailyGoal);
@@ -110,21 +110,21 @@ class ProgressService extends ChangeNotifier {
     _dailyExercises++;
 
     // Track specific exercise types
-    if (practiceType == 'reading') {
-      _readingExercises++;
+    if (practiceType == 'text') {
+      _textChallenges++;
 
-      // Check for reading-specific achievements
-      if (_readingExercises == 10) {
-        _addAchievement('reading_10');
-      } else if (_readingExercises == 20) {
-        _addAchievement('reading_20');
+      // Check for text-related achievements
+      if (_textChallenges == 10) {
+        _addAchievement('text_10');
+      } else if (_textChallenges == 20) {
+        _addAchievement('text_20');
       }
-    } else if (practiceType == 'listening') {
-      _listeningExercises++;
+    } else if (practiceType == 'audio') {
+      _audioChallenges++;
 
-      // Check for listening-specific achievements
-      if (_listeningExercises == 10) {
-        _addAchievement('listening_10');
+      // Check for audio-related achievements
+      if (_audioChallenges == 10) {
+        _addAchievement('audio_10');
       }
     }
 
@@ -207,8 +207,8 @@ class ProgressService extends ChangeNotifier {
 
   // Getters for progress metrics
   int getTotalExercises() => _totalExercises;
-  int getReadingExercises() => _readingExercises;
-  int getListeningExercises() => _listeningExercises;
+  int getTextChallenges() => _textChallenges;
+  int getAudioChallenges() => _audioChallenges;
   double getAccuracyPercentage() => _accuracyPercentage;
   int getCurrentStreak() => _currentStreak;
   int getDailyGoal() => _dailyGoal;
@@ -234,8 +234,8 @@ class ProgressService extends ChangeNotifier {
   Future<void> resetAllProgress() async {
     // Reset all tracked statistics to initial values
     _totalExercises = 0;
-    _readingExercises = 0;
-    _listeningExercises = 0;
+    _textChallenges = 0;
+    _audioChallenges = 0;
     _accuracyPercentage = 0.0;
     _currentStreak = 0;
     _dailyGoal = 5; // Reset to default value
@@ -249,8 +249,8 @@ class ProgressService extends ChangeNotifier {
     // Clear data from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('totalExercises');
-    await prefs.remove('readingExercises');
-    await prefs.remove('listeningExercises');
+    await prefs.remove('textChallenges');
+    await prefs.remove('audioChallenges');
     await prefs.remove('accuracyPercentage');
     await prefs.remove('currentStreak');
     await prefs.remove('dailyGoal');

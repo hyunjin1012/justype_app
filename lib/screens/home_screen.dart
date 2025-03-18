@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Language Practice'),
+        title: const Text('JusType'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
@@ -224,22 +224,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPracticeModeCards(BuildContext context) {
     final List<Map<String, dynamic>> practiceModes = [
       {
-        'title': 'Reading Practice',
-        'description': 'Improve your reading skills',
+        'title': 'Type Challenge',
+        'description': 'Test your typing speed and accuracy',
         'icon': Icons.menu_book,
         'color': Colors.blue.shade100,
         'route': '/reading',
       },
       {
-        'title': 'Listening Practice',
-        'description': 'Enhance your listening comprehension',
+        'title': 'Audio Challenge',
+        'description': 'Type what you hear and level up',
         'icon': Icons.hearing,
         'color': Colors.green.shade100,
         'route': '/listening',
       },
       {
-        'title': 'Browse Books',
-        'description': 'Practice with classic literature',
+        'title': 'Book Collection',
+        'description': 'Explore classic stories and quotes to type',
         'icon': Icons.library_books,
         'color': Colors.purple.shade100,
         'route': '/books',

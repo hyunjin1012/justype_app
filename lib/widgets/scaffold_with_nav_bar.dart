@@ -33,11 +33,11 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book),
-            label: 'Reading',
+            label: 'Text',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.hearing),
-            label: 'Listening',
+            label: 'Audio',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.library_books),

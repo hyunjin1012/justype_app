@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../screens/reading_practice_screen.dart';
-import '../screens/listening_practice_screen.dart';
+import '../screens/text_challenge_screen.dart';
+import '../screens/audio_challenge_screen.dart';
 import '../screens/book_list_screen.dart';
 import '../screens/book_detail_screen.dart';
 import '../screens/dashboard_screen.dart';
@@ -29,8 +29,8 @@ class AppRouter {
   // Create static instances of screens to preserve their state
   static const homeScreen = HomeScreen();
   static const dashboardScreen = DashboardScreen();
-  static const readingScreen = ReadingPracticeScreen();
-  static const listeningScreen = ListeningPracticeScreen();
+  static const textChallengeScreen = TextChallengeScreen();
+  static const audioChallengeScreen = AudioChallengeScreen();
   static const booksScreen = BookListScreen();
 
   static final GoRouter router = GoRouter(
@@ -74,8 +74,8 @@ class AppRouter {
             navigatorKey: _readingNavigatorKey,
             routes: [
               GoRoute(
-                path: '/reading',
-                builder: (context, state) => const ReadingPracticeScreen(),
+                path: '/text',
+                builder: (context, state) => const TextChallengeScreen(),
               ),
             ],
           ),
@@ -84,8 +84,8 @@ class AppRouter {
             navigatorKey: _listeningNavigatorKey,
             routes: [
               GoRoute(
-                path: '/listening',
-                builder: (context, state) => const ListeningPracticeScreen(),
+                path: '/audio',
+                builder: (context, state) => const AudioChallengeScreen(),
               ),
             ],
           ),
@@ -146,15 +146,15 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
-            label: 'Progress',
+            label: 'Stats',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book),
-            label: 'Reading',
+            label: 'Text',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.hearing),
-            label: 'Listening',
+            label: 'Audio',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.library_books),

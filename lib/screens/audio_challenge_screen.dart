@@ -7,15 +7,14 @@ import '../widgets/sentence_display_card.dart';
 import '../services/progress_service.dart';
 import '../services/sentence_manager.dart';
 
-class ListeningPracticeScreen extends StatefulWidget {
-  const ListeningPracticeScreen({super.key});
+class AudioChallengeScreen extends StatefulWidget {
+  const AudioChallengeScreen({super.key});
 
   @override
-  State<ListeningPracticeScreen> createState() =>
-      _ListeningPracticeScreenState();
+  State<AudioChallengeScreen> createState() => _AudioChallengeScreenState();
 }
 
-class _ListeningPracticeScreenState extends State<ListeningPracticeScreen> {
+class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
   final TtsService _ttsService = TtsService();
   final SentenceManager _sentenceManager = SentenceManager();
   bool _isTextVisible = false;
@@ -56,7 +55,7 @@ class _ListeningPracticeScreenState extends State<ListeningPracticeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Listening Practice'),
+        title: const Text('Audio Challenge'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: PracticeContent(

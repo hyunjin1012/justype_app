@@ -132,15 +132,25 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                   color: Colors.grey[700],
                                 ),
                       ),
-                      const SizedBox(height: 8),
-                      ElevatedButton.icon(
-                        onPressed: () => _showPracticeModal(context),
-                        icon: const Icon(Icons.school),
-                        label: const Text('Practice with this Book'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primaryContainer,
-                        ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => _showPracticeModal(context),
+                              icon: const Icon(Icons.keyboard),
+                              label: const Text('Practice Typing'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onPrimary,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const Divider(height: 24),
                       Expanded(

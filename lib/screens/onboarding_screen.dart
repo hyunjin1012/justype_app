@@ -16,16 +16,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<Map<String, dynamic>> _pages = [
     {
-      'title': 'Welcome to Language Practice',
-      'description':
-          'Improve your language skills through reading and listening exercises',
+      'title': 'Welcome to JusType',
+      'description': 'Have fun with typing challenges and improve your skills',
       'image': 'assets/images/onboarding_welcome.png',
       'color': Colors.blue.shade50,
     },
     {
-      'title': 'Practice Reading',
+      'title': 'Text Challenges',
       'description':
-          'Read sentences from classic books and AI-generated content to improve your reading comprehension',
+          'Type sentences from classic books and level up your typing speed',
       'image': 'assets/images/onboarding_reading.png',
       'color': Colors.green.shade50,
     },

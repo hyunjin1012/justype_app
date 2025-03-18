@@ -145,7 +145,7 @@ class _BookListScreenState extends State<BookListScreen> {
                   });
                 },
               )
-            : const Text('Book Library'),
+            : const Text('Book Collection'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
