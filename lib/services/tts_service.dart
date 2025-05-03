@@ -25,50 +25,50 @@ class TtsService {
       print("TTS completed - completion handler");
       _isSpeaking = false;
       _cancelSpeechTimer();
-      if (_onStateChangeCallback != null) {
-        _onStateChangeCallback!();
-      }
+      _safeCallback();
     });
 
     // Listen to TTS status changes
     _flutterTts.setStartHandler(() {
       print("TTS started - start handler");
       _isSpeaking = true;
-      if (_onStateChangeCallback != null) {
-        _onStateChangeCallback!();
-      }
+      _safeCallback();
     });
 
     // Also listen to progress updates which might help catch completion
     _flutterTts.setCancelHandler(() {
       print("TTS cancelled - cancel handler");
       _isSpeaking = false;
-      if (_onStateChangeCallback != null) {
-        _onStateChangeCallback!();
-      }
+      _safeCallback();
     });
 
     _flutterTts.setPauseHandler(() {
       print("TTS paused - pause handler");
-      if (_onStateChangeCallback != null) {
-        _onStateChangeCallback!();
-      }
+      _safeCallback();
     });
 
     _flutterTts.setContinueHandler(() {
       print("TTS continued - continue handler");
-      if (_onStateChangeCallback != null) {
-        _onStateChangeCallback!();
-      }
+      _safeCallback();
     });
 
     _flutterTts.setErrorHandler((error) {
       print("TTS error: $error - error handler");
       _isSpeaking = false;
-      if (_onStateChangeCallback != null) {
-        _onStateChangeCallback!();
-      }
+      _safeCallback();
     });
+  }
+
+  // Helper method to safely call the callback
+  void _safeCallback() {
+    if (_onStateChangeCallback != null) {
+      try {
+        _onStateChangeCallback!();
+      } catch (e) {
+        print("Error in TTS callback: $e");
+        _onStateChangeCallback = null;
+      }
+    }
   }
 
   // Speak or stop speaking
@@ -81,18 +81,14 @@ class TtsService {
       _cancelSpeechTimer();
       await _flutterTts.stop();
       _isSpeaking = false;
-      if (onStateChange != null) {
-        onStateChange();
-      }
+      _safeCallback();
       return;
     }
 
     print("Starting TTS");
     // Explicitly set speaking state before calling the API
     _isSpeaking = true;
-    if (onStateChange != null) {
-      onStateChange();
-    }
+    _safeCallback();
 
     await _flutterTts.speak(text);
 
@@ -100,29 +96,25 @@ class TtsService {
     _startSpeechTimer(text, onStateChange);
   }
 
-  // Start a timer based on text length to detect when speech might be complete
+  // Start a timer to detect when speech might be complete
   void _startSpeechTimer(String text, Function? onStateChange) {
-    _cancelSpeechTimer();
+    _cancelSpeechTimer(); // Cancel any existing timer
 
-    // Estimate speech duration based on text length and speaking rate
-    // Assuming average speaking rate of 2-3 words per second at 0.5 speed
-    int wordCount = text.split(' ').length;
-    int estimatedDurationInSeconds = (wordCount / 1.5).ceil() + 2; // Add buffer
+    // Estimate speech duration (roughly 1 second per 5 words at normal speed)
+    final wordCount = text.split(' ').length;
+    final estimatedDuration =
+        Duration(milliseconds: (wordCount * 200 / _speechRate).round());
 
-    print("Starting speech timer for $estimatedDurationInSeconds seconds");
-    _speechTimer = Timer(Duration(seconds: estimatedDurationInSeconds), () {
-      if (_isSpeaking) {
-        print("Speech timer expired - assuming speech is complete");
-        _isSpeaking = false;
-        if (onStateChange != null) {
-          onStateChange();
-        }
-      }
+    _speechTimer = Timer(estimatedDuration, () {
+      print("Speech timer completed");
+      _isSpeaking = false;
+      _safeCallback();
     });
   }
 
+  // Cancel the speech timer
   void _cancelSpeechTimer() {
-    if (_speechTimer != null && _speechTimer!.isActive) {
+    if (_speechTimer != null) {
       _speechTimer!.cancel();
       _speechTimer = null;
     }
@@ -130,19 +122,18 @@ class TtsService {
 
   // Stop speaking
   Future<void> stop() async {
+    print("TTS stop called");
     _cancelSpeechTimer();
-    if (_isSpeaking) {
-      await _flutterTts.stop();
-      _isSpeaking = false;
-      if (_onStateChangeCallback != null) {
-        _onStateChangeCallback!();
-      }
-    }
+    await _flutterTts.stop();
+    _isSpeaking = false;
+    _safeCallback();
   }
 
-  // Dispose resources
+  // Clean up resources
   Future<void> dispose() async {
+    print("TTS dispose called");
     _cancelSpeechTimer();
+    _onStateChangeCallback = null;
     await _flutterTts.stop();
   }
 

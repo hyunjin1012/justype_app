@@ -84,8 +84,12 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   }
 
   void _speakSentence() {
+    if (!mounted) return;
+
     _ttsService.speak(_sentenceManager.currentSentence, onStateChange: () {
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
