@@ -1,18 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'ai_service.dart';
 
 class PracticeService extends ChangeNotifier {
   int _totalExercises = 0;
+  final AIService _aiService = AIService();
 
   // Renamed method to clarify it's for AI content only
   Future<Map<String, dynamic>> fetchAIContent() async {
-    Map<String, dynamic> result = {
-      'content': 'This is a random sentence from AI.',
-      'bookTitle': 'AI Generated',
-      'bookAuthor': 'AI',
-      'currentBookId': '',
-    };
-
-    return result;
+    return await _aiService.generateSentence();
   }
 
   // Shared method to check answers

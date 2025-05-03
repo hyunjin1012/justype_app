@@ -42,32 +42,43 @@ class SentenceManager {
         onLoadingChanged(true);
       }
 
-      if (_selectedSource == 'Books') {
-        // Use the shared method from GutenbergService
-        final result = await _gutenbergService.getProcessedSentence();
-        _booksSentence = result['sentence'] ?? "";
-        _bookTitle = result['title'] ?? "";
-        _bookAuthor = result['author'] ?? "";
-        _currentBookId = result['bookId'] ?? "";
-      } else {
-        // For AI, use the dedicated AI content method
-        final result = await _practiceService.fetchAIContent();
-        _aiSentence = result['content'];
-        _bookTitle = result['bookTitle'];
-        _bookAuthor = result['bookAuthor'];
-        _currentBookId = result['currentBookId'];
-      }
+      try {
+        if (_selectedSource == 'Books') {
+          // Use the shared method from GutenbergService
+          final result = await _gutenbergService.getProcessedSentence();
+          _booksSentence = result['sentence'] ?? "";
+          _bookTitle = result['title'] ?? "";
+          _bookAuthor = result['author'] ?? "";
+          _currentBookId = result['bookId'] ?? "";
+        } else {
+          // For AI, use the dedicated AI content method
+          final result = await _practiceService.fetchAIContent();
+          _aiSentence = result['content'];
+          _bookTitle = result['bookTitle'];
+          _bookAuthor = result['bookAuthor'];
+          _currentBookId = result['currentBookId'];
+        }
 
-      _currentSentence =
-          _selectedSource == 'Books' ? _booksSentence : _aiSentence;
-      _isLoading = false;
-
-      if (onLoadingChanged != null) {
-        onLoadingChanged(false);
-      }
-
-      if (onContentUpdated != null) {
-        onContentUpdated();
+        _currentSentence =
+            _selectedSource == 'Books' ? _booksSentence : _aiSentence;
+      } catch (e) {
+        print('Error fetching content: $e');
+        // Set fallback content
+        if (_selectedSource == 'AI') {
+          _aiSentence = "The quick brown fox jumps over the lazy dog.";
+          _bookTitle = "AI Generated";
+          _bookAuthor = "AI";
+          _currentBookId = "";
+          _currentSentence = _aiSentence;
+        }
+      } finally {
+        _isLoading = false;
+        if (onLoadingChanged != null) {
+          onLoadingChanged(false);
+        }
+        if (onContentUpdated != null) {
+          onContentUpdated();
+        }
       }
     } else {
       // Just switch to the existing content
