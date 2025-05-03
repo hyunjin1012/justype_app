@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../widgets/achievement_banner.dart';
 import '../services/progress_service.dart';
 import '../widgets/shimmer_loading_effect.dart';
+import 'package:provider/provider.dart';
+import '../services/theme_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -59,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeService = Provider.of<ThemeService>(context);
     // Get achievements to display
     final achievements = _progressService.getAchievements();
     final bool showAchievementBanner = _progressService.hasRecentAchievements();

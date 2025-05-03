@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 class TtsService {
   final FlutterTts _flutterTts = FlutterTts();
   bool _isSpeaking = false;
   Function? _onStateChangeCallback;
   Timer? _speechTimer;
+  double _speechRate = 0.5; // Default is already 0.5 for normal speed
 
   // Getter for speaking state
   bool get isSpeaking => _isSpeaking;
@@ -14,7 +16,7 @@ class TtsService {
   // Initialize TTS with default settings
   Future<void> initialize() async {
     await _flutterTts.setLanguage("en-US");
-    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.setSpeechRate(_speechRate);
     await _flutterTts.setVolume(1.0);
     await _flutterTts.setPitch(1.0);
 
@@ -158,5 +160,11 @@ class TtsService {
             : Theme.of(context).colorScheme.primary.withOpacity(0.1),
       ),
     );
+  }
+
+  // Method to set the speech rate
+  void setSpeechRate(double rate) {
+    _speechRate = rate;
+    _flutterTts.setSpeechRate(_speechRate);
   }
 }

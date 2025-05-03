@@ -8,6 +8,7 @@ import '../widgets/visibility_toggle.dart';
 import '../widgets/practice_mode_selector.dart';
 import '../services/book_sentence_manager.dart';
 import '../services/progress_service.dart';
+import 'enhanced_feedback.dart';
 
 class BookPracticeModal extends StatefulWidget {
   final Book book;
@@ -137,6 +138,33 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     });
   }
 
+  void _showEnhancedFeedback() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              EnhancedFeedback(
+                userInput: _textController.text,
+                correctSentence: _sentenceManager.currentSentence,
+                isCorrect: _practiceService.checkAnswer(
+                    _textController.text, _sentenceManager.currentSentence),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,14 +195,6 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Text(
-                  //   _isListeningMode
-                  //       ? 'Listening Practice'
-                  //       : 'Reading Practice',
-                  //   style: Theme.of(context).textTheme.titleLarge,
-                  // ),
-                  // const SizedBox(height: 24),
-
                   // Sentence display section
                   if (_isListeningMode)
                     Column(
@@ -202,13 +222,38 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
 
                   const Spacer(),
 
-                  // Input area
-                  PracticeInputArea(
-                    controller: _textController,
-                    onCheck: _checkAnswer,
-                    feedback: _feedback,
-                    labelText: 'Type what you see/hear',
-                    isCheckButtonEnabled: _isCheckButtonEnabled,
+                  // Input area and feedback
+                  Column(
+                    children: [
+                      PracticeInputArea(
+                        controller: _textController,
+                        onCheck: _checkAnswer,
+                        feedback:
+                            "", // Empty feedback since we'll show it separately
+                        labelText: 'Type what you see/hear',
+                        isCheckButtonEnabled: _isCheckButtonEnabled,
+                      ),
+                      if (_feedback.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          _feedback,
+                          style: TextStyle(
+                            color: _practiceService.checkAnswer(
+                                    _textController.text,
+                                    _sentenceManager.currentSentence)
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: _showEnhancedFeedback,
+                          icon: const Icon(Icons.feedback),
+                          label: const Text('View Detailed Feedback'),
+                        ),
+                      ],
+                      const SizedBox(height: 32), // Add spacing at the bottom
+                    ],
                   ),
                 ],
               ),

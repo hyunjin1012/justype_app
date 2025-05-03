@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/sentence_manager.dart';
 import 'package:go_router/go_router.dart';
 import '../services/progress_service.dart';
+import 'enhanced_feedback.dart';
 
 class PracticeContent extends StatefulWidget {
   final String title;
@@ -197,6 +198,33 @@ class _PracticeContentState extends State<PracticeContent> {
     );
   }
 
+  void _showEnhancedFeedback() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              EnhancedFeedback(
+                userInput: _textController.text,
+                correctSentence: widget.sentenceManager.currentSentence,
+                isCorrect:
+                    widget.sentenceManager.checkAnswer(_textController.text),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -247,9 +275,40 @@ class _PracticeContentState extends State<PracticeContent> {
                 ),
               ),
             ),
-            // Input area using the provided builder - pass the button state
-            widget.inputArea(_textController, _checkAnswer, _feedback,
-                _isCheckButtonEnabled),
+            // Input area with feedback
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Input area using the provided builder
+                  widget.inputArea(
+                    _textController,
+                    _checkAnswer,
+                    "", // Empty feedback since we'll show it separately
+                    _isCheckButtonEnabled,
+                  ),
+                  // Feedback message and button
+                  if (_feedback.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _feedback,
+                      style: TextStyle(
+                        color: widget.sentenceManager
+                                .checkAnswer(_textController.text)
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      onPressed: _showEnhancedFeedback,
+                      icon: const Icon(Icons.feedback),
+                      label: const Text('View Detailed Feedback'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
       ),

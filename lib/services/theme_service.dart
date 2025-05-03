@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 class ThemeService extends ChangeNotifier {
   // Define a variable to hold the current theme mode
@@ -43,16 +44,19 @@ class ThemeService extends ChangeNotifier {
   // Method to set the accent color
   void setAccentColor(Color color) {
     _accentColor = color;
+    notifyListeners();
   }
 
   // Method to set the speech rate
   void setSpeechRate(double rate) {
     _speechRate = rate;
+    notifyListeners();
   }
 
   // Method to set the font size
   void setFontSize(double size) {
     _fontSize = size;
+    notifyListeners();
   }
 
   // Method to get the current theme data

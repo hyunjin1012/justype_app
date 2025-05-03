@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'router/app_router.dart';
+import 'package:provider/provider.dart';
+import 'services/theme_service.dart';
+import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,7 +12,15 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final bool showOnboarding = prefs.getBool('first_launch') ?? true;
 
-  runApp(MyApp(showOnboarding: showOnboarding));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeService()),
+        // Add other providers here
+      ],
+      child: MyApp(showOnboarding: showOnboarding),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

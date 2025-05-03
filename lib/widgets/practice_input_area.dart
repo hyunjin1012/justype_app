@@ -70,21 +70,6 @@ class PracticeInputAreaState extends State<PracticeInputArea> {
                 : null,
             child: const Text('Check'),
           ),
-          const SizedBox(height: 16), // Consistent spacing
-          SizedBox(
-            height: 24, // Fixed height for feedback area
-            child: widget.feedback.isNotEmpty
-                ? Text(
-                    widget.feedback,
-                    style: TextStyle(
-                      color: widget.feedback.toLowerCase().contains('correct')
-                          ? Colors.green
-                          : Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                : null, // No widget when empty, but space is reserved
-          ),
         ],
       ),
     );

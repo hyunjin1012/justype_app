@@ -1,23 +1,50 @@
 import 'package:flutter/material.dart';
 import '../services/theme_service.dart';
+import '../services/progress_service.dart';
+import '../services/tts_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final ThemeService themeService;
 
-  const SettingsScreen({super.key, required this.themeService});
+  const SettingsScreen({
+    super.key,
+    required this.themeService,
+  });
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late ThemeService _themeService;
-  int _dailyGoal = 5;
+  final ProgressService _progressService = ProgressService();
+  final TtsService _ttsService = TtsService();
+
+  // Local state for settings
+  double _speechRate = 1.0; // Default value is set to 1.0 (maximum speed)
+  double _fontSize = 1.0; // Default value
 
   @override
   void initState() {
     super.initState();
-    _themeService = widget.themeService;
+    // Initialize with current values
+    _speechRate = widget.themeService.speechRate;
+    _fontSize = widget.themeService.fontSize;
+
+    // Initialize TTS service
+    _ttsService.initialize();
+  }
+
+  // Helper method to create section headers
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+      ),
+    );
   }
 
   @override
@@ -29,34 +56,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
-          // Theme settings
+          // Theme section
+          _buildSectionHeader(context, 'Appearance'),
           Card(
-            elevation: 2,
-            margin: const EdgeInsets.all(16.0),
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Appearance',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-
                   // Dark mode toggle
-                  ListTile(
+                  SwitchListTile(
                     title: const Text('Dark Mode'),
                     subtitle: const Text('Switch between light and dark theme'),
-                    trailing: Switch(
-                      value: _themeService.isDarkMode,
-                      onChanged: (value) {
-                        setState(() {
-                          _themeService.toggleTheme();
-                        });
-                      },
+                    value: widget.themeService.isDarkMode,
+                    onChanged: (value) {
+                      setState(() {
+                        widget.themeService.toggleTheme();
+                      });
+                    },
+                    secondary: Icon(
+                      widget.themeService.isDarkMode
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
 
@@ -64,6 +89,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ListTile(
                     title: const Text('Accent Color'),
                     subtitle: const Text('Choose your preferred accent color'),
+                    leading: Icon(Icons.color_lens,
+                        color: widget.themeService.accentColor),
                     trailing: _buildColorSelector(),
                   ),
                 ],
@@ -71,122 +98,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Practice settings
+          // Comment out entire Reading & Typing section
+          /*
+          // Reading & Typing settings
+          _buildSectionHeader(context, 'Reading & Typing'),
           Card(
-            elevation: 2,
-            margin: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Practice Settings',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Daily goal setting
-                  ListTile(
-                    title: const Text('Daily Goal'),
-                    subtitle:
-                        const Text('Number of exercises to complete each day'),
-                    trailing: DropdownButton<int>(
-                      value: _dailyGoal,
-                      items: [3, 5, 10, 15, 20].map((int value) {
-                        return DropdownMenuItem<int>(
-                          value: value,
-                          child: Text('$value'),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _dailyGoal = newValue;
-                            // Assuming _progressService.setDailyGoal(newValue) is called elsewhere
-                          });
-                        }
-                      },
-                    ),
-                  ),
-
-                  // Font size slider
-                  ListTile(
-                    title: const Text('Text Size'),
-                    subtitle: const Text('Adjust the size of practice text'),
-                    trailing: SizedBox(
-                      width: 120,
-                      child: Slider(
-                        value: _themeService.fontSize,
-                        min: 0.8,
-                        max: 1.4,
-                        divisions: 6,
-                        label: _getFontSizeLabel(_themeService.fontSize),
-                        onChanged: (value) {
-                          setState(() {
-                            _themeService.setFontSize(value);
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-
-                  // Speech rate slider for audio challenges
-                  ListTile(
-                    title: const Text('Speech Rate'),
-                    subtitle: const Text('Adjust the speed of audio playback'),
-                    trailing: SizedBox(
-                      width: 120,
-                      child: Slider(
-                        value: _themeService.speechRate,
-                        min: 0.5,
-                        max: 1.5,
-                        divisions: 4,
-                        label: '${_themeService.speechRate}x',
-                        onChanged: (value) {
-                          setState(() {
-                            _themeService.setSpeechRate(value);
-                          });
-                        },
-                      ),
-                    ),
-                  ),
+                  // Text-to-speech settings commented out
+                  // Font size settings commented out
                 ],
               ),
             ),
           ),
+          */
 
-          // Data management
+          // User Data settings
+          _buildSectionHeader(context, 'User Data'),
           Card(
-            elevation: 2,
-            margin: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Data Management',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Reset progress button
                   ListTile(
-                    title: const Text('Reset Progress'),
-                    subtitle:
-                        const Text('Clear all achievements and statistics'),
-                    trailing: ElevatedButton(
-                      onPressed: _showResetConfirmationDialog,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade100,
-                      ),
-                      child: const Text('Reset'),
-                    ),
+                    title: const Text('Clear History'),
+                    subtitle: const Text('Remove all your saved data'),
+                    leading:
+                        Icon(Icons.restart_alt, color: Colors.red.shade400),
+                    onTap: () => _showResetConfirmation(context),
                   ),
                 ],
               ),
@@ -194,31 +143,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           // App info
+          _buildSectionHeader(context, 'About'),
           Card(
-            elevation: 2,
-            margin: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'About JusType',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
                   const ListTile(
                     title: Text('Version'),
                     subtitle: Text('1.0.0'),
+                    leading: Icon(Icons.info_outline),
                   ),
                   ListTile(
-                    title: const Text('Help & Feedback'),
-                    subtitle: const Text('Get support or share your thoughts'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    title: const Text('About'),
+                    subtitle: const Text('Learn more about this app'),
+                    leading: const Icon(Icons.info),
                     onTap: () {
-                      // Open help/feedback screen or link
+                      // Show about dialog
+                      showAboutDialog(
+                        context: context,
+                        applicationName: 'JusType',
+                        applicationVersion: '1.0.0',
+                        applicationIcon: const FlutterLogo(size: 32),
+                        applicationLegalese: '© 2023 JusType',
+                        children: [
+                          const SizedBox(height: 16),
+                          const Text(
+                            'An interactive reading and typing application designed to enhance your experience with digital text.',
+                          ),
+                        ],
+                      );
                     },
                   ),
                 ],
@@ -246,12 +204,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _colorOption(Color color) {
-    final isSelected = _themeService.accentColor == color;
+    final isSelected = widget.themeService.accentColor == color;
 
     return GestureDetector(
       onTap: () {
         setState(() {
-          _themeService.setAccentColor(color);
+          widget.themeService.setAccentColor(color);
+          // Explicitly notify listeners to ensure UI updates
+          widget.themeService.notifyListeners();
         });
       },
       child: Container(
@@ -279,51 +239,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return 'XL';
   }
 
-  Future<void> _showResetConfirmationDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Reset All Progress'),
-          content: const SingleChildScrollView(
-            child: Text(
-              'This will erase all your progress, achievements, and statistics. '
-              'This action cannot be undone. Are you sure you want to continue?',
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-              ),
-              child: const Text('Reset'),
-              onPressed: () {
-                _resetAllProgress();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  String _getSpeechRateLabel(double rate) {
+    if (rate <= 0.25) return 'Slow';
+    if (rate <= 0.5) return 'Normal';
+    if (rate <= 0.75) return 'Fast';
+    return 'Very Fast';
   }
 
-  Future<void> _resetAllProgress() async {
-    // Assuming _resetAllProgress() is called elsewhere
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('All progress has been reset'),
-          duration: Duration(seconds: 2),
+  void _showResetConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear History'),
+        content: const Text(
+          'Are you sure you want to clear all your saved data? This action cannot be undone.',
         ),
-      );
-    }
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              // Reset all progress
+              await _progressService.resetAllProgress();
+              if (mounted) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('History has been cleared'),
+                  ),
+                );
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
   }
 }
