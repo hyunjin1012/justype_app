@@ -17,22 +17,58 @@ class EnhancedFeedback extends StatefulWidget {
   State<EnhancedFeedback> createState() => _EnhancedFeedbackState();
 }
 
-class _EnhancedFeedbackState extends State<EnhancedFeedback> {
+class _EnhancedFeedbackState extends State<EnhancedFeedback>
+    with SingleTickerProviderStateMixin {
   late ConfettiController _confettiController;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _rotationAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 2));
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    _rotationAnimation = Tween<double>(begin: -0.2, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutBack,
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -0.5),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutBack,
+      ),
+    );
+
     if (widget.isCorrect) {
       _confettiController.play();
     }
+    _animationController.forward();
   }
 
   @override
   void dispose() {
     _confettiController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -60,60 +96,92 @@ class _EnhancedFeedbackState extends State<EnhancedFeedback> {
           ),
         ),
 
-        // Feedback content
-        Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: widget.isCorrect ? Colors.green.shade50 : Colors.red.shade50,
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-              color: widget.isCorrect ? Colors.green : Colors.red,
-              width: 1.0,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Feedback header
-              Row(
-                children: [
-                  Icon(
-                    widget.isCorrect ? Icons.check_circle : Icons.error,
+        // Animated feedback content
+        SlideTransition(
+          position: _slideAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: RotationTransition(
+              turns: _rotationAnimation,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: widget.isCorrect
+                      ? Colors.green.shade50
+                      : Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
                     color: widget.isCorrect ? Colors.green : Colors.red,
+                    width: 1.0,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    widget.isCorrect ? 'Correct!' : 'Not quite right',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: widget.isCorrect ? Colors.green : Colors.red,
-                      fontSize: 18,
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.isCorrect
+                          ? Colors.green.withOpacity(0.3)
+                          : Colors.red.withOpacity(0.3),
+                      blurRadius: 10,
+                      spreadRadius: 2,
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Feedback header with bounce animation
+                    Row(
+                      children: [
+                        AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: 1.0 + (_animationController.value * 0.2),
+                              child: Icon(
+                                widget.isCorrect
+                                    ? Icons.check_circle
+                                    : Icons.error,
+                                color: widget.isCorrect
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.isCorrect ? 'Correct!' : 'Not quite right',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: widget.isCorrect ? Colors.green : Colors.red,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Only show difference analysis for incorrect answers
+                    if (!widget.isCorrect) ...[
+                      const Text(
+                        'Here\'s what was different:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildDifferenceHighlight(
+                          widget.userInput, widget.correctSentence),
+                    ],
+
+                    // Show encouragement for correct answers
+                    if (widget.isCorrect) ...[
+                      const Text(
+                        'Great job! Keep practicing to improve your skills.',
+                        style: TextStyle(color: Colors.green),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 16),
-
-              // Only show difference analysis for incorrect answers
-              if (!widget.isCorrect) ...[
-                const Text(
-                  'Here\'s what was different:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                _buildDifferenceHighlight(
-                    widget.userInput, widget.correctSentence),
-              ],
-
-              // Show encouragement for correct answers
-              if (widget.isCorrect) ...[
-                const Text(
-                  'Great job! Keep practicing to improve your skills.',
-                  style: TextStyle(color: Colors.green),
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       ],
