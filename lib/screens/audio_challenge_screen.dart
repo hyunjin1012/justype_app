@@ -4,7 +4,6 @@ import '../widgets/practice_input_area.dart';
 import '../services/tts_service.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/sentence_display_card.dart';
-import '../services/progress_service.dart';
 import '../services/sentence_manager.dart';
 
 class AudioChallengeScreen extends StatefulWidget {

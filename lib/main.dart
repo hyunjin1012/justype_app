@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'router/app_router.dart';
 import 'package:provider/provider.dart';
 import 'services/theme_service.dart';
-import 'screens/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
 

@@ -241,6 +241,13 @@ class _HomeScreenState extends State<HomeScreen> {
         'route': '/listening',
       },
       {
+        'title': 'Speech Translation',
+        'description': 'Speak in your language, type in English',
+        'icon': Icons.translate,
+        'color': Colors.orange.shade100,
+        'route': '/speech-translation',
+      },
+      {
         'title': 'Book Collection',
         'description': 'Explore classic stories and quotes to type',
         'icon': Icons.library_books,

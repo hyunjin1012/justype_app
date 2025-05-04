@@ -8,7 +8,7 @@ import '../screens/dashboard_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/onboarding_screen.dart';
-import '../widgets/scaffold_with_nav_bar.dart';
+import '../screens/speech_translation_screen.dart';
 import '../services/theme_service.dart';
 
 class AppRouter {
@@ -21,6 +21,8 @@ class AppRouter {
       GlobalKey<NavigatorState>(debugLabel: 'reading');
   static final _listeningNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'listening');
+  static final _speechTranslationNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'speech_translation');
   static final _booksNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'books');
 
@@ -86,6 +88,16 @@ class AppRouter {
               GoRoute(
                 path: '/audio',
                 builder: (context, state) => const AudioChallengeScreen(),
+              ),
+            ],
+          ),
+          // Speech Translation branch
+          StatefulShellBranch(
+            navigatorKey: _speechTranslationNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/speech-translation',
+                builder: (context, state) => const SpeechTranslationScreen(),
               ),
             ],
           ),
@@ -155,6 +167,10 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.hearing),
             label: 'Audio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.translate),
+            label: 'Translate',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.library_books),

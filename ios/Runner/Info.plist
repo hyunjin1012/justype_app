@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Justype App needs access to speech recognition to translate your speech into text for practice and learning.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Justype App needs access to your microphone to record your speech for translation and practice.</string>
 </dict>
 </plist>

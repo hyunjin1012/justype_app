@@ -60,7 +60,7 @@ class _PracticeContentState extends State<PracticeContent> {
     super.dispose();
   }
 
-  void _checkAnswer() {
+  void _checkAnswer() async {
     final userInput = _textController.text;
     if (userInput.isEmpty) return;
 
@@ -78,14 +78,13 @@ class _PracticeContentState extends State<PracticeContent> {
       // Disable check button when answer is correct
       setState(() {
         _isCheckButtonEnabled = false;
+        _feedback = "Correct! Great job.";
+      });
+    } else {
+      setState(() {
+        _feedback = "Not quite right. Try again or get a new sentence.";
       });
     }
-
-    setState(() {
-      _feedback = isCorrect
-          ? "Correct! Great job."
-          : "Not quite right. Try again or get a new sentence.";
-    });
   }
 
   Future<void> _fetchRandomSentence() async {
@@ -153,8 +152,9 @@ class _PracticeContentState extends State<PracticeContent> {
     Function(String) onTap,
     String selectedSource,
   ) {
-    if (selectedSource != 'Books' || title.isEmpty)
+    if (selectedSource != 'Books' || title.isEmpty) {
       return const SizedBox.shrink();
+    }
 
     return GestureDetector(
       onTap: () => onTap(bookId),
