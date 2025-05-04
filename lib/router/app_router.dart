@@ -46,68 +46,68 @@ class AppRouter {
       ),
 
       // Use StatefulShellRoute for bottom navigation
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         builder: (context, state, navigationShell) {
           return ScaffoldWithBottomNavBar(navigationShell: navigationShell);
         },
+        navigatorContainerBuilder: (context, navigationShell, children) {
+          return IndexedStack(
+            index: navigationShell.currentIndex,
+            children: children,
+          );
+        },
         branches: [
-          // Home branch
           StatefulShellBranch(
-            navigatorKey: _homeNavigatorKey,
             routes: [
               GoRoute(
                 path: '/home',
-                builder: (context, state) => const HomeScreen(),
+                builder: (context, state) => homeScreen,
               ),
             ],
           ),
-          // Dashboard branch
           StatefulShellBranch(
-            navigatorKey: _dashboardNavigatorKey,
             routes: [
               GoRoute(
                 path: '/dashboard',
-                builder: (context, state) => const DashboardScreen(),
+                builder: (context, state) => dashboardScreen,
               ),
             ],
           ),
-          // Reading branch
           StatefulShellBranch(
-            navigatorKey: _readingNavigatorKey,
             routes: [
               GoRoute(
                 path: '/text',
-                builder: (context, state) => const TextChallengeScreen(),
+                builder: (context, state) => textChallengeScreen,
               ),
             ],
           ),
-          // Listening branch
           StatefulShellBranch(
-            navigatorKey: _listeningNavigatorKey,
             routes: [
               GoRoute(
                 path: '/audio',
-                builder: (context, state) => const AudioChallengeScreen(),
+                builder: (context, state) => audioChallengeScreen,
               ),
             ],
           ),
-          // Speech Translation branch
           StatefulShellBranch(
-            navigatorKey: _speechTranslationNavigatorKey,
             routes: [
               GoRoute(
-                path: '/speech-translation',
+                path: '/translate',
                 builder: (context, state) => const SpeechTranslationScreen(),
               ),
             ],
           ),
-          // Books branch
           StatefulShellBranch(
-            navigatorKey: _booksNavigatorKey,
             routes: [
               GoRoute(
                 path: '/books',
-                builder: (context, state) => const BookListScreen(),
+                builder: (context, state) => booksScreen,
+              ),
+              GoRoute(
+                path: '/book/:id',
+                builder: (context, state) => BookDetailScreen(
+                  bookId: state.pathParameters['id']!,
+                ),
               ),
             ],
           ),
@@ -115,14 +115,6 @@ class AppRouter {
       ),
 
       // Routes not part of the bottom navigation
-      GoRoute(
-        path: '/book/:id',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final bookId = state.pathParameters['id']!;
-          return BookDetailScreen(bookId: bookId);
-        },
-      ),
       GoRoute(
         path: '/settings',
         parentNavigatorKey: _rootNavigatorKey,
@@ -186,8 +178,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
     if (index != navigationShell.currentIndex) {
       navigationShell.goBranch(
         index,
-        // Set initial location if it's the first visit to this tab
-        initialLocation: index == navigationShell.currentIndex,
+        // Don't set initialLocation to false to prevent rebuilding
       );
     }
   }

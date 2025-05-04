@@ -54,7 +54,6 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
   Widget build(BuildContext context) {
     return PracticeContent(
       title: 'Audio Challenge',
-      heroTag: 'practice_fab',
       sentenceManager: _sentenceManager,
       // Define how to display the sentence (with speak button and visibility toggle)
       sentenceDisplay: (sentence) {

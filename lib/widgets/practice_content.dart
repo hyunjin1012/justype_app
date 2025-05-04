@@ -13,7 +13,7 @@ class PracticeContent extends StatefulWidget {
       String feedback,
       bool isCheckButtonEnabled) inputArea;
   final Function() onRefresh;
-  final String heroTag;
+  final String? heroTag;
   final SentenceManager sentenceManager;
   final ScrollController? scrollController;
   final bool showSourceSelector;
@@ -24,7 +24,7 @@ class PracticeContent extends StatefulWidget {
     required this.sentenceDisplay,
     required this.inputArea,
     required this.onRefresh,
-    required this.heroTag,
+    this.heroTag,
     required this.sentenceManager,
     this.scrollController,
     this.showSourceSelector = true,

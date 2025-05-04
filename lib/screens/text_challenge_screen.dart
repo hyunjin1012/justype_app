@@ -22,7 +22,6 @@ class _TextChallengeScreenState extends State<TextChallengeScreen> {
   Widget build(BuildContext context) {
     return PracticeContent(
       title: 'Text Challenge',
-      heroTag: 'practice_fab',
       sentenceManager: _sentenceManager,
       // Use the reusable SentenceDisplayCard widget
       sentenceDisplay: (sentence) => SentenceDisplayCard(
