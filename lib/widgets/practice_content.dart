@@ -228,6 +228,10 @@ class _PracticeContentState extends State<PracticeContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -312,25 +316,11 @@ class _PracticeContentState extends State<PracticeContent> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _isLoading
-            ? null
-            : () {
-                _fetchNewSentence();
-                widget.onRefresh();
-              },
-        tooltip: 'Get New Sentence',
-        heroTag: widget.heroTag,
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2.0,
-                ),
-              )
-            : const Icon(Icons.refresh),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _fetchRandomSentence,
+        tooltip: 'Next Sentence',
+        icon: const Icon(Icons.arrow_forward),
+        label: const Text('Next'),
       ),
     );
   }

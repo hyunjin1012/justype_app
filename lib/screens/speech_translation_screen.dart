@@ -4,6 +4,7 @@ import '../services/practice_service.dart';
 import '../services/progress_service.dart';
 import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
+import '../widgets/enhanced_feedback.dart';
 
 class SpeechTranslationScreen extends StatefulWidget {
   const SpeechTranslationScreen({super.key});
@@ -45,7 +46,6 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   @override
   void initState() {
     super.initState();
-    print('SpeechTranslationScreen: initState called');
     _speechService = SpeechTranslationService();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeSpeechService();
@@ -53,7 +53,6 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   }
 
   Future<void> _initializeSpeechService() async {
-    print('SpeechTranslationScreen: Starting speech service initialization');
     if (!mounted) return;
 
     setState(() {
@@ -62,11 +61,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
     });
 
     try {
-      print(
-          'SpeechTranslationScreen: Checking if speech recognition is available');
       final isAvailable = await _speechService.initialize();
-      print(
-          'SpeechTranslationScreen: Speech service initialization result: $isAvailable');
 
       if (!mounted) return;
 
@@ -75,8 +70,6 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
           _isInitialized = true;
           _isLoading = false;
         });
-        print(
-            'SpeechTranslationScreen: Successfully initialized speech service');
       } else {
         final error = _speechService.error ?? 'Unknown error occurred';
         setState(() {
@@ -91,12 +84,8 @@ Please ensure:
 Tap the refresh button to try again.''';
           _isLoading = false;
         });
-        print(
-            'SpeechTranslationScreen: Speech recognition initialization failed: $error');
       }
-    } catch (e, stackTrace) {
-      print('SpeechTranslationScreen: Error initializing speech service: $e');
-      print('SpeechTranslationScreen: Stack trace: $stackTrace');
+    } catch (e) {
       if (!mounted) return;
 
       setState(() {
@@ -115,15 +104,9 @@ Tap the refresh button to try again.''';
   }
 
   Future<void> _startListening() async {
-    print('SpeechTranslationScreen: Starting listening');
     if (!_isInitialized) {
-      print(
-          'SpeechTranslationScreen: Service not initialized, attempting to initialize');
       await _initializeSpeechService();
-      if (!_isInitialized) {
-        print('SpeechTranslationScreen: Still not initialized after retry');
-        return;
-      }
+      if (!_isInitialized) return;
     }
 
     setState(() {
@@ -132,16 +115,12 @@ Tap the refresh button to try again.''';
     });
 
     try {
-      print('SpeechTranslationScreen: Calling startListening on service');
       await _speechService.startListening();
-      print('SpeechTranslationScreen: Successfully started listening');
-
       setState(() {
         _isListening = true;
         _isLoading = false;
       });
     } catch (e) {
-      print('SpeechTranslationScreen: Error starting listening: $e');
       setState(() {
         _errorMessage = 'Error starting speech recognition: $e';
         _isLoading = false;
@@ -150,16 +129,12 @@ Tap the refresh button to try again.''';
   }
 
   Future<void> _stopListening() async {
-    print('SpeechTranslationScreen: Stopping listening');
     setState(() {
       _isLoading = true;
     });
 
     try {
-      print('SpeechTranslationScreen: Calling stopListening on service');
       await _speechService.stopListening();
-      print('SpeechTranslationScreen: Successfully stopped listening');
-
       setState(() {
         _isListening = false;
         _isLoading = false;
@@ -167,7 +142,6 @@ Tap the refresh button to try again.''';
         _translatedText = _speechService.translatedText;
       });
     } catch (e) {
-      print('SpeechTranslationScreen: Error stopping listening: $e');
       setState(() {
         _errorMessage = 'Error stopping speech recognition: $e';
         _isLoading = false;
@@ -203,7 +177,6 @@ Tap the refresh button to try again.''';
   }
 
   void _onLanguageChanged(String? value) {
-    print('SpeechTranslationScreen: Language changed to: $value');
     if (value != null) {
       setState(() {
         _selectedLanguage = value;
@@ -214,9 +187,37 @@ Tap the refresh button to try again.''';
     }
   }
 
+  void _showEnhancedFeedback() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              EnhancedFeedback(
+                userInput: _textController.text,
+                correctSentence: _translatedText,
+                isCorrect: _practiceService.checkAnswer(
+                  _textController.text,
+                  _translatedText,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
-    print('SpeechTranslationScreen: dispose called');
     _speechService.dispose();
     _textController.dispose();
     super.dispose();
@@ -224,7 +225,6 @@ Tap the refresh button to try again.''';
 
   @override
   Widget build(BuildContext context) {
-    print('SpeechTranslationScreen: Building UI');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Speech Translation'),
@@ -380,25 +380,36 @@ Tap the refresh button to try again.''';
                   isCheckButtonEnabled:
                       _isCheckButtonEnabled && _translatedText.isNotEmpty,
                 ),
-                if (_feedback.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      _feedback,
-                      style: TextStyle(
-                        color: _practiceService.checkAnswer(
-                          _textController.text,
-                          _translatedText,
-                        )
-                            ? Colors.green
-                            : Colors.red,
-                      ),
+                if (_feedback.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    _feedback,
+                    style: TextStyle(
+                      color: _practiceService.checkAnswer(
+                        _textController.text,
+                        _translatedText,
+                      )
+                          ? Colors.green
+                          : Colors.red,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    onPressed: _showEnhancedFeedback,
+                    icon: const Icon(Icons.feedback),
+                    label: const Text('View Detailed Feedback'),
+                  ),
+                ],
               ],
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _clearState,
+        tooltip: 'New Translation',
+        icon: const Icon(Icons.refresh),
+        label: const Text('New'),
       ),
     );
   }

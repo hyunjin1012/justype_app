@@ -52,57 +52,51 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Audio Challenge'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    return PracticeContent(
+      title: 'Audio Challenge',
+      heroTag: 'practice_fab',
+      sentenceManager: _sentenceManager,
+      // Define how to display the sentence (with speak button and visibility toggle)
+      sentenceDisplay: (sentence) {
+        // Force rebuild when this function is called
+        print(
+            "Building sentence display, TTS speaking: ${_ttsService.isSpeaking}");
+        return Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _ttsService.buildSpeakButton(
+                    context, _speakSentence, _ttsService.isSpeaking),
+                const SizedBox(width: 16),
+                VisibilityToggle(
+                  isVisible: _isTextVisible,
+                  onToggle: _toggleTextVisibility,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (_isTextVisible) SentenceDisplayCard(sentence: sentence),
+          ],
+        );
+      },
+      // Use the shared input area widget with button state
+      inputArea: (controller, checkAnswer, feedback, isCheckButtonEnabled) =>
+          PracticeInputArea(
+        controller: controller,
+        onCheck: checkAnswer,
+        feedback: feedback,
+        labelText: 'Type what you hear',
+        isCheckButtonEnabled: isCheckButtonEnabled,
       ),
-      body: PracticeContent(
-        title: 'Listening Practice',
-        heroTag: 'listening_fab',
-        sentenceManager: _sentenceManager,
-        // Define how to display the sentence (with speak button and visibility toggle)
-        sentenceDisplay: (sentence) {
-          // Force rebuild when this function is called
-          print(
-              "Building sentence display, TTS speaking: ${_ttsService.isSpeaking}");
-          return Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _ttsService.buildSpeakButton(
-                      context, _speakSentence, _ttsService.isSpeaking),
-                  const SizedBox(width: 16),
-                  VisibilityToggle(
-                    isVisible: _isTextVisible,
-                    onToggle: _toggleTextVisibility,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              if (_isTextVisible) SentenceDisplayCard(sentence: sentence),
-            ],
-          );
-        },
-        // Use the shared input area widget with button state
-        inputArea: (controller, checkAnswer, feedback, isCheckButtonEnabled) =>
-            PracticeInputArea(
-          controller: controller,
-          onCheck: checkAnswer,
-          feedback: feedback,
-          labelText: 'Type what you hear',
-          isCheckButtonEnabled: isCheckButtonEnabled,
-        ),
-        onRefresh: () {
-          // Stop speaking if a new sentence is fetched
-          _ttsService.stop();
-          // Reset visibility
-          setState(() {
-            _isTextVisible = false;
-          });
-        },
-      ),
+      onRefresh: () {
+        // Stop speaking if a new sentence is fetched
+        _ttsService.stop();
+        // Reset visibility
+        setState(() {
+          _isTextVisible = false;
+        });
+      },
     );
   }
 }
