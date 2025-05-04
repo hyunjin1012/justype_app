@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'router/app_router.dart';
 import 'package:provider/provider.dart';
 import 'services/theme_service.dart';
+import 'services/progress_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
 
@@ -29,7 +30,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeService()),
-        // Add other providers here
+        ChangeNotifierProvider(create: (_) => ProgressService()),
       ],
       child: MyApp(showOnboarding: showOnboarding),
     ),

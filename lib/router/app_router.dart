@@ -9,6 +9,7 @@ import '../screens/home_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/speech_translation_screen.dart';
+import '../screens/challenges_screen.dart';
 import '../services/theme_service.dart';
 
 class AppRouter {
@@ -17,12 +18,8 @@ class AppRouter {
       GlobalKey<NavigatorState>(debugLabel: 'home');
   static final _dashboardNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'dashboard');
-  static final _readingNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'reading');
-  static final _listeningNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'listening');
-  static final _speechTranslationNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'speech_translation');
+  static final _challengesNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'challenges');
   static final _booksNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'books');
 
@@ -31,8 +28,7 @@ class AppRouter {
   // Create static instances of screens to preserve their state
   static const homeScreen = HomeScreen();
   static const dashboardScreen = DashboardScreen();
-  static const textChallengeScreen = TextChallengeScreen();
-  static const audioChallengeScreen = AudioChallengeScreen();
+  static const challengesScreen = ChallengesScreen();
   static const booksScreen = BookListScreen();
 
   static final GoRouter router = GoRouter(
@@ -76,23 +72,19 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/text',
-                builder: (context, state) => textChallengeScreen,
+                path: '/challenges',
+                builder: (context, state) => challengesScreen,
               ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
               GoRoute(
-                path: '/audio',
-                builder: (context, state) => audioChallengeScreen,
+                path: '/challenges/text',
+                builder: (context, state) => const TextChallengeScreen(),
               ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
               GoRoute(
-                path: '/translate',
+                path: '/challenges/audio',
+                builder: (context, state) => const AudioChallengeScreen(),
+              ),
+              GoRoute(
+                path: '/challenges/translate',
                 builder: (context, state) => const SpeechTranslationScreen(),
               ),
             ],
@@ -153,16 +145,8 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
             label: 'Stats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Text',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.hearing),
-            label: 'Audio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.translate),
-            label: 'Translate',
+            icon: Icon(Icons.games),
+            label: 'Challenges',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.library_books),

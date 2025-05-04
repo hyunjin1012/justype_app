@@ -4,6 +4,7 @@ import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../services/progress_service.dart';
 import '../services/sentence_manager.dart';
+import 'package:go_router/go_router.dart';
 
 class TextChallengeScreen extends StatefulWidget {
   const TextChallengeScreen({super.key});
@@ -40,6 +41,10 @@ class _TextChallengeScreenState extends State<TextChallengeScreen> {
       onRefresh: () {
         // Nothing special needed for reading practice refresh
       },
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => GoRouter.of(context).go('/challenges'),
+      ),
     );
   }
 }

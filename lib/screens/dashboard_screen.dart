@@ -132,6 +132,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                         '${_progressService.getTextChallenges()}'),
                     _buildStatRow('Audio Challenges',
                         '${_progressService.getAudioChallenges()}'),
+                    _buildStatRow('Translation Challenges',
+                        '${_progressService.getTranslationChallenges()}'),
                     _buildStatRow('Current Streak',
                         '${_progressService.getCurrentStreak()} ${_progressService.getCurrentStreak() == 1 ? 'day' : 'days'}'),
                     _buildStatRow('Daily Goal',
@@ -433,7 +435,9 @@ class _DashboardScreenState extends State<DashboardScreen>
       case 'reading_20':
         return 'Completed 20 text challenges';
       case 'listening_10':
-        return 'Completed 10 audio challenges';
+        return 'Completed 10 listening exercises';
+      case 'translation_10':
+        return 'Completed 10 translation exercises';
       default:
         return achievementId;
     }

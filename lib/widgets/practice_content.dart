@@ -17,6 +17,8 @@ class PracticeContent extends StatefulWidget {
   final SentenceManager sentenceManager;
   final ScrollController? scrollController;
   final bool showSourceSelector;
+  final List<Widget>? appBarActions;
+  final Widget? leading;
 
   const PracticeContent({
     super.key,
@@ -28,6 +30,8 @@ class PracticeContent extends StatefulWidget {
     required this.sentenceManager,
     this.scrollController,
     this.showSourceSelector = true,
+    this.appBarActions,
+    this.leading,
   });
 
   @override
@@ -71,16 +75,17 @@ class _PracticeContentState extends State<PracticeContent> {
     if (isCorrect) {
       _correctAnswers++;
       // Save progress based on practice type
-      final practiceType =
-          widget.title.contains('Reading') ? 'reading' : 'listening';
+      final practiceType = widget.title.contains('Text') ? 'text' : 'audio';
       _progressService.completeExercise(practiceType: practiceType);
 
       // Disable check button when answer is correct
-      setState(() {
-        _isCheckButtonEnabled = false;
-        _feedback = "Correct! Great job.";
-      });
-    } else {
+      if (mounted) {
+        setState(() {
+          _isCheckButtonEnabled = false;
+          _feedback = "Correct! Great job.";
+        });
+      }
+    } else if (mounted) {
       setState(() {
         _feedback = "Not quite right. Try again or get a new sentence.";
       });
@@ -88,26 +93,35 @@ class _PracticeContentState extends State<PracticeContent> {
   }
 
   Future<void> _fetchRandomSentence() async {
-    setState(() {
-      _isLoading = true;
-      _feedback = "";
-      _isCheckButtonEnabled =
-          true; // Reset button state when fetching new sentence
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _feedback = "";
+        _isCheckButtonEnabled =
+            true; // Reset button state when fetching new sentence
+      });
+    }
+
+    // Clear the controller before any async operations
+    if (mounted) {
+      _textController.clear();
+    }
 
     await widget.sentenceManager.fetchContent(
       forceRefresh: true,
       onLoadingChanged: (isLoading) {
-        setState(() {
-          _isLoading = isLoading;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = isLoading;
+          });
+        }
       },
       onContentUpdated: () {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       },
     );
-
-    _textController.clear();
   }
 
   Future<void> _fetchNewSentence() async {
@@ -231,6 +245,8 @@ class _PracticeContentState extends State<PracticeContent> {
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: widget.leading,
+        actions: widget.appBarActions,
       ),
       body: SafeArea(
         child: Column(

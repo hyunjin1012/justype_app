@@ -5,6 +5,7 @@ import '../services/progress_service.dart';
 import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/enhanced_feedback.dart';
+import 'package:go_router/go_router.dart';
 
 class SpeechTranslationScreen extends StatefulWidget {
   const SpeechTranslationScreen({super.key});
@@ -229,6 +230,10 @@ Tap the refresh button to try again.''';
       appBar: AppBar(
         title: const Text('Speech Translation'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => GoRouter.of(context).go('/challenges'),
+        ),
       ),
       body: Column(
         children: [

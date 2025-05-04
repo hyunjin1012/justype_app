@@ -227,25 +227,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPracticeModeCards(BuildContext context) {
     final List<Map<String, dynamic>> practiceModes = [
       {
-        'title': 'Type Challenge',
-        'description': 'Test your typing speed and accuracy',
-        'icon': Icons.menu_book,
+        'title': 'Challenges',
+        'description': 'Choose from text, audio, or translation challenges',
+        'icon': Icons.games,
         'color': Colors.blue.shade100,
-        'route': '/reading',
-      },
-      {
-        'title': 'Audio Challenge',
-        'description': 'Type what you hear and level up',
-        'icon': Icons.hearing,
-        'color': Colors.green.shade100,
-        'route': '/listening',
-      },
-      {
-        'title': 'Speech Translation',
-        'description': 'Speak in your language, type in English',
-        'icon': Icons.translate,
-        'color': Colors.orange.shade100,
-        'route': '/speech-translation',
+        'route': '/challenges',
       },
       {
         'title': 'Book Collection',

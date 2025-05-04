@@ -113,7 +113,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     // Record progress when the answer is correct
     if (isCorrect) {
       // Determine the practice type based on the current mode
-      final practiceType = _isListeningMode ? 'listening' : 'reading';
+      final practiceType = _isListeningMode ? 'audio' : 'text';
       print("Recording exercise completion: $practiceType");
 
       // Update progress using the completeExercise method
@@ -173,7 +173,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Practice with ${widget.book.title}'),
+        title: Text('Type with ${widget.book.title}'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(

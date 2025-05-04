@@ -138,7 +138,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                             child: ElevatedButton.icon(
                               onPressed: () => _showPracticeModal(context),
                               icon: const Icon(Icons.keyboard),
-                              label: const Text('Practice Typing'),
+                              label: const Text('Start Typing'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     Theme.of(context).colorScheme.primary,

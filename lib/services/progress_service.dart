@@ -19,6 +19,7 @@ class ProgressService extends ChangeNotifier {
   int _totalExercises = 0;
   int _textChallenges = 0;
   int _audioChallenges = 0;
+  int _translationChallenges = 0;
   double _accuracyPercentage = 0.0;
   int _currentStreak = 0;
   int _dailyGoal = 5; // Example daily goal
@@ -39,6 +40,7 @@ class ProgressService extends ChangeNotifier {
     _totalExercises = prefs.getInt('totalExercises') ?? 0;
     _textChallenges = prefs.getInt('textChallenges') ?? 0;
     _audioChallenges = prefs.getInt('audioChallenges') ?? 0;
+    _translationChallenges = prefs.getInt('translationChallenges') ?? 0;
     _accuracyPercentage = prefs.getDouble('accuracyPercentage') ?? 0.0;
     _currentStreak = prefs.getInt('currentStreak') ?? 0;
     _dailyGoal = prefs.getInt('dailyGoal') ?? 5;
@@ -81,6 +83,7 @@ class ProgressService extends ChangeNotifier {
     await prefs.setInt('totalExercises', _totalExercises);
     await prefs.setInt('textChallenges', _textChallenges);
     await prefs.setInt('audioChallenges', _audioChallenges);
+    await prefs.setInt('translationChallenges', _translationChallenges);
     await prefs.setDouble('accuracyPercentage', _accuracyPercentage);
     await prefs.setInt('currentStreak', _currentStreak);
     await prefs.setInt('dailyGoal', _dailyGoal);
@@ -125,6 +128,13 @@ class ProgressService extends ChangeNotifier {
       // Check for audio-related achievements
       if (_audioChallenges == 10) {
         _addAchievement('audio_10');
+      }
+    } else if (practiceType == 'translation') {
+      _translationChallenges++;
+
+      // Check for translation-related achievements
+      if (_translationChallenges == 10) {
+        _addAchievement('translation_10');
       }
     }
 
@@ -209,6 +219,7 @@ class ProgressService extends ChangeNotifier {
   int getTotalExercises() => _totalExercises;
   int getTextChallenges() => _textChallenges;
   int getAudioChallenges() => _audioChallenges;
+  int getTranslationChallenges() => _translationChallenges;
   double getAccuracyPercentage() => _accuracyPercentage;
   int getCurrentStreak() => _currentStreak;
   int getDailyGoal() => _dailyGoal;
@@ -236,6 +247,7 @@ class ProgressService extends ChangeNotifier {
     _totalExercises = 0;
     _textChallenges = 0;
     _audioChallenges = 0;
+    _translationChallenges = 0;
     _accuracyPercentage = 0.0;
     _currentStreak = 0;
     _dailyGoal = 5; // Reset to default value
@@ -251,6 +263,7 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('totalExercises');
     await prefs.remove('textChallenges');
     await prefs.remove('audioChallenges');
+    await prefs.remove('translationChallenges');
     await prefs.remove('accuracyPercentage');
     await prefs.remove('currentStreak');
     await prefs.remove('dailyGoal');

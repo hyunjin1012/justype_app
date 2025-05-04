@@ -5,6 +5,7 @@ import '../services/tts_service.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/sentence_display_card.dart';
 import '../services/sentence_manager.dart';
+import 'package:go_router/go_router.dart';
 
 class AudioChallengeScreen extends StatefulWidget {
   const AudioChallengeScreen({super.key});
@@ -96,6 +97,10 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
           _isTextVisible = false;
         });
       },
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => GoRouter.of(context).go('/challenges'),
+      ),
     );
   }
 }
