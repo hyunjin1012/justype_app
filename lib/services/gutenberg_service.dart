@@ -3,15 +3,19 @@ import '../models/booksResponse.dart';
 import '../models/book.dart';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:async';
 
 class GutenbergService {
   static const String baseUrl = 'https://gutenberg.org';
   static const String apiUrl = 'https://gutendex.com';
+  static const Duration timeoutDuration = Duration(seconds: 10);
 
   Future<BooksResponse> fetchBooks({int page = 1, int limit = 32}) async {
-    final response = await http.get(
-      Uri.parse('$apiUrl/books?page=$page&limit=$limit'),
-    );
+    final response = await http
+        .get(
+          Uri.parse('$apiUrl/books?page=$page&limit=$limit'),
+        )
+        .timeout(timeoutDuration);
 
     if (response.statusCode == 200) {
       final data = json.decode(utf8.decode(response.bodyBytes));
@@ -24,10 +28,12 @@ class GutenbergService {
   Future<Book> fetchBook(String bookId) async {
     Map<String, dynamic>? metadataData;
     try {
-      // First try to get the book metadata
-      final metadataResponse = await http.get(
-        Uri.parse('$apiUrl/books?ids=$bookId'),
-      );
+      // First try to get the book metadata with timeout
+      final metadataResponse = await http
+          .get(
+            Uri.parse('$apiUrl/books?ids=$bookId'),
+          )
+          .timeout(timeoutDuration);
 
       if (metadataResponse.statusCode != 200) {
         throw Exception(
@@ -57,8 +63,9 @@ class GutenbergService {
         throw Exception('No text format available for this book');
       }
 
-      // Fetch the actual text content
-      final contentResponse = await http.get(Uri.parse(textUrl));
+      // Fetch the actual text content with timeout
+      final contentResponse =
+          await http.get(Uri.parse(textUrl)).timeout(timeoutDuration);
 
       if (contentResponse.statusCode != 200) {
         throw Exception(
@@ -76,6 +83,8 @@ class GutenbergService {
         author: authorName,
         content: content,
       );
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
     } catch (e) {
       // If the API approach fails, try the direct file approach
       String? title;
@@ -104,41 +113,47 @@ class GutenbergService {
 
   Future<Book> _fetchBookDirect(String bookId,
       {String? title, String? author}) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/files/$bookId/$bookId-0.txt'),
-    );
+    try {
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/files/$bookId/$bookId-0.txt'),
+          )
+          .timeout(timeoutDuration);
 
-    if (response.statusCode == 200) {
-      final content = response.body;
+      if (response.statusCode == 200) {
+        final content = response.body;
 
-      // Use provided title and author if available, otherwise parse from content
-      String bookTitle = title ?? 'Unknown Title';
-      String bookAuthor = author ?? 'Unknown Author';
+        // Use provided title and author if available, otherwise parse from content
+        String bookTitle = title ?? 'Unknown Title';
+        String bookAuthor = author ?? 'Unknown Author';
 
-      // Only parse title and author from content if they weren't provided
-      if (title == null || author == null) {
-        final lines = content.split('\n');
+        // Only parse title and author from content if they weren't provided
+        if (title == null || author == null) {
+          final lines = content.split('\n');
 
-        // Look for title and author in the first 100 lines
-        for (int i = 0; i < lines.length && i < 100; i++) {
-          final line = lines[i];
-          if (title == null && line.contains('Title:')) {
-            bookTitle = line.replaceAll('Title:', '').trim();
-          }
-          if (author == null && line.contains('Author:')) {
-            bookAuthor = line.replaceAll('Author:', '').trim();
+          // Look for title and author in the first 100 lines
+          for (int i = 0; i < lines.length && i < 100; i++) {
+            final line = lines[i];
+            if (title == null && line.contains('Title:')) {
+              bookTitle = line.replaceAll('Title:', '').trim();
+            }
+            if (author == null && line.contains('Author:')) {
+              bookAuthor = line.replaceAll('Author:', '').trim();
+            }
           }
         }
-      }
 
-      return Book(
-        id: bookId,
-        title: bookTitle,
-        author: bookAuthor,
-        content: _cleanupContent(content),
-      );
-    } else {
-      throw Exception('Failed to load book: ${response.statusCode}');
+        return Book(
+          id: bookId,
+          title: bookTitle,
+          author: bookAuthor,
+          content: _cleanupContent(content),
+        );
+      } else {
+        throw Exception('Failed to load book: ${response.statusCode}');
+      }
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
     }
   }
 

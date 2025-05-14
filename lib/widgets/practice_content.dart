@@ -44,6 +44,10 @@ class _PracticeContentState extends State<PracticeContent> {
   String _feedback = "";
   bool _isLoading = false;
   bool _isCheckButtonEnabled = true;
+  String _loadingMessage = "";
+  String _currentBookTitle = "";
+  String _currentBookAuthor = "";
+  String _currentBookId = "";
 
   // Add tracking variables
   int _correctAnswers = 0;
@@ -99,6 +103,12 @@ class _PracticeContentState extends State<PracticeContent> {
         _feedback = "";
         _isCheckButtonEnabled =
             true; // Reset button state when fetching new sentence
+        _loadingMessage =
+            "Loading ${widget.sentenceManager.selectedSource} content...";
+        // Clear current book information
+        _currentBookTitle = "";
+        _currentBookAuthor = "";
+        _currentBookId = "";
       });
     }
 
@@ -113,12 +123,26 @@ class _PracticeContentState extends State<PracticeContent> {
         if (mounted) {
           setState(() {
             _isLoading = isLoading;
+            if (isLoading) {
+              _loadingMessage =
+                  "Loading ${widget.sentenceManager.selectedSource} content...";
+              // Clear current book information
+              _currentBookTitle = "";
+              _currentBookAuthor = "";
+              _currentBookId = "";
+            }
           });
         }
       },
       onContentUpdated: () {
         if (mounted) {
-          setState(() {});
+          setState(() {
+            _loadingMessage = "";
+            // Update current book information
+            _currentBookTitle = widget.sentenceManager.bookTitle;
+            _currentBookAuthor = widget.sentenceManager.bookAuthor;
+            _currentBookId = widget.sentenceManager.currentBookId;
+          });
         }
       },
     );
@@ -273,18 +297,52 @@ class _PracticeContentState extends State<PracticeContent> {
                       if (widget.showSourceSelector)
                         _buildBookSourceInfo(
                           context,
-                          widget.sentenceManager.bookTitle,
-                          widget.sentenceManager.bookAuthor,
-                          widget.sentenceManager.currentBookId,
+                          _currentBookTitle,
+                          _currentBookAuthor,
+                          _currentBookId,
                           _navigateToBookDetail,
                           widget.sentenceManager.selectedSource,
                         ),
                       // Loading indicator or sentence display
                       _isLoading
-                          ? const Center(
+                          ? Center(
                               child: Padding(
-                                padding: EdgeInsets.all(32.0),
-                                child: CircularProgressIndicator(),
+                                padding: const EdgeInsets.all(32.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const CircularProgressIndicator(),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      _loadingMessage,
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
+                                    if (widget.sentenceManager.selectedSource ==
+                                        'Books') ...[
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'This may take a few seconds...',
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
                             )
                           : widget.sentenceDisplay(
@@ -333,7 +391,7 @@ class _PracticeContentState extends State<PracticeContent> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _fetchRandomSentence,
+        onPressed: _isLoading ? null : _fetchRandomSentence,
         tooltip: 'Next Sentence',
         icon: const Icon(Icons.arrow_forward),
         label: const Text('Next'),

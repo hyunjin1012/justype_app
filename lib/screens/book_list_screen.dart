@@ -191,7 +191,20 @@ class _BookListScreenState extends State<BookListScreen> {
       body: _isLoading && _booksResponse == null
           ? const Center(child: CircularProgressIndicator())
           : _booksResponse == null
-              ? const Center(child: Text('No books available'))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('No books available'),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _loadBooks,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
               : RefreshIndicator(
                   onRefresh: () async {
                     _currentPage = 1;

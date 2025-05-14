@@ -20,6 +20,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   final GutenbergService _gutenbergService = GutenbergService();
   Book? _book;
   bool _isLoading = true;
+  String? _errorMessage;
   double _fontSize = 16.0;
   final ScrollController _scrollController = ScrollController();
 
@@ -38,6 +39,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   Future<void> _loadBook() async {
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
     try {
@@ -49,9 +51,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     } catch (e) {
       setState(() {
         _isLoading = false;
+        _errorMessage = e.toString();
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading book: $e')),
+        SnackBar(
+          content: Text('Error loading book: $e'),
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: _loadBook,
+          ),
+        ),
       );
     }
   }
@@ -108,65 +117,95 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _book == null
-              ? const Center(child: Text('Book not available'))
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Loading book...'),
+                ],
+              ),
+            )
+          : _errorMessage != null
+              ? Center(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        _book!.title,
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      const Icon(Icons.error_outline,
+                          size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(_errorMessage!),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadBook,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : _book == null
+                  ? const Center(child: Text('Book not available'))
+                  : Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _book!.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'By ${_book!.author}',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'By ${_book!.author}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
                                   color: Colors.grey[700],
                                 ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _showPracticeModal(context),
+                                  icon: const Icon(Icons.keyboard),
+                                  label: const Text('Start Typing'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.primary,
+                                    foregroundColor:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 24),
                           Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => _showPracticeModal(context),
-                              icon: const Icon(Icons.keyboard),
-                              label: const Text('Start Typing'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.onPrimary,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                            child: SingleChildScrollView(
+                              controller: _scrollController,
+                              child: Text(
+                                _book!.content,
+                                style: TextStyle(
+                                  fontSize: _fontSize,
+                                  height: 1.5,
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const Divider(height: 24),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          controller: _scrollController,
-                          child: Text(
-                            _book!.content,
-                            style: TextStyle(
-                              fontSize: _fontSize,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
     );
   }
 }
