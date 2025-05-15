@@ -217,7 +217,14 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(challenge['icon'], size: 28),
+                                      Icon(
+                                        challenge['icon'],
+                                        size: 28,
+                                        color: Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.black87
+                                            : null,
+                                      ),
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Column(
@@ -226,16 +233,25 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                           children: [
                                             Text(
                                               challenge['title'],
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 18,
+                                                color: Theme.of(context)
+                                                            .brightness ==
+                                                        Brightness.dark
+                                                    ? Colors.black87
+                                                    : null,
                                               ),
                                             ),
                                             Text(
                                               challenge['subtitle'],
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 14,
-                                                color: Colors.black54,
+                                                color: Theme.of(context)
+                                                            .brightness ==
+                                                        Brightness.dark
+                                                    ? Colors.black87
+                                                    : Colors.black54,
                                               ),
                                             ),
                                           ],

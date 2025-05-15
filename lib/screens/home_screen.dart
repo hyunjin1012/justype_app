@@ -266,20 +266,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(mode['icon'], size: 28),
+                  Icon(
+                    mode['icon'],
+                    size: 28,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black87
+                        : null,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     mode['title'],
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black87
+                          : null,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 2),
                   Text(
                     mode['description'],
-                    style: const TextStyle(fontSize: 11),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black87
+                          : null,
+                    ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
