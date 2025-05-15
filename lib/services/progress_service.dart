@@ -31,6 +31,8 @@ class ProgressService extends ChangeNotifier {
   String _lastExerciseDate = '';
   String _lastAiChallengeDate =
       ''; // Add new field for tracking last AI challenge
+  String _lastBooksAudioChallengeDate =
+      ''; // Add new field for tracking last Books audio challenge
   Map<String, dynamic> _achievementData =
       {}; // Map of achievement ID to timestamp
 
@@ -50,6 +52,8 @@ class ProgressService extends ChangeNotifier {
     _lastExerciseDate = prefs.getString('lastExerciseDate') ?? '';
     _lastAiChallengeDate = prefs.getString('lastAiChallengeDate') ??
         ''; // Load last AI challenge date
+    _lastBooksAudioChallengeDate =
+        prefs.getString('lastBooksAudioChallengeDate') ?? '';
 
     // Load recent achievements if stored
     _recentAchievements = prefs.getStringList('recentAchievements') ?? [];
@@ -97,6 +101,8 @@ class ProgressService extends ChangeNotifier {
     await prefs.setString('lastExerciseDate', _lastExerciseDate);
     await prefs.setString('lastAiChallengeDate',
         _lastAiChallengeDate); // Save last AI challenge date
+    await prefs.setString(
+        'lastBooksAudioChallengeDate', _lastBooksAudioChallengeDate);
 
     // Save achievement data
     await prefs.setString('achievementData', json.encode(_achievementData));
@@ -140,6 +146,9 @@ class ProgressService extends ChangeNotifier {
       // If it's an AI challenge, update the last AI challenge date
       if (isAiChallenge) {
         await updateLastAiChallengeDate();
+      } else {
+        // If it's a Books audio challenge, update the last Books audio challenge date
+        await updateLastBooksAudioChallengeDate();
       }
 
       // Check for audio-related achievements
@@ -273,6 +282,7 @@ class ProgressService extends ChangeNotifier {
     _dailyExercises = 0;
     _lastExerciseDate = '';
     _lastAiChallengeDate = ''; // Reset last AI challenge date
+    _lastBooksAudioChallengeDate = ''; // Reset last Books audio challenge date
 
     _achievementData = {};
 
@@ -290,6 +300,7 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('dailyExercises');
     await prefs.remove('lastExerciseDate');
     await prefs.remove('lastAiChallengeDate');
+    await prefs.remove('lastBooksAudioChallengeDate');
     await prefs.remove('achievementData');
 
     // Clear streak tracking data
@@ -340,9 +351,21 @@ class ProgressService extends ChangeNotifier {
     return _lastAiChallengeDate != today;
   }
 
+  // Add method to check if Books audio challenge is available today
+  bool isBooksAudioChallengeAvailableToday() {
+    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
+    return _lastBooksAudioChallengeDate != today;
+  }
+
   // Add method to update last AI challenge date
   Future<void> updateLastAiChallengeDate() async {
     _lastAiChallengeDate = DateTime.now().toString().split(' ')[0];
+    await saveProgress();
+  }
+
+  // Add method to update last Books audio challenge date
+  Future<void> updateLastBooksAudioChallengeDate() async {
+    _lastBooksAudioChallengeDate = DateTime.now().toString().split(' ')[0];
     await saveProgress();
   }
 

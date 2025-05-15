@@ -113,6 +113,20 @@ class _PracticeContentState extends State<PracticeContent> {
       return;
     }
 
+    // Check if Books audio challenge is available when in audio mode with Books source
+    if (widget.title.contains('Audio') &&
+        widget.sentenceManager.selectedSource == 'Books' &&
+        !_progressService.isBooksAudioChallengeAvailableToday()) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _feedback =
+              "You've already completed your daily Books audio challenge. Please try again tomorrow or switch to AI mode.";
+        });
+      }
+      return;
+    }
+
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -178,6 +192,9 @@ class _PracticeContentState extends State<PracticeContent> {
       String selectedSource, Function(String) onSourceChanged) {
     // Check if AI is available before allowing selection
     final bool isAiAvailable = _progressService.isAiChallengeAvailableToday();
+    // Check if Books audio is available
+    final bool isBooksAudioAvailable =
+        _progressService.isBooksAudioChallengeAvailableToday();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -186,8 +203,26 @@ class _PracticeContentState extends State<PracticeContent> {
           label: const Text('Books'),
           selected: selectedSource == 'Books',
           onSelected: (selected) {
-            if (selected) onSourceChanged('Books');
+            if (selected) {
+              // Check if Books audio challenge is available when in audio mode
+              if (widget.title.contains('Audio') && !isBooksAudioAvailable) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                        'You\'ve already completed your daily Books audio challenge. Please try again tomorrow.'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+                return;
+              }
+              onSourceChanged('Books');
+            }
           },
+          // Disable the chip if Books audio is not available in audio mode
+          disabledColor:
+              widget.title.contains('Audio') && !isBooksAudioAvailable
+                  ? Colors.grey.shade300
+                  : null,
         ),
         const SizedBox(width: 16),
         ChoiceChip(

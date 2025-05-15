@@ -44,6 +44,8 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     final audioChallenges = _progressService.getAudioChallenges();
     final translationChallenges = _progressService.getTranslationChallenges();
     final isAiAvailable = _progressService.isAiChallengeAvailableToday();
+    final isBooksAudioAvailable =
+        _progressService.isBooksAudioChallengeAvailableToday();
 
     final List<Map<String, dynamic>> challenges = [
       {
@@ -80,8 +82,8 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'modes': [
           {
             'name': 'Books',
-            'available': true,
-            'limit': 'Unlimited',
+            'available': isBooksAudioAvailable,
+            'limit': 'Once per day',
           },
           {
             'name': 'AI',
