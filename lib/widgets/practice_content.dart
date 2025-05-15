@@ -80,7 +80,10 @@ class _PracticeContentState extends State<PracticeContent> {
       _correctAnswers++;
       // Save progress based on practice type
       final practiceType = widget.title.contains('Text') ? 'text' : 'audio';
-      _progressService.completeExercise(practiceType: practiceType);
+      // Check if it's an AI challenge by looking at the source
+      final isAiChallenge = widget.sentenceManager.selectedSource == 'AI';
+      _progressService.completeExercise(
+          practiceType: practiceType, isAiChallenge: isAiChallenge);
 
       // Disable check button when answer is correct
       if (mounted) {
@@ -97,6 +100,19 @@ class _PracticeContentState extends State<PracticeContent> {
   }
 
   Future<void> _fetchRandomSentence() async {
+    // Check if AI challenge is available when AI source is selected
+    if (widget.sentenceManager.selectedSource == 'AI' &&
+        !_progressService.isAiChallengeAvailableToday()) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _feedback =
+              "You've already completed your daily AI challenge. Please try again tomorrow or switch to Books mode.";
+        });
+      }
+      return;
+    }
+
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -160,6 +176,9 @@ class _PracticeContentState extends State<PracticeContent> {
 
   Widget _buildSourceSelector(
       String selectedSource, Function(String) onSourceChanged) {
+    // Check if AI is available before allowing selection
+    final bool isAiAvailable = _progressService.isAiChallengeAvailableToday();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -175,8 +194,21 @@ class _PracticeContentState extends State<PracticeContent> {
           label: const Text('AI'),
           selected: selectedSource == 'AI',
           onSelected: (selected) {
-            if (selected) onSourceChanged('AI');
+            if (selected && isAiAvailable) {
+              onSourceChanged('AI');
+            } else if (selected && !isAiAvailable) {
+              // Show message when trying to select AI when not available
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      'You\'ve already completed your daily AI challenge. Please try again tomorrow.'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
           },
+          // Disable the chip if AI is not available
+          disabledColor: !isAiAvailable ? Colors.grey.shade300 : null,
         ),
       ],
     );

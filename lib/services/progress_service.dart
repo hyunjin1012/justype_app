@@ -29,6 +29,8 @@ class ProgressService extends ChangeNotifier {
   bool _isInitialized = false;
   int _dailyExercises = 0;
   String _lastExerciseDate = '';
+  String _lastAiChallengeDate =
+      ''; // Add new field for tracking last AI challenge
   Map<String, dynamic> _achievementData =
       {}; // Map of achievement ID to timestamp
 
@@ -46,6 +48,8 @@ class ProgressService extends ChangeNotifier {
     _dailyGoal = prefs.getInt('dailyGoal') ?? 5;
     _dailyExercises = prefs.getInt('dailyExercises') ?? 0;
     _lastExerciseDate = prefs.getString('lastExerciseDate') ?? '';
+    _lastAiChallengeDate = prefs.getString('lastAiChallengeDate') ??
+        ''; // Load last AI challenge date
 
     // Load recent achievements if stored
     _recentAchievements = prefs.getStringList('recentAchievements') ?? [];
@@ -91,6 +95,8 @@ class ProgressService extends ChangeNotifier {
     await prefs.setStringList('allAchievements', _allAchievements);
     await prefs.setInt('dailyExercises', _dailyExercises);
     await prefs.setString('lastExerciseDate', _lastExerciseDate);
+    await prefs.setString('lastAiChallengeDate',
+        _lastAiChallengeDate); // Save last AI challenge date
 
     // Save achievement data
     await prefs.setString('achievementData', json.encode(_achievementData));
@@ -105,7 +111,8 @@ class ProgressService extends ChangeNotifier {
   }
 
   // Example methods to update progress
-  Future<void> completeExercise({String practiceType = 'general'}) async {
+  Future<void> completeExercise(
+      {String practiceType = 'general', bool isAiChallenge = false}) async {
     // Check if we need to reset daily exercises (new day)
     _checkAndResetDailyExercises();
 
@@ -116,6 +123,11 @@ class ProgressService extends ChangeNotifier {
     if (practiceType == 'text') {
       _textChallenges++;
 
+      // If it's an AI challenge, update the last AI challenge date
+      if (isAiChallenge) {
+        await updateLastAiChallengeDate();
+      }
+
       // Check for text-related achievements
       if (_textChallenges == 10) {
         _addAchievement('text_10');
@@ -124,6 +136,11 @@ class ProgressService extends ChangeNotifier {
       }
     } else if (practiceType == 'audio') {
       _audioChallenges++;
+
+      // If it's an AI challenge, update the last AI challenge date
+      if (isAiChallenge) {
+        await updateLastAiChallengeDate();
+      }
 
       // Check for audio-related achievements
       if (_audioChallenges == 10) {
@@ -255,6 +272,7 @@ class ProgressService extends ChangeNotifier {
     _allAchievements = []; // Clear all achievements
     _dailyExercises = 0;
     _lastExerciseDate = '';
+    _lastAiChallengeDate = ''; // Reset last AI challenge date
 
     _achievementData = {};
 
@@ -271,6 +289,7 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('allAchievements');
     await prefs.remove('dailyExercises');
     await prefs.remove('lastExerciseDate');
+    await prefs.remove('lastAiChallengeDate');
     await prefs.remove('achievementData');
 
     // Clear streak tracking data
@@ -313,6 +332,18 @@ class ProgressService extends ChangeNotifier {
   // Add a method to get achievement timestamp
   int getAchievementTimestamp(String achievementId) {
     return _achievementData[achievementId] ?? 0;
+  }
+
+  // Add method to check if AI challenge is available today
+  bool isAiChallengeAvailableToday() {
+    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
+    return _lastAiChallengeDate != today;
+  }
+
+  // Add method to update last AI challenge date
+  Future<void> updateLastAiChallengeDate() async {
+    _lastAiChallengeDate = DateTime.now().toString().split(' ')[0];
+    await saveProgress();
   }
 
   // Other methods to update accuracy, streak, etc.
