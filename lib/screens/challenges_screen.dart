@@ -43,6 +43,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     final textChallenges = _progressService.getTextChallenges();
     final audioChallenges = _progressService.getAudioChallenges();
     final translationChallenges = _progressService.getTranslationChallenges();
+    final isAiAvailable = _progressService.isAiChallengeAvailableToday();
 
     final List<Map<String, dynamic>> challenges = [
       {
@@ -54,6 +55,18 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'progress': textChallenges,
         'total': 50, // Example total
         'subtitle': 'Type what you see',
+        'modes': [
+          {
+            'name': 'Books',
+            'available': true,
+            'limit': 'Unlimited',
+          },
+          {
+            'name': 'AI',
+            'available': isAiAvailable,
+            'limit': 'Once per day',
+          },
+        ],
       },
       {
         'title': 'Audio Challenge',
@@ -64,6 +77,18 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'progress': audioChallenges,
         'total': 50, // Example total
         'subtitle': 'Listen and type',
+        'modes': [
+          {
+            'name': 'Books',
+            'available': true,
+            'limit': 'Unlimited',
+          },
+          {
+            'name': 'AI',
+            'available': isAiAvailable,
+            'limit': 'Once per day',
+          },
+        ],
       },
       {
         'title': 'Speech Translation',
@@ -74,6 +99,13 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'progress': translationChallenges,
         'total': 50, // Example total
         'subtitle': 'Speak and type',
+        'modes': [
+          {
+            'name': 'Translation',
+            'available': true,
+            'limit': 'Unlimited',
+          },
+        ],
       },
     ];
 
@@ -162,70 +194,86 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                         ),
                   ),
                   const SizedBox(height: 16),
-                  GridView.builder(
+                  ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 1.2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
                     itemCount: challenges.length,
                     itemBuilder: (context, index) {
                       final challenge = challenges[index];
-                      final progress =
-                          challenge['progress'] / challenge['total'];
-                      return GestureDetector(
-                        onTap: () =>
-                            GoRouter.of(context).go(challenge['route']),
-                        child: Card(
-                          elevation: 2,
-                          color: challenge['color'],
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(challenge['icon'], size: 24),
-                                    const Spacer(),
-                                    Text(
-                                      '${challenge['progress']}/${challenge['total']}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: GestureDetector(
+                          onTap: () =>
+                              GoRouter.of(context).go(challenge['route']),
+                          child: Card(
+                            elevation: 2,
+                            color: challenge['color'],
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(challenge['icon'], size: 28),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              challenge['title'],
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                            Text(
+                                              challenge['subtitle'],
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  challenge['title'],
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    ],
                                   ),
-                                ),
-                                Text(
-                                  challenge['subtitle'],
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                const Spacer(),
-                                LinearProgressIndicator(
-                                  value: progress,
-                                  backgroundColor:
-                                      Colors.white.withOpacity(0.3),
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              ],
+                                  const SizedBox(height: 16),
+                                  // Show modes and their availability
+                                  ...challenge['modes'].map<Widget>((mode) {
+                                    return Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.0),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            mode['available']
+                                                ? Icons.check_circle
+                                                : Icons.timer,
+                                            size: 16,
+                                            color: mode['available']
+                                                ? Colors.green
+                                                : Colors.orange,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            '${mode['name']}: ${mode['limit']}',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: mode['available']
+                                                  ? Colors.black87
+                                                  : Colors.black54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ],
+                              ),
                             ),
                           ),
                         ),
