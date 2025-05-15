@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/practice_content.dart';
 import '../widgets/practice_input_area.dart';
-import '../services/tts_service.dart';
+import '../services/elevenlabs_service.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/sentence_display_card.dart';
 import '../services/sentence_manager.dart';
@@ -15,14 +15,13 @@ class AudioChallengeScreen extends StatefulWidget {
 }
 
 class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
-  final TtsService _ttsService = TtsService();
+  final ElevenLabsService _ttsService = ElevenLabsService();
   final SentenceManager _sentenceManager = SentenceManager();
   bool _isTextVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _ttsService.initialize();
   }
 
   @override

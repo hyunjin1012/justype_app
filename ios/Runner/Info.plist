@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Justype App</string>
+	<string>Justype</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -49,5 +49,9 @@
 	<string>Justype App needs access to speech recognition to translate your speech into text for practice and learning.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Justype App needs access to your microphone to record your speech for translation and practice.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 </dict>
 </plist>
