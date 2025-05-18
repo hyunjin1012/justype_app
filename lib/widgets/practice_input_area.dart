@@ -60,6 +60,10 @@ class PracticeInputAreaState extends State<PracticeInputArea> {
               labelText: widget.labelText,
             ),
             maxLines: 3,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) {
+              FocusScope.of(context).unfocus();
+            },
           ),
           const SizedBox(height: 16),
           ElevatedButton(
