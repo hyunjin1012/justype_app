@@ -80,7 +80,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Stats'),
+        title: const Text('Your Progress'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           // Add reset button in the app bar
@@ -122,24 +122,24 @@ class _DashboardScreenState extends State<DashboardScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Practice Statistics',
+                      'Your Stats',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 16),
-                    _buildStatRow('Today\'s Exercises',
+                    _buildStatRow('Today\'s Sessions',
                         '${_progressService.getDailyExercises()}'),
-                    _buildStatRow('Total Exercises',
+                    _buildStatRow('Total Sessions',
                         '${_progressService.getTotalExercises()}'),
-                    _buildStatRow('Text Challenges',
+                    _buildStatRow('Text Sessions',
                         '${_progressService.getTextChallenges()}'),
-                    _buildStatRow('Audio Challenges',
+                    _buildStatRow('Audio Sessions',
                         '${_progressService.getAudioChallenges()}'),
-                    _buildStatRow('Translation Challenges',
+                    _buildStatRow('Translation Sessions',
                         '${_progressService.getTranslationChallenges()}'),
                     _buildStatRow('Current Streak',
                         '${_progressService.getCurrentStreak()} ${_progressService.getCurrentStreak() == 1 ? 'day' : 'days'}'),
                     _buildStatRow('Daily Goal',
-                        '${_progressService.getDailyGoal()} exercises'),
+                        '${_progressService.getDailyGoal()} sessions'),
                   ],
                 ),
               ),
@@ -207,7 +207,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '$dailyExercises/$dailyGoal exercises',
+                    '$dailyExercises/$dailyGoal sessions',
                     style: TextStyle(
                       color: progress >= 1.0
                           ? themeService.accentColor
@@ -272,7 +272,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: Theme.of(context).primaryColor),
                   const SizedBox(width: 8),
                   Text(
-                    'Keep going! You\'re making progress!',
+                    'Keep going! You\'re doing great!',
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
                     ),
@@ -318,7 +318,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         size: 48, color: Colors.grey),
                     const SizedBox(height: 8),
                     Text(
-                      'No achievements yet. Keep practicing!',
+                      'No achievements yet. Start typing today!',
                       style: TextStyle(color: Colors.grey.shade700),
                     ),
                   ],

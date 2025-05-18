@@ -116,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
                       child: Text(
-                        'Practice Modes',
+                        'Start Typing',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
                       child: Text(
-                        'Recommended Books',
+                        'Explore Stories',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -165,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final dailyExercises = _progressService.getDailyExercises();
     final dailyGoal = _progressService.getDailyGoal();
     final progress = dailyExercises / dailyGoal;
-    final goalText = '$dailyExercises/$dailyGoal exercises';
+    final goalText = '$dailyExercises/$dailyGoal sessions';
     final themeService = Provider.of<ThemeService>(context);
 
     return GestureDetector(
@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Daily Goal',
+                    'Daily Progress',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 8),
               if (progress >= 1.0)
                 Text(
-                  'Goal completed! Great job!',
+                  'Daily goal completed! Great job!',
                   style: TextStyle(
                     color: themeService.accentColor,
                     fontWeight: FontWeight.bold,
@@ -217,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               else
                 Text(
-                  'Keep going!',
+                  'Keep going! You\'re doing great!',
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                   ),
@@ -233,14 +233,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<Map<String, dynamic>> practiceModes = [
       {
         'title': 'Challenges',
-        'description': 'Choose from text, audio, or translation challenges',
+        'description': 'Try text, audio, or translation typing sessions',
         'icon': Icons.games,
         'color': Colors.blue.shade100,
         'route': '/challenges',
       },
       {
-        'title': 'Book Collection',
-        'description': 'Explore classic stories and quotes to type',
+        'title': 'Story Collection',
+        'description': 'Type through classic stories and inspiring quotes',
         'icon': Icons.library_books,
         'color': Colors.purple.shade100,
         'route': '/books',

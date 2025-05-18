@@ -140,7 +140,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Choose a challenge and start typing. Track your progress and unlock achievements as you play.',
+                    'Choose a challenge and start typing. Track your progress and unlock achievements as you go.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color:
                               Theme.of(context).colorScheme.onPrimaryContainer,
@@ -167,7 +167,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                     children: [
                       _buildStatCard(
                         context,
-                        'Total Challenges',
+                        'Total Sessions',
                         _progressService.getTotalExercises().toString(),
                         Icons.emoji_events,
                         Colors.amber,
@@ -193,7 +193,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Available Challenges',
+                    'Choose Your Challenge',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
