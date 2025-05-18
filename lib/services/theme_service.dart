@@ -5,7 +5,7 @@ class ThemeService extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.light;
 
   // Define a variable to hold the accent color
-  Color _accentColor = Colors.blue; // Default accent color
+  Color _accentColor = Colors.green; // Default accent color
 
   // Define a variable to hold the speech rate
   double _speechRate = 1.0; // Default speech rate

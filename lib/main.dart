@@ -50,20 +50,20 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Listen for theme changes
-    AppRouter.themeService.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'JusType',
-      theme: AppRouter.themeService.getThemeData(),
-      darkTheme: AppRouter.themeService.darkTheme,
-      themeMode: AppRouter.themeService.themeMode,
-      routerConfig: AppRouter.router,
+    return Consumer<ThemeService>(
+      builder: (context, themeService, child) {
+        return MaterialApp.router(
+          title: 'JusType',
+          theme: themeService.getThemeData(),
+          darkTheme: themeService.darkTheme,
+          themeMode: themeService.themeMode,
+          routerConfig: AppRouter.router,
+        );
+      },
     );
   }
 }

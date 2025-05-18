@@ -11,6 +11,7 @@ import '../screens/onboarding_screen.dart';
 import '../screens/speech_translation_screen.dart';
 import '../screens/challenges_screen.dart';
 import '../services/theme_service.dart';
+import 'package:provider/provider.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -22,8 +23,6 @@ class AppRouter {
       GlobalKey<NavigatorState>(debugLabel: 'challenges');
   static final _booksNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'books');
-
-  static final ThemeService themeService = ThemeService();
 
   // Create static instances of screens to preserve their state
   static const homeScreen = HomeScreen();
@@ -111,7 +110,8 @@ class AppRouter {
         path: '/settings',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
-          return SettingsScreen(themeService: themeService);
+          return SettingsScreen(
+              themeService: Provider.of<ThemeService>(context));
         },
       ),
     ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/achievement_banner.dart';
 import '../services/progress_service.dart';
+import '../services/theme_service.dart';
+import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -100,7 +102,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 title: 'Congratulations!',
                 description: achievements.last,
                 icon: 'assets/animations/achievement.json',
-                backgroundColor: Colors.green,
+                backgroundColor: Provider.of<ThemeService>(context).accentColor,
                 textColor: Colors.white,
                 onDismiss: () {
                   // Clear recent achievements when dismissed
@@ -176,6 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     final dailyExercises = _progressService.getDailyExercises();
     final dailyGoal = _progressService.getDailyGoal();
     final progress = dailyExercises / dailyGoal;
+    final themeService = Provider.of<ThemeService>(context);
 
     return Card(
       elevation: 4,
@@ -199,7 +202,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: progress >= 1.0
-                        ? Colors.green.shade100
+                        ? themeService.accentColor.withOpacity(0.1)
                         : Theme.of(context).primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -207,7 +210,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     '$dailyExercises/$dailyGoal exercises',
                     style: TextStyle(
                       color: progress >= 1.0
-                          ? Colors.green.shade800
+                          ? themeService.accentColor
                           : Theme.of(context).primaryColor,
                       fontWeight: FontWeight.bold,
                     ),
@@ -226,7 +229,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     backgroundColor: Colors.grey.shade200,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       progress >= 1.0
-                          ? Colors.green
+                          ? themeService.accentColor
                           : Theme.of(context).primaryColor,
                     ),
                   ),
@@ -256,7 +259,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   Text(
                     'Daily goal completed! Great job!',
                     style: TextStyle(
-                      color: Colors.green.shade800,
+                      color: themeService.accentColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

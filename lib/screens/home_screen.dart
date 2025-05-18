@@ -66,94 +66,98 @@ class _HomeScreenState extends State<HomeScreen> {
     final achievements = _progressService.getAchievements();
     final bool showAchievementBanner = _progressService.hasRecentAchievements();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('JusType'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => GoRouter.of(context).push('/settings'),
+    return Consumer<ThemeService>(
+      builder: (context, themeService, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('JusType'),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => GoRouter.of(context).push('/settings'),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _loadProgress,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Daily goal progress
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: _buildDailyGoalCard(context),
-                ),
-
-                // Show achievement banner if there are recent achievements
-                if (showAchievementBanner && achievements.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: AchievementBanner(
-                      title: 'New Achievement!',
-                      description: achievements.last,
-                      icon: 'assets/animations/achievement.json',
-                      backgroundColor: Colors.amber.shade100,
-                      textColor: Colors.brown,
-                      onDismiss: () {
-                        // Clear recent achievements when dismissed
-                        _progressService.clearRecentAchievements();
-                        setState(() {});
-                      },
+          body: RefreshIndicator(
+            onRefresh: _loadProgress,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Daily goal progress
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: _buildDailyGoalCard(context),
                     ),
-                  ),
 
-                // Practice modes section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                  child: Text(
-                    'Practice Modes',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                    // Show achievement banner if there are recent achievements
+                    if (showAchievementBanner && achievements.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: AchievementBanner(
+                          title: 'New Achievement!',
+                          description: achievements.last,
+                          icon: 'assets/animations/achievement.json',
+                          backgroundColor: Colors.amber.shade100,
+                          textColor: Colors.brown,
+                          onDismiss: () {
+                            // Clear recent achievements when dismissed
+                            _progressService.clearRecentAchievements();
+                            setState(() {});
+                          },
                         ),
-                  ),
+                      ),
+
+                    // Practice modes section
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                      child: Text(
+                        'Practice Modes',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+
+                    // Practice mode cards
+                    _buildPracticeModeCards(context),
+
+                    // Recommended books section
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                      child: Text(
+                        'Recommended Books',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+
+                    // Recommended books carousel
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        itemCount: 5, // Example count
+                        itemBuilder: (context, index) {
+                          return _buildBookCard(context, index);
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+                  ],
                 ),
-
-                // Practice mode cards
-                _buildPracticeModeCards(context),
-
-                // Recommended books section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                  child: Text(
-                    'Recommended Books',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ),
-
-                // Recommended books carousel
-                SizedBox(
-                  height: 200,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    itemCount: 5, // Example count
-                    itemBuilder: (context, index) {
-                      return _buildBookCard(context, index);
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -162,6 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final dailyGoal = _progressService.getDailyGoal();
     final progress = dailyExercises / dailyGoal;
     final goalText = '$dailyExercises/$dailyGoal exercises';
+    final themeService = Provider.of<ThemeService>(context);
 
     return GestureDetector(
       onTap: () {
@@ -197,16 +202,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 backgroundColor: Colors.grey.shade200,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   progress >= 1.0
-                      ? Colors.green
+                      ? themeService.accentColor
                       : Theme.of(context).primaryColor,
                 ),
               ),
               const SizedBox(height: 8),
               if (progress >= 1.0)
-                const Text(
+                Text(
                   'Goal completed! Great job!',
                   style: TextStyle(
-                    color: Colors.green,
+                    color: themeService.accentColor,
                     fontWeight: FontWeight.bold,
                   ),
                 )
