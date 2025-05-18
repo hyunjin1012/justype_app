@@ -112,16 +112,24 @@ class _PracticeContentState extends State<PracticeContent> {
 
   Future<void> _fetchRandomSentence() async {
     // Check if AI challenge is available when AI source is selected
-    if (widget.sentenceManager.selectedSource == 'AI' &&
-        !_progressService.isAiChallengeAvailableToday()) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _feedback =
-              "You've already completed your daily AI challenge. Please try again tomorrow or switch to Books mode.";
-        });
+    if (widget.sentenceManager.selectedSource == 'AI') {
+      bool isAiAvailable = true;
+      if (widget.title.contains('Text')) {
+        isAiAvailable = _progressService.isTextAiChallengeAvailableToday();
+      } else if (widget.title.contains('Audio')) {
+        isAiAvailable = _progressService.isAudioAiChallengeAvailableToday();
       }
-      return;
+
+      if (!isAiAvailable) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _feedback =
+                "You've already completed your daily AI challenge. Please try again tomorrow or switch to Books mode.";
+          });
+        }
+        return;
+      }
     }
 
     // Check if Books audio challenge is available when in audio mode with Books source
@@ -204,8 +212,10 @@ class _PracticeContentState extends State<PracticeContent> {
 
   Widget _buildSourceSelector(
       String selectedSource, Function(String) onSourceChanged) {
-    // Check if AI is available before allowing selection
-    final bool isAiAvailable = _progressService.isAiChallengeAvailableToday();
+    // Check if AI is available based on challenge type
+    final bool isAiAvailable = widget.title.contains('Text')
+        ? _progressService.isTextAiChallengeAvailableToday()
+        : _progressService.isAudioAiChallengeAvailableToday();
     // Check if Books audio is available
     final bool isBooksAudioAvailable =
         _progressService.isBooksAudioChallengeAvailableToday();
@@ -248,10 +258,11 @@ class _PracticeContentState extends State<PracticeContent> {
             } else if (selected && !isAiAvailable) {
               // Show message when trying to select AI when not available
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text(
-                      'You\'ve already completed your daily AI challenge. Please try again tomorrow.'),
-                  duration: Duration(seconds: 3),
+                    'You\'ve already completed your daily ${widget.title.contains('Text') ? 'text' : 'audio'} AI challenge. Please try again tomorrow.',
+                  ),
+                  duration: const Duration(seconds: 3),
                 ),
               );
             }

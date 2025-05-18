@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:translator/translator.dart';
+import 'openai_translation_service.dart';
 
 class SpeechTranslationService extends ChangeNotifier {
   final SpeechToText _speech = SpeechToText();
-  final GoogleTranslator _translator = GoogleTranslator();
+  final OpenAITranslationService _translator = OpenAITranslationService();
 
   bool _isListening = false;
   bool _isInitialized = false;
@@ -152,12 +152,11 @@ class SpeechTranslationService extends ChangeNotifier {
       } else {
         final translation = await _translator.translate(
           text,
-          from: _sourceLanguage,
-          to: _targetLanguage,
+          _sourceLanguage,
+          _targetLanguage,
         );
-        print(
-            'SpeechTranslationService: Translation successful: ${translation.text}');
-        _translatedText = translation.text;
+        print('SpeechTranslationService: Translation successful: $translation');
+        _translatedText = translation;
       }
 
       _onTranslatedTextChanged?.call(_translatedText);

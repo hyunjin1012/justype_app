@@ -54,8 +54,22 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
     _speechService = SpeechTranslationService();
     _feedbackService.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeSpeechService();
+      _checkAvailability();
     });
+  }
+
+  void _checkAvailability() {
+    if (!_progressService.isSpeechTranslationAvailableToday()) {
+      setState(() {
+        _errorMessage = '''
+You've already completed your daily speech translation challenge. Please try again tomorrow.
+
+This helps you maintain a consistent practice routine and prevents overuse of the translation service.''';
+        _isLoading = false;
+      });
+    } else {
+      _initializeSpeechService();
+    }
   }
 
   Future<void> _initializeSpeechService() async {
@@ -185,6 +199,18 @@ Tap the refresh button to try again.''';
   }
 
   void _clearState() async {
+    // Check if speech translation is available before clearing state
+    if (!_progressService.isSpeechTranslationAvailableToday()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'You\'ve already completed your daily speech translation challenge. Please try again tomorrow.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _recognizedText = '';
       _translatedText = '';
@@ -279,10 +305,12 @@ Tap the refresh button to try again.''';
                                 style: const TextStyle(color: Colors.red),
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.refresh),
-                              onPressed: _initializeSpeechService,
-                            ),
+                            if (_progressService
+                                .isSpeechTranslationAvailableToday())
+                              IconButton(
+                                icon: const Icon(Icons.refresh),
+                                onPressed: _initializeSpeechService,
+                              ),
                           ],
                         ),
                       ),
@@ -452,12 +480,14 @@ Tap the refresh button to try again.''';
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _clearState,
-        tooltip: 'New Translation',
-        icon: const Icon(Icons.refresh),
-        label: const Text('New'),
-      ),
+      floatingActionButton: _progressService.isSpeechTranslationAvailableToday()
+          ? FloatingActionButton.extended(
+              onPressed: _clearState,
+              tooltip: 'New Translation',
+              icon: const Icon(Icons.refresh),
+              label: const Text('New'),
+            )
+          : null,
     );
   }
 }

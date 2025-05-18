@@ -31,10 +31,16 @@ class ProgressService extends ChangeNotifier {
   String _lastExerciseDate = '';
   String _lastAiChallengeDate =
       ''; // Add new field for tracking last AI challenge
+  String _lastTextAiChallengeDate =
+      ''; // Add new field for tracking last text AI challenge
+  String _lastAudioAiChallengeDate =
+      ''; // Add new field for tracking last audio AI challenge
   String _lastBooksAudioChallengeDate =
       ''; // Add new field for tracking last Books audio challenge
   Map<String, dynamic> _achievementData =
       {}; // Map of achievement ID to timestamp
+  String _lastSpeechTranslationDate =
+      ''; // Add new field for tracking last speech translation
 
   // Map of achievement IDs to their descriptive messages
   final Map<String, String> _achievementMessages = {
@@ -66,10 +72,14 @@ class ProgressService extends ChangeNotifier {
     _dailyGoal = prefs.getInt('dailyGoal') ?? 5;
     _dailyExercises = prefs.getInt('dailyExercises') ?? 0;
     _lastExerciseDate = prefs.getString('lastExerciseDate') ?? '';
-    _lastAiChallengeDate = prefs.getString('lastAiChallengeDate') ??
-        ''; // Load last AI challenge date
+    _lastAiChallengeDate = prefs.getString('lastAiChallengeDate') ?? '';
+    _lastTextAiChallengeDate = prefs.getString('lastTextAiChallengeDate') ?? '';
+    _lastAudioAiChallengeDate =
+        prefs.getString('lastAudioAiChallengeDate') ?? '';
     _lastBooksAudioChallengeDate =
         prefs.getString('lastBooksAudioChallengeDate') ?? '';
+    _lastSpeechTranslationDate =
+        prefs.getString('lastSpeechTranslationDate') ?? '';
 
     // Load recent achievements if stored
     _recentAchievements = prefs.getStringList('recentAchievements') ?? [];
@@ -115,10 +125,14 @@ class ProgressService extends ChangeNotifier {
     await prefs.setStringList('allAchievements', _allAchievements);
     await prefs.setInt('dailyExercises', _dailyExercises);
     await prefs.setString('lastExerciseDate', _lastExerciseDate);
-    await prefs.setString('lastAiChallengeDate',
-        _lastAiChallengeDate); // Save last AI challenge date
+    await prefs.setString('lastAiChallengeDate', _lastAiChallengeDate);
+    await prefs.setString('lastTextAiChallengeDate', _lastTextAiChallengeDate);
+    await prefs.setString(
+        'lastAudioAiChallengeDate', _lastAudioAiChallengeDate);
     await prefs.setString(
         'lastBooksAudioChallengeDate', _lastBooksAudioChallengeDate);
+    await prefs.setString(
+        'lastSpeechTranslationDate', _lastSpeechTranslationDate);
 
     // Save achievement data
     await prefs.setString('achievementData', json.encode(_achievementData));
@@ -145,9 +159,9 @@ class ProgressService extends ChangeNotifier {
     if (practiceType == 'text') {
       _textChallenges++;
 
-      // If it's an AI challenge, update the last AI challenge date
+      // If it's an AI challenge, update the last text AI challenge date
       if (isAiChallenge) {
-        await updateLastAiChallengeDate();
+        await updateLastTextAiChallengeDate();
       }
 
       // Check for text-related achievements
@@ -159,9 +173,9 @@ class ProgressService extends ChangeNotifier {
     } else if (practiceType == 'audio') {
       _audioChallenges++;
 
-      // If it's an AI challenge, update the last AI challenge date
+      // If it's an AI challenge, update the last audio AI challenge date
       if (isAiChallenge) {
-        await updateLastAiChallengeDate();
+        await updateLastAudioAiChallengeDate();
       } else {
         // If it's a Books audio challenge, update the last Books audio challenge date
         await updateLastBooksAudioChallengeDate();
@@ -173,6 +187,8 @@ class ProgressService extends ChangeNotifier {
       }
     } else if (practiceType == 'translation') {
       _translationChallenges++;
+      // Update the last speech translation date
+      await updateLastSpeechTranslationDate();
 
       // Check for translation-related achievements
       if (_translationChallenges == 10) {
@@ -301,7 +317,10 @@ class ProgressService extends ChangeNotifier {
     _dailyExercises = 0;
     _lastExerciseDate = '';
     _lastAiChallengeDate = ''; // Reset last AI challenge date
+    _lastTextAiChallengeDate = ''; // Reset last text AI challenge date
+    _lastAudioAiChallengeDate = ''; // Reset last audio AI challenge date
     _lastBooksAudioChallengeDate = ''; // Reset last Books audio challenge date
+    _lastSpeechTranslationDate = ''; // Reset last speech translation date
 
     _achievementData = {};
 
@@ -319,7 +338,10 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('dailyExercises');
     await prefs.remove('lastExerciseDate');
     await prefs.remove('lastAiChallengeDate');
+    await prefs.remove('lastTextAiChallengeDate');
+    await prefs.remove('lastAudioAiChallengeDate');
     await prefs.remove('lastBooksAudioChallengeDate');
+    await prefs.remove('lastSpeechTranslationDate');
     await prefs.remove('achievementData');
 
     // Clear streak tracking data
@@ -376,15 +398,51 @@ class ProgressService extends ChangeNotifier {
     return _lastBooksAudioChallengeDate != today;
   }
 
+  // Add method to check if speech translation is available today
+  bool isSpeechTranslationAvailableToday() {
+    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
+    return _lastSpeechTranslationDate != today;
+  }
+
+  // Add method to check if text AI challenge is available today
+  bool isTextAiChallengeAvailableToday() {
+    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
+    return _lastTextAiChallengeDate != today;
+  }
+
+  // Add method to check if audio AI challenge is available today
+  bool isAudioAiChallengeAvailableToday() {
+    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
+    return _lastAudioAiChallengeDate != today;
+  }
+
   // Add method to update last AI challenge date
   Future<void> updateLastAiChallengeDate() async {
     _lastAiChallengeDate = DateTime.now().toString().split(' ')[0];
     await saveProgress();
   }
 
+  // Add method to update last text AI challenge date
+  Future<void> updateLastTextAiChallengeDate() async {
+    _lastTextAiChallengeDate = DateTime.now().toString().split(' ')[0];
+    await saveProgress();
+  }
+
+  // Add method to update last audio AI challenge date
+  Future<void> updateLastAudioAiChallengeDate() async {
+    _lastAudioAiChallengeDate = DateTime.now().toString().split(' ')[0];
+    await saveProgress();
+  }
+
   // Add method to update last Books audio challenge date
   Future<void> updateLastBooksAudioChallengeDate() async {
     _lastBooksAudioChallengeDate = DateTime.now().toString().split(' ')[0];
+    await saveProgress();
+  }
+
+  // Add method to update last speech translation date
+  Future<void> updateLastSpeechTranslationDate() async {
+    _lastSpeechTranslationDate = DateTime.now().toString().split(' ')[0];
     await saveProgress();
   }
 

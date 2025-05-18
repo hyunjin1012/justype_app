@@ -43,7 +43,10 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     final textChallenges = _progressService.getTextChallenges();
     final audioChallenges = _progressService.getAudioChallenges();
     final translationChallenges = _progressService.getTranslationChallenges();
-    final isAiAvailable = _progressService.isAiChallengeAvailableToday();
+    final isTextAiAvailable =
+        _progressService.isTextAiChallengeAvailableToday();
+    final isAudioAiAvailable =
+        _progressService.isAudioAiChallengeAvailableToday();
     final isBooksAudioAvailable =
         _progressService.isBooksAudioChallengeAvailableToday();
 
@@ -65,7 +68,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
           },
           {
             'name': 'AI',
-            'available': isAiAvailable,
+            'available': isTextAiAvailable,
             'limit': 'Once per day',
           },
         ],
@@ -87,7 +90,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
           },
           {
             'name': 'AI',
-            'available': isAiAvailable,
+            'available': isAudioAiAvailable,
             'limit': 'Once per day',
           },
         ],
@@ -104,8 +107,8 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'modes': [
           {
             'name': 'Translation',
-            'available': true,
-            'limit': 'Unlimited',
+            'available': _progressService.isSpeechTranslationAvailableToday(),
+            'limit': 'Once per day',
           },
         ],
       },
@@ -205,92 +208,120 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
                         child: GestureDetector(
-                          onTap: () =>
-                              GoRouter.of(context).go(challenge['route']),
+                          onTap: () {
+                            // Check if all modes are unavailable
+                            final allModesUnavailable = challenge['modes']
+                                .every((mode) => !mode['available']);
+                            if (!allModesUnavailable) {
+                              GoRouter.of(context).go(challenge['route']);
+                            }
+                          },
                           child: Card(
                             elevation: 2,
                             color: challenge['color'],
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        challenge['icon'],
-                                        size: 28,
-                                        color: Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? Colors.black87
-                                            : null,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              challenge['title'],
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? Colors.black87
-                                                    : null,
+                            // Add opacity when all modes are unavailable
+                            child: Opacity(
+                              opacity: challenge['modes']
+                                      .every((mode) => !mode['available'])
+                                  ? 0.5
+                                  : 1.0,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          challenge['icon'],
+                                          size: 28,
+                                          color: Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.black87
+                                              : null,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                challenge['title'],
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.dark
+                                                      ? Colors.black87
+                                                      : null,
+                                                ),
                                               ),
+                                              Text(
+                                                challenge['subtitle'],
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.dark
+                                                      ? Colors.black87
+                                                      : Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    // Show modes and their availability
+                                    ...challenge['modes'].map<Widget>((mode) {
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8.0),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              mode['available']
+                                                  ? Icons.check_circle
+                                                  : Icons.timer,
+                                              size: 16,
+                                              color: mode['available']
+                                                  ? Colors.green
+                                                  : Colors.orange,
                                             ),
+                                            const SizedBox(width: 8),
                                             Text(
-                                              challenge['subtitle'],
+                                              '${mode['name']}: ${mode['limit']}',
                                               style: TextStyle(
                                                 fontSize: 14,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
+                                                color: mode['available']
                                                     ? Colors.black87
                                                     : Colors.black54,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  // Show modes and their availability
-                                  ...challenge['modes'].map<Widget>((mode) {
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 8.0),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            mode['available']
-                                                ? Icons.check_circle
-                                                : Icons.timer,
-                                            size: 16,
-                                            color: mode['available']
-                                                ? Colors.green
-                                                : Colors.orange,
+                                      );
+                                    }).toList(),
+                                    // Add message when all modes are unavailable
+                                    if (challenge['modes']
+                                        .every((mode) => !mode['available']))
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 8.0),
+                                        child: Text(
+                                          'All modes used for today. Try again tomorrow!',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.red.shade700,
+                                            fontStyle: FontStyle.italic,
                                           ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            '${mode['name']}: ${mode['limit']}',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: mode['available']
-                                                  ? Colors.black87
-                                                  : Colors.black54,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    );
-                                  }).toList(),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
