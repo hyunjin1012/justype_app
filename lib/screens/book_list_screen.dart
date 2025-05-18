@@ -64,7 +64,8 @@ class _BookListScreenState extends State<BookListScreen> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading books: $e')),
+          const SnackBar(
+              content: Text('Unable to load books. Please try again.')),
         );
       }
     }
@@ -109,7 +110,8 @@ class _BookListScreenState extends State<BookListScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading more books: $e')),
+          const SnackBar(
+              content: Text('Unable to load more books. Please try again.')),
         );
       }
     }
@@ -189,7 +191,16 @@ class _BookListScreenState extends State<BookListScreen> {
         ],
       ),
       body: _isLoading && _booksResponse == null
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Loading books... This might take a few seconds.'),
+                ],
+              ),
+            )
           : _booksResponse == null
               ? Center(
                   child: Column(

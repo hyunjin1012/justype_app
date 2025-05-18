@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/book.dart';
 import '../services/practice_service.dart';
-import '../services/tts_service.dart';
+import '../services/combined_tts_service.dart';
 import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/visibility_toggle.dart';
@@ -28,7 +28,7 @@ class BookPracticeModal extends StatefulWidget {
 class _BookPracticeModalState extends State<BookPracticeModal> {
   final TextEditingController _textController = TextEditingController();
   bool _isListeningMode = false;
-  final TtsService _ttsService = TtsService();
+  final CombinedTtsService _ttsService = CombinedTtsService();
   bool _isTextVisible = true;
   final BookSentenceManager _sentenceManager = BookSentenceManager();
   final PracticeService _practiceService = PracticeService();
