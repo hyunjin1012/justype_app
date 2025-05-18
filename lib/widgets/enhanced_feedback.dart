@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import '../services/feedback_service.dart';
 
 class EnhancedFeedback extends StatefulWidget {
   final String userInput;
@@ -24,6 +25,7 @@ class _EnhancedFeedbackState extends State<EnhancedFeedback>
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotationAnimation;
   late Animation<Offset> _slideAnimation;
+  final FeedbackService _feedbackService = FeedbackService();
 
   @override
   void initState() {
@@ -59,8 +61,14 @@ class _EnhancedFeedbackState extends State<EnhancedFeedback>
       ),
     );
 
+    // Initialize feedback service
+    _feedbackService.initialize();
+
     if (widget.isCorrect) {
       _confettiController.play();
+      _feedbackService.playCorrectSound();
+    } else {
+      _feedbackService.playWrongSound();
     }
     _animationController.forward();
   }
@@ -69,6 +77,7 @@ class _EnhancedFeedbackState extends State<EnhancedFeedback>
   void dispose() {
     _confettiController.dispose();
     _animationController.dispose();
+    _feedbackService.dispose();
     super.dispose();
   }
 
