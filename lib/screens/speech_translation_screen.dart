@@ -26,7 +26,8 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   String _recognizedText = '';
   String _translatedText = '';
   String _feedback = '';
-  bool _isCheckButtonEnabled = true;
+  bool _isCheckButtonEnabled = false;
+  bool _isRecordButtonEnabled = true;
   bool _isLoading = false;
   bool _isInitialized = false;
   bool _isListening = false;
@@ -147,6 +148,8 @@ Tap the refresh button to try again.''';
         _isProcessing = false;
         _recognizedText = _speechService.lastRecognizedWords;
         _translatedText = _speechService.translatedText;
+        _isCheckButtonEnabled = true;
+        _isRecordButtonEnabled = false;
       });
     } catch (e) {
       setState(() {
@@ -166,16 +169,19 @@ Tap the refresh button to try again.''';
     if (isCorrect) {
       _feedbackService.playCorrectSound();
       _progressService.completeExercise(practiceType: 'translation');
+      setState(() {
+        _feedback = "Correct! Great job.";
+        _isCheckButtonEnabled = false;
+        _isRecordButtonEnabled = false;
+      });
     } else {
       _feedbackService.playWrongSound();
+      setState(() {
+        _feedback = "Not quite right. Try again or record a new sentence.";
+        _isCheckButtonEnabled = true;
+        _isRecordButtonEnabled = false;
+      });
     }
-
-    setState(() {
-      _feedback = isCorrect
-          ? "Correct! Great job."
-          : "Not quite right. Try again or record a new sentence.";
-      _isCheckButtonEnabled = !isCorrect;
-    });
   }
 
   void _clearState() async {
@@ -184,7 +190,8 @@ Tap the refresh button to try again.''';
       _translatedText = '';
       _textController.clear();
       _feedback = '';
-      _isCheckButtonEnabled = true;
+      _isCheckButtonEnabled = false;
+      _isRecordButtonEnabled = true;
     });
 
     // Play load sound when starting a new translation
@@ -322,7 +329,7 @@ Tap the refresh button to try again.''';
 
                   // Record button
                   ElevatedButton.icon(
-                    onPressed: _isLoading
+                    onPressed: (_isLoading || !_isRecordButtonEnabled)
                         ? null
                         : _isListening
                             ? _stopListening
