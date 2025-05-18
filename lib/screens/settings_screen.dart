@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/theme_service.dart';
 import '../services/progress_service.dart';
 import '../services/tts_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends StatefulWidget {
   final ThemeService themeService;
@@ -18,6 +19,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final ProgressService _progressService = ProgressService();
   final TtsService _ttsService = TtsService();
+  String _appVersion = '';
 
   // Local state for settings
   double _speechRate = 1.0; // Default value is set to 1.0 (maximum speed)
@@ -32,6 +34,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     // Initialize TTS service
     _ttsService.initialize();
+
+    // Get app version
+    _getAppVersion();
+  }
+
+  Future<void> _getAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _appVersion = packageInfo.version;
+    });
   }
 
   // Helper method to create section headers
@@ -167,9 +179,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       showAboutDialog(
                         context: context,
                         applicationName: 'JusType',
-                        applicationVersion: '1.0.0',
-                        applicationIcon: const FlutterLogo(size: 32),
-                        applicationLegalese: '© 2023 JusType',
+                        applicationVersion: _appVersion,
+                        applicationIcon: Image.asset(
+                          'assets/icons/app_icon.png',
+                          width: 32,
+                          height: 32,
+                        ),
+                        applicationLegalese: '© 2025 JusType',
                         children: [
                           const SizedBox(height: 16),
                           const Text(
