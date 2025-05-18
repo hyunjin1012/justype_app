@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Language Practice App',
+      title: 'JusType',
       theme: AppRouter.themeService.getThemeData(),
       darkTheme: AppRouter.themeService.darkTheme,
       themeMode: AppRouter.themeService.themeMode,

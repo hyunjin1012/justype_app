@@ -1,4 +1,4 @@
-# justype_app
+# justype
 
 A new Flutter project.
 

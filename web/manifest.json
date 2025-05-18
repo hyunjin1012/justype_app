@@ -1,6 +1,6 @@
 {
-    "name": "justype_app",
-    "short_name": "justype_app",
+    "name": "JusType",
+    "short_name": "JusType",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

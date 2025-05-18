@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/speech_translation_service.dart';
 import '../services/practice_service.dart';
 import '../services/progress_service.dart';
+import '../services/feedback_service.dart';
 import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/enhanced_feedback.dart';
@@ -19,6 +20,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   late final SpeechTranslationService _speechService;
   final PracticeService _practiceService = PracticeService();
   final ProgressService _progressService = ProgressService();
+  final FeedbackService _feedbackService = FeedbackService();
   final TextEditingController _textController = TextEditingController();
 
   String _recognizedText = '';
@@ -48,6 +50,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   void initState() {
     super.initState();
     _speechService = SpeechTranslationService();
+    _feedbackService.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeSpeechService();
     });
@@ -155,19 +158,23 @@ Tap the refresh button to try again.''';
     if (userInput.isEmpty || _translatedText.isEmpty) return;
 
     final isCorrect = _practiceService.checkAnswer(userInput, _translatedText);
+
+    if (isCorrect) {
+      _feedbackService.playCorrectSound();
+      _progressService.completeExercise(practiceType: 'translation');
+    } else {
+      _feedbackService.playWrongSound();
+    }
+
     setState(() {
       _feedback = isCorrect
           ? "Correct! Great job."
           : "Not quite right. Try again or record a new sentence.";
       _isCheckButtonEnabled = !isCorrect;
     });
-
-    if (isCorrect) {
-      _progressService.completeExercise(practiceType: 'translation');
-    }
   }
 
-  void _clearState() {
+  void _clearState() async {
     setState(() {
       _recognizedText = '';
       _translatedText = '';
@@ -175,6 +182,9 @@ Tap the refresh button to try again.''';
       _feedback = '';
       _isCheckButtonEnabled = true;
     });
+
+    // Play load sound when starting a new translation
+    await _feedbackService.playLoadSound();
   }
 
   void _onLanguageChanged(String? value) {
@@ -221,6 +231,7 @@ Tap the refresh button to try again.''';
   void dispose() {
     _speechService.dispose();
     _textController.dispose();
+    _feedbackService.dispose();
     super.dispose();
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/sentence_manager.dart';
+import '../services/feedback_service.dart';
 import 'package:go_router/go_router.dart';
 import '../services/progress_service.dart';
 import 'enhanced_feedback.dart';
@@ -41,6 +42,7 @@ class PracticeContent extends StatefulWidget {
 class _PracticeContentState extends State<PracticeContent> {
   final TextEditingController _textController = TextEditingController();
   final ProgressService _progressService = ProgressService();
+  final FeedbackService _feedbackService = FeedbackService();
   String _feedback = "";
   bool _isLoading = false;
   bool _isCheckButtonEnabled = true;
@@ -56,6 +58,8 @@ class _PracticeContentState extends State<PracticeContent> {
   @override
   void initState() {
     super.initState();
+    // Initialize feedback service
+    _feedbackService.initialize();
     // Fetch a random sentence when the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchRandomSentence();
@@ -65,6 +69,7 @@ class _PracticeContentState extends State<PracticeContent> {
   @override
   void dispose() {
     _textController.dispose();
+    _feedbackService.dispose();
     super.dispose();
   }
 
@@ -85,6 +90,9 @@ class _PracticeContentState extends State<PracticeContent> {
       _progressService.completeExercise(
           practiceType: practiceType, isAiChallenge: isAiChallenge);
 
+      // Play correct sound and haptic feedback
+      await _feedbackService.playCorrectSound();
+
       // Disable check button when answer is correct
       if (mounted) {
         setState(() {
@@ -93,6 +101,9 @@ class _PracticeContentState extends State<PracticeContent> {
         });
       }
     } else if (mounted) {
+      // Play wrong sound and haptic feedback
+      await _feedbackService.playWrongSound();
+
       setState(() {
         _feedback = "Not quite right. Try again or get a new sentence.";
       });
@@ -164,8 +175,11 @@ class _PracticeContentState extends State<PracticeContent> {
           });
         }
       },
-      onContentUpdated: () {
+      onContentUpdated: () async {
         if (mounted) {
+          // Play load sound and haptic feedback when content is updated
+          await _feedbackService.playLoadSound();
+
           setState(() {
             _loadingMessage = "";
             // Update current book information

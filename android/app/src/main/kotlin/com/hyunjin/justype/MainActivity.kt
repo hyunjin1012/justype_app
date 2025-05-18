@@ -1,4 +1,4 @@
-package com.example.justype_app
+package com.hyunjin.justype
 
 import io.flutter.embedding.android.FlutterActivity
 
