@@ -30,6 +30,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   bool _isLoading = false;
   bool _isInitialized = false;
   bool _isListening = false;
+  bool _isProcessing = false;
   String _selectedLanguage = 'en';
   String _errorMessage = '';
 
@@ -135,6 +136,7 @@ Tap the refresh button to try again.''';
   Future<void> _stopListening() async {
     setState(() {
       _isLoading = true;
+      _isProcessing = true;
     });
 
     try {
@@ -142,6 +144,7 @@ Tap the refresh button to try again.''';
       setState(() {
         _isListening = false;
         _isLoading = false;
+        _isProcessing = false;
         _recognizedText = _speechService.lastRecognizedWords;
         _translatedText = _speechService.translatedText;
       });
@@ -149,6 +152,7 @@ Tap the refresh button to try again.''';
       setState(() {
         _errorMessage = 'Error stopping speech recognition: $e';
         _isLoading = false;
+        _isProcessing = false;
       });
     }
   }
@@ -336,11 +340,31 @@ Tap the refresh button to try again.''';
                     ),
                   ),
 
-                  if (_isLoading)
+                  if (_isLoading) ...[
                     const Padding(
                       padding: EdgeInsets.all(16.0),
                       child: CircularProgressIndicator(),
                     ),
+                    Text(
+                      _isProcessing
+                          ? 'Processing your speech...'
+                          : 'Initializing speech recognition...',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ] else if (_isListening) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Start speaking now...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
 
                   // Recognized text
                   if (_recognizedText.isNotEmpty)
