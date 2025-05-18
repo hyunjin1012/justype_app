@@ -98,7 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             if (showAchievementBanner && achievements.isNotEmpty)
               AchievementBanner(
                 title: 'Congratulations!',
-                description: _formatAchievementName(achievements.last),
+                description: achievements.last,
                 icon: 'assets/animations/achievement.json',
                 backgroundColor: Colors.green,
                 textColor: Colors.white,
@@ -284,6 +284,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Widget _buildAllAchievements() {
     final achievements = _progressService.getAllAchievements();
+    final achievementMessages = _progressService.achievementMessages;
 
     return Card(
       elevation: 4,
@@ -326,25 +327,27 @@ class _DashboardScreenState extends State<DashboardScreen>
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: achievements.length,
                 itemBuilder: (context, index) {
-                  final achievement = achievements[index];
+                  final achievementId = achievements[index];
+                  final achievementMessage =
+                      achievementMessages[achievementId] ?? achievementId;
                   return Card(
                     elevation: 1,
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    color: _getAchievementColor(achievement).withOpacity(0.1),
+                    color: _getAchievementColor(achievementId).withOpacity(0.1),
                     child: ListTile(
                       leading: Icon(
-                        _getAchievementIcon(achievement),
-                        color: _getAchievementColor(achievement),
+                        _getAchievementIcon(achievementId),
+                        color: _getAchievementColor(achievementId),
                       ),
                       title: Text(
-                        _formatAchievementName(achievement),
+                        achievementMessage,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       trailing: Text(
-                        _getAchievementDate(achievement),
+                        _getAchievementDate(achievementId),
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 12,
@@ -366,10 +369,12 @@ class _DashboardScreenState extends State<DashboardScreen>
       return Icons.fitness_center;
     } else if (achievementId.contains('streak')) {
       return Icons.local_fire_department;
-    } else if (achievementId.contains('reading')) {
+    } else if (achievementId.contains('text')) {
       return Icons.menu_book;
-    } else if (achievementId.contains('listening')) {
+    } else if (achievementId.contains('audio')) {
       return Icons.hearing;
+    } else if (achievementId.contains('translation')) {
+      return Icons.translate;
     }
     return Icons.emoji_events;
   }
@@ -379,10 +384,12 @@ class _DashboardScreenState extends State<DashboardScreen>
       return Colors.purple;
     } else if (achievementId.contains('streak')) {
       return Colors.orange;
-    } else if (achievementId.contains('reading')) {
+    } else if (achievementId.contains('text')) {
       return Colors.blue;
-    } else if (achievementId.contains('listening')) {
+    } else if (achievementId.contains('audio')) {
       return Colors.green;
+    } else if (achievementId.contains('translation')) {
+      return Colors.teal;
     }
     return Colors.amber;
   }
@@ -414,32 +421,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     } else {
       final years = (difference.inDays / 365).floor();
       return "$years ${years == 1 ? 'year' : 'years'} ago";
-    }
-  }
-
-  String _formatAchievementName(String achievementId) {
-    // Convert achievement IDs to more fun names
-    switch (achievementId) {
-      case 'exercises_5':
-        return 'Completed 5 challenges';
-      case 'exercises_10':
-        return 'Completed 10 challenges';
-      case 'exercises_50':
-        return 'Completed 50 challenges';
-      case 'streak_3':
-        return '3-day streak';
-      case 'streak_7':
-        return '7-day streak';
-      case 'reading_10':
-        return 'Completed 10 text challenges';
-      case 'reading_20':
-        return 'Completed 20 text challenges';
-      case 'listening_10':
-        return 'Completed 10 listening exercises';
-      case 'translation_10':
-        return 'Completed 10 translation exercises';
-      default:
-        return achievementId;
     }
   }
 

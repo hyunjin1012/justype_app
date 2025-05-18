@@ -36,6 +36,22 @@ class ProgressService extends ChangeNotifier {
   Map<String, dynamic> _achievementData =
       {}; // Map of achievement ID to timestamp
 
+  // Map of achievement IDs to their descriptive messages
+  final Map<String, String> _achievementMessages = {
+    'text_10': 'Completed 10 text challenges!',
+    'text_20': 'Completed 20 text challenges!',
+    'audio_10': 'Completed 10 audio challenges!',
+    'translation_10': 'Completed 10 translation challenges!',
+    'exercises_5': 'Completed 5 exercises!',
+    'exercises_10': 'Completed 10 exercises!',
+    'exercises_50': 'Completed 50 exercises!',
+    'streak_3': 'Maintained a 3-day streak!',
+    'streak_7': 'Maintained a 7-day streak!',
+  };
+
+  // Getter for achievement messages
+  Map<String, String> get achievementMessages => _achievementMessages;
+
   // Load progress from persistent storage
   Future<void> loadProgress() async {
     if (_isInitialized) return;
@@ -259,7 +275,10 @@ class ProgressService extends ChangeNotifier {
 
   // Method to get recent achievements
   List<String> getAchievements() {
-    return _recentAchievements; // Return the list of recent achievements
+    // Convert achievement IDs to descriptive messages
+    return _recentAchievements
+        .map((id) => _achievementMessages[id] ?? id)
+        .toList();
   }
 
   // Add a method to get all achievements

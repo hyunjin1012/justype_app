@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: AchievementBanner(
                       title: 'New Achievement!',
-                      description: _formatAchievementName(achievements.last),
+                      description: achievements.last,
                       icon: 'assets/animations/achievement.json',
                       backgroundColor: Colors.amber.shade100,
                       textColor: Colors.brown,
@@ -442,29 +442,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  String _formatAchievementName(String achievementId) {
-    // Convert achievement IDs to readable names
-    switch (achievementId) {
-      case 'exercises_5':
-        return 'Completed 5 exercises';
-      case 'exercises_10':
-        return 'Completed 10 exercises';
-      case 'exercises_50':
-        return 'Completed 50 exercises';
-      case 'streak_3':
-        return '3-day practice streak';
-      case 'streak_7':
-        return '7-day practice streak';
-      case 'reading_10':
-        return 'Completed 10 reading exercises';
-      case 'reading_20':
-        return 'Completed 20 reading exercises';
-      case 'listening_10':
-        return 'Completed 10 listening exercises';
-      default:
-        return achievementId;
-    }
   }
 }
