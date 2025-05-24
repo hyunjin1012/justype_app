@@ -124,29 +124,35 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header section
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ready to Type?',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Choose a challenge and start typing. Track your progress and unlock achievements as you go.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
-                  ),
-                ],
+            SizedBox(
+              width: double.infinity,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ready to Type?',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                              ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Choose a challenge and start typing. Track your progress and unlock achievements as you go.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
