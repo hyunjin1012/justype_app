@@ -34,8 +34,6 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
   void _speakSentence() {
     _ttsService.speak(_sentenceManager.currentSentence, onStateChange: () {
       if (mounted) {
-        print(
-            "TTS state changed callback, isSpeaking: ${_ttsService.isSpeaking}");
         // Force a rebuild of the entire screen
         setState(() {});
       }
@@ -59,8 +57,6 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
       // Define how to display the sentence (with speak button and visibility toggle)
       sentenceDisplay: (sentence) {
         // Force rebuild when this function is called
-        print(
-            "Building sentence display, TTS speaking: ${_ttsService.isSpeaking}");
         return Column(
           children: [
             Row(

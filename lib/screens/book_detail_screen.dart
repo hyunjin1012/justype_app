@@ -53,15 +53,17 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         _isLoading = false;
         _errorMessage = e.toString();
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error loading book: $e'),
-          action: SnackBarAction(
-            label: 'Retry',
-            onPressed: _loadBook,
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading book: $e'),
+            action: SnackBarAction(
+              label: 'Retry',
+              onPressed: _loadBook,
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 

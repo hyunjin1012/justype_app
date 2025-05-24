@@ -15,14 +15,6 @@ import 'package:provider/provider.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  static final _homeNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'home');
-  static final _dashboardNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'dashboard');
-  static final _challengesNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'challenges');
-  static final _booksNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'books');
 
   // Create static instances of screens to preserve their state
   static const homeScreen = HomeScreen();

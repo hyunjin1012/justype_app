@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'services/theme_service.dart';
 import 'services/progress_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,12 +12,7 @@ void main() async {
   try {
     // Load environment variables from root directory
     await dotenv.load(fileName: ".env");
-    print('Environment variables loaded successfully');
-    print(
-        'API Key: ${dotenv.env['OPENAI_API_KEY']?.substring(0, 10)}...'); // Print first 10 chars for verification
   } catch (e) {
-    print('Error loading environment variables: $e');
-    print('Current working directory: ${Directory.current.path}');
     // Continue running the app even if .env loading fails
   }
 

@@ -22,15 +22,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _appVersion = '';
 
   // Local state for settings
-  double _speechRate = 1.0; // Default value is set to 1.0 (maximum speed)
-  double _fontSize = 1.0; // Default value
+  // double _speechRate = 1.0; // Default value is set to 1.0 (maximum speed)
+  // double _fontSize = 1.0; // Default value
 
   @override
   void initState() {
     super.initState();
     // Initialize with current values
-    _speechRate = widget.themeService.speechRate;
-    _fontSize = widget.themeService.fontSize;
+    // _speechRate = widget.themeService.speechRate;
+    // _fontSize = widget.themeService.fontSize;
 
     // Initialize TTS service
     _ttsService.initialize();
@@ -226,8 +226,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: () {
         setState(() {
           widget.themeService.setAccentColor(color);
-          // Explicitly notify listeners to ensure UI updates
-          widget.themeService.notifyListeners();
         });
       },
       child: Container(
@@ -248,20 +246,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  String _getFontSizeLabel(double value) {
-    if (value <= 0.8) return 'S';
-    if (value <= 1.0) return 'M';
-    if (value <= 1.2) return 'L';
-    return 'XL';
-  }
-
-  String _getSpeechRateLabel(double rate) {
-    if (rate <= 0.25) return 'Slow';
-    if (rate <= 0.5) return 'Normal';
-    if (rate <= 0.75) return 'Fast';
-    return 'Very Fast';
-  }
-
   void _showResetConfirmation(BuildContext context) {
     showDialog(
       context: context,
@@ -279,7 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () async {
               // Reset all progress
               await _progressService.resetAllProgress();
-              if (mounted) {
+              if (mounted && context.mounted) {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(

@@ -126,10 +126,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     if (userInput.isEmpty) return;
 
     final currentSentence = _sentenceManager.currentSentence;
-    print("Checking answer: '$userInput' against '$currentSentence'");
 
     final isCorrect = _practiceService.checkAnswer(userInput, currentSentence);
-    print("Answer is correct: $isCorrect");
 
     if (isCorrect) {
       // Play correct sound and haptic feedback
@@ -143,7 +141,6 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       // Record progress when the answer is correct
       // Determine the practice type based on the current mode
       final practiceType = _isListeningMode ? 'audio' : 'text';
-      print("Recording exercise completion: $practiceType");
 
       // Update progress using the completeExercise method
       await _progressService.completeExercise(practiceType: practiceType);
@@ -152,9 +149,6 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       if (_isListeningMode) {
         await _progressService.updateLastBooksAudioChallengeDate();
       }
-
-      print(
-          "Progress updated. Total exercises: ${_progressService.getTotalExercises()}");
     } else {
       // Play wrong sound and haptic feedback
       await _feedbackService.playWrongSound();
@@ -163,8 +157,6 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
         _feedback = "Not quite right. Try again or get a new sentence.";
       });
     }
-
-    print("Feedback after check: $_feedback");
   }
 
   Future<void> _getNextSentence() async {
@@ -257,6 +249,12 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    // Loading indicator
+                    if (_isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    else
                     // Sentence display section
                     if (_isListeningMode)
                       Column(
@@ -272,13 +270,13 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
                             Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: SentenceDisplayCard(
-                                  sentence: _sentenceManager.currentSentence),
+                                  sentence: _currentSentence),
                             ),
                         ],
                       )
                     else
                       SentenceDisplayCard(
-                        sentence: _sentenceManager.currentSentence,
+                        sentence: _currentSentence,
                         textStyle: Theme.of(context).textTheme.titleLarge,
                       ),
                   ],

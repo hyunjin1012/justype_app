@@ -21,7 +21,6 @@ class TtsService {
 
     // Set up completion handler
     _flutterTts.setCompletionHandler(() {
-      print("TTS completed - completion handler");
       _isSpeaking = false;
       _cancelSpeechTimer();
       _safeCallback();
@@ -29,30 +28,25 @@ class TtsService {
 
     // Listen to TTS status changes
     _flutterTts.setStartHandler(() {
-      print("TTS started - start handler");
       _isSpeaking = true;
       _safeCallback();
     });
 
     // Also listen to progress updates which might help catch completion
     _flutterTts.setCancelHandler(() {
-      print("TTS cancelled - cancel handler");
       _isSpeaking = false;
       _safeCallback();
     });
 
     _flutterTts.setPauseHandler(() {
-      print("TTS paused - pause handler");
       _safeCallback();
     });
 
     _flutterTts.setContinueHandler(() {
-      print("TTS continued - continue handler");
       _safeCallback();
     });
 
     _flutterTts.setErrorHandler((error) {
-      print("TTS error: $error - error handler");
       _isSpeaking = false;
       _safeCallback();
     });
@@ -64,7 +58,7 @@ class TtsService {
       try {
         _onStateChangeCallback!();
       } catch (e) {
-        print("Error in TTS callback: $e");
+        debugPrint("Error in TTS callback: $e");
         _onStateChangeCallback = null;
       }
     }
@@ -72,11 +66,9 @@ class TtsService {
 
   // Speak or stop speaking
   Future<void> speak(String text, {Function? onStateChange}) async {
-    print("TTS speak called, current state: $_isSpeaking");
     _onStateChangeCallback = onStateChange;
 
     if (_isSpeaking) {
-      print("Stopping TTS");
       _cancelSpeechTimer();
       await _flutterTts.stop();
       _isSpeaking = false;
@@ -84,7 +76,6 @@ class TtsService {
       return;
     }
 
-    print("Starting TTS");
     // Explicitly set speaking state before calling the API
     _isSpeaking = true;
     _safeCallback();
@@ -105,7 +96,6 @@ class TtsService {
         Duration(milliseconds: (wordCount * 200 / _speechRate).round());
 
     _speechTimer = Timer(estimatedDuration, () {
-      print("Speech timer completed");
       _isSpeaking = false;
       _safeCallback();
     });
@@ -121,7 +111,6 @@ class TtsService {
 
   // Stop speaking
   Future<void> stop() async {
-    print("TTS stop called");
     _cancelSpeechTimer();
     await _flutterTts.stop();
     _isSpeaking = false;
@@ -130,7 +119,6 @@ class TtsService {
 
   // Clean up resources
   Future<void> dispose() async {
-    print("TTS dispose called");
     _cancelSpeechTimer();
     _onStateChangeCallback = null;
     await _flutterTts.stop();
@@ -139,7 +127,6 @@ class TtsService {
   // Build a speak button with consistent styling
   Widget buildSpeakButton(
       BuildContext context, VoidCallback onPressed, bool isSpeaking) {
-    print("Building button with isSpeaking: $isSpeaking");
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(isSpeaking ? Icons.stop : Icons.volume_up),

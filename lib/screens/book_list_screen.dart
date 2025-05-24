@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../models/booksResponse.dart';
+import '../models/books_response.dart';
 import '../services/gutenberg_service.dart';
 
 class BookListScreen extends StatefulWidget {
@@ -58,7 +58,7 @@ class _BookListScreenState extends State<BookListScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       if (mounted && context.mounted) {
         setState(() {
           _isLoading = false;
@@ -95,24 +95,28 @@ class _BookListScreenState extends State<BookListScreen> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No more books available.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No more books available.')),
+          );
+        }
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       setState(() {
         _isLoading = false;
       });
-      if (e.toString().contains('404')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No more books available.')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Unable to load more books. Please try again.')),
-        );
+      if (mounted) {
+        if (e.toString().contains('404')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No more books available.')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Unable to load more books. Please try again.')),
+          );
+        }
       }
     }
   }

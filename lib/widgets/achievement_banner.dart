@@ -28,7 +28,6 @@ class _AchievementBannerState extends State<AchievementBanner>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotateAnimation;
-  final bool _lottieLoadError = false;
 
   @override
   void initState() {

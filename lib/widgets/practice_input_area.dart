@@ -21,22 +21,15 @@ class PracticeInputArea extends StatefulWidget {
 }
 
 class PracticeInputAreaState extends State<PracticeInputArea> {
-  bool _isChecked = false; // Track if the answer has been checked
-
   // Reset the state when a new sentence is fetched
   void reset() {
-    print("Resetting PracticeInputArea state.");
     setState(() {
-      _isChecked = false; // Reset the button state
       widget.controller.clear(); // Clear the input field
     });
-    print("Button state after reset: $_isChecked"); // Debugging line
   }
 
   @override
   Widget build(BuildContext context) {
-    print(
-        "Building PracticeInputArea, button state: $_isChecked"); // Debugging line
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(

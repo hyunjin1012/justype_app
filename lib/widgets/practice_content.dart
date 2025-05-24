@@ -51,10 +51,6 @@ class _PracticeContentState extends State<PracticeContent> {
   String _currentBookAuthor = "";
   String _currentBookId = "";
 
-  // Add tracking variables
-  int _correctAnswers = 0;
-  int _totalAttempts = 0;
-
   @override
   void initState() {
     super.initState();
@@ -79,10 +75,7 @@ class _PracticeContentState extends State<PracticeContent> {
 
     final isCorrect = widget.sentenceManager.checkAnswer(userInput);
 
-    // Track progress
-    _totalAttempts++;
     if (isCorrect) {
-      _correctAnswers++;
       // Save progress based on practice type
       final practiceType = widget.title.contains('Text') ? 'text' : 'audio';
       // Check if it's an AI challenge by looking at the source
@@ -198,10 +191,6 @@ class _PracticeContentState extends State<PracticeContent> {
         }
       },
     );
-  }
-
-  Future<void> _fetchNewSentence() async {
-    await _fetchRandomSentence();
   }
 
   void _navigateToBookDetail(String bookId) {

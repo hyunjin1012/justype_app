@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 
@@ -19,42 +20,38 @@ class FeedbackService {
       await _audioPlayer.setSource(AssetSource(_wrongSoundPath));
       await _audioPlayer.setSource(AssetSource(_loadSoundPath));
       _isInitialized = true;
-      print('FeedbackService: Successfully initialized sound effects');
     } catch (e) {
-      print('FeedbackService: Error initializing sound effects: $e');
+      debugPrint('Error initializing feedback service: $e');
     }
   }
 
   Future<void> playCorrectSound() async {
     if (!_isInitialized) await initialize();
     try {
-      print('Playing correct sound from: $_correctSoundPath');
       await _audioPlayer.play(AssetSource(_correctSoundPath));
       await HapticFeedback.mediumImpact();
     } catch (e) {
-      print('Error playing correct sound: $e');
+      debugPrint('Error playing correct sound: $e');
     }
   }
 
   Future<void> playWrongSound() async {
     if (!_isInitialized) await initialize();
     try {
-      print('Playing wrong sound from: $_wrongSoundPath');
       await _audioPlayer.play(AssetSource(_wrongSoundPath));
       await HapticFeedback.heavyImpact();
     } catch (e) {
-      print('Error playing wrong sound: $e');
+      debugPrint('Error playing wrong sound: $e');
     }
   }
 
   Future<void> playLoadSound() async {
     if (!_isInitialized) await initialize();
     try {
-      print('Playing load sound from: $_loadSoundPath');
       await _audioPlayer.play(AssetSource(_loadSoundPath));
       await HapticFeedback.lightImpact();
     } catch (e) {
-      print('Error playing load sound: $e');
+      debugPrint('Error playing load sound: $e');
     }
   }
 

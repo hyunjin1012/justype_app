@@ -31,10 +31,8 @@ class ElevenLabsService {
     try {
       final apiKey = dotenv.env['ELEVENLABS_API_KEY'];
       if (apiKey == null || apiKey.isEmpty) {
-        print('Warning: ElevenLabs API key not found in environment variables');
         _apiKey = '';
       } else {
-        print('ElevenLabs API Key loaded successfully');
         _apiKey = apiKey;
       }
 
@@ -42,7 +40,7 @@ class ElevenLabsService {
       _audioPlayer = AudioPlayer();
       _isInitialized = true;
     } catch (e) {
-      print('Error initializing ElevenLabs service: $e');
+      debugPrint('Error initializing ElevenLabs service: $e');
       _isInitialized = false;
     }
   }
@@ -53,7 +51,7 @@ class ElevenLabsService {
       try {
         _onStateChangeCallback!();
       } catch (e) {
-        print("Error in ElevenLabs callback: $e");
+        debugPrint('Error in ElevenLabs callback: $e');
         _onStateChangeCallback = null;
       }
     }
@@ -61,12 +59,10 @@ class ElevenLabsService {
 
   Future<bool> speak(String text, {Function? onStateChange}) async {
     if (!_isInitialized) {
-      print('Error: ElevenLabs service not initialized');
       return false;
     }
 
     if (_apiKey.isEmpty) {
-      print('Error: ElevenLabs API key not configured');
       return false;
     }
 
@@ -87,7 +83,6 @@ class ElevenLabsService {
       final tempDir = await getTemporaryDirectory();
       final audioFile = File('${tempDir.path}/tts_audio.mp3');
 
-      print('Making API request to ElevenLabs for text: $text');
       // Make the API request to ElevenLabs
       final response = await http.post(
         Uri.parse('$_apiEndpoint/21m00Tcm4TlvDq8ikWAM'),
@@ -107,19 +102,15 @@ class ElevenLabsService {
       );
 
       if (response.statusCode == 200) {
-        print(
-            'Received audio data from ElevenLabs, size: ${response.bodyBytes.length} bytes');
         // Save the audio file
         await audioFile.writeAsBytes(response.bodyBytes);
         _currentAudioPath = audioFile.path;
 
-        print('Playing audio from file: ${audioFile.path}');
         // Play the audio
         try {
           // Set up completion handler before playing
           _completionSubscription = _audioPlayer.onPlayerComplete.listen((_) {
             if (!_hasCompleted) {
-              print('ElevenLabs: Audio playback completed');
               _hasCompleted = true;
               _isSpeaking = false;
               _safeCallback();
@@ -128,7 +119,6 @@ class ElevenLabsService {
 
           _stateSubscription =
               _audioPlayer.onPlayerStateChanged.listen((state) {
-            print('ElevenLabs: Audio player state changed: $state');
             if (state == PlayerState.playing) {
               _isSpeaking = true;
             } else if (state == PlayerState.stopped ||
@@ -147,69 +137,36 @@ class ElevenLabsService {
           _safeCallback();
           return true;
         } catch (e) {
-          print('Error playing audio: $e');
+          debugPrint('Error playing audio: $e');
           _isSpeaking = false;
           _safeCallback();
           return false;
         }
       } else {
-        print('Error from ElevenLabs API: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return false;
       }
-    } catch (e, stackTrace) {
-      print('Error in ElevenLabs TTS: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
+      debugPrint('Error in ElevenLabs TTS: $e');
       _isSpeaking = false;
       _safeCallback();
       return false;
     }
   }
 
-  List<String> _splitTextIntoChunks(String text, int maxChunkSize) {
-    final sentences = text
-        .split(RegExp(r'[.!?]+'))
-        .where((s) => s.trim().isNotEmpty)
-        .toList();
-    final chunks = <String>[];
-    var currentChunk = '';
-
-    for (final sentence in sentences) {
-      final trimmedSentence = sentence.trim();
-      if (currentChunk.isEmpty) {
-        currentChunk = trimmedSentence;
-      } else if (currentChunk.length + trimmedSentence.length + 2 <=
-          maxChunkSize) {
-        currentChunk += '. $trimmedSentence';
-      } else {
-        chunks.add(currentChunk);
-        currentChunk = trimmedSentence;
-      }
-    }
-
-    if (currentChunk.isNotEmpty) {
-      chunks.add(currentChunk);
-    }
-
-    return chunks;
-  }
-
   Future<void> stop() async {
     if (!_isInitialized) return;
-    print('ElevenLabs: Stopping audio playback');
     try {
       await _audioPlayer.stop();
       _isSpeaking = false;
       _hasCompleted = false;
       _safeCallback();
     } catch (e) {
-      print('Error stopping audio: $e');
+      debugPrint('Error stopping audio: $e');
     }
   }
 
   Future<void> dispose() async {
     if (!_isInitialized) return;
-    print('ElevenLabs: Disposing audio player');
     try {
       await _completionSubscription?.cancel();
       await _stateSubscription?.cancel();
@@ -222,7 +179,7 @@ class ElevenLabsService {
         }
       }
     } catch (e) {
-      print('Error during disposal: $e');
+      debugPrint('Error during disposal: $e');
     }
   }
 

@@ -61,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeService = Provider.of<ThemeService>(context);
     // Get achievements to display
     final achievements = _progressService.getAchievements();
     final bool showAchievementBanner = _progressService.hasRecentAchievements();
@@ -382,7 +381,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     final imageProvider = NetworkImage(book['coverUrl']);
                     try {
                       // This will start loading the image
-                      await precacheImage(imageProvider, context);
+                      if (mounted && context.mounted) {
+                        await precacheImage(imageProvider, context);
+                      }
                       return imageProvider;
                     } catch (e) {
                       // Return null if there's an error loading the image

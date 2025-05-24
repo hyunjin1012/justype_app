@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../widgets/practice_content.dart';
 import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
-import '../services/progress_service.dart';
 import '../services/sentence_manager.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,10 +13,7 @@ class TextChallengeScreen extends StatefulWidget {
 }
 
 class _TextChallengeScreenState extends State<TextChallengeScreen> {
-  final ProgressService _progressService = ProgressService();
-  final TextEditingController _controller = TextEditingController();
   final SentenceManager _sentenceManager = SentenceManager();
-  final String _feedback = "";
 
   @override
   Widget build(BuildContext context) {

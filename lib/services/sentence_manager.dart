@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
+
 import '../services/practice_service.dart';
 import '../services/gutenberg_service.dart';
 
@@ -62,7 +64,7 @@ class SentenceManager {
         _currentSentence =
             _selectedSource == 'Books' ? _booksSentence : _aiSentence;
       } catch (e) {
-        print('Error fetching content: $e');
+        debugPrint('Error fetching content: $e');
         // Set fallback content
         if (_selectedSource == 'AI') {
           _aiSentence = "The quick brown fox jumps over the lazy dog.";
