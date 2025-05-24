@@ -63,6 +63,7 @@ class _MyAppState extends State<MyApp> {
           darkTheme: themeService.darkTheme,
           themeMode: themeService.themeMode,
           routerConfig: AppRouter.router,
+          debugShowCheckedModeBanner: false,
         );
       },
     );
