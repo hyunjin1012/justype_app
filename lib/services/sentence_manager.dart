@@ -23,6 +23,7 @@ class SentenceManager {
   String get currentBookId => _currentBookId;
   String get selectedSource => _selectedSource;
   bool get isLoading => _isLoading;
+  bool get hasAvailablePrompt => !_isExhaustedPrompt(_currentSentence);
 
   // Set the source
   void setSource(String source) {
@@ -187,5 +188,12 @@ class SentenceManager {
   // Check if the answer is correct
   bool checkAnswer(String userInput) {
     return _practiceService.checkAnswer(userInput, _currentSentence);
+  }
+
+  bool _isExhaustedPrompt(String prompt) {
+    final normalized = prompt.toLowerCase();
+    return normalized.startsWith('you have practiced every') ||
+        normalized.startsWith('no suitable sentences') ||
+        normalized.startsWith('no book selected');
   }
 }

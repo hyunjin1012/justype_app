@@ -73,7 +73,9 @@ class _PracticeContentState extends State<PracticeContent> {
 
   void _checkAnswer() async {
     final userInput = _textController.text;
-    if (userInput.isEmpty) return;
+    if (userInput.isEmpty || !widget.sentenceManager.hasAvailablePrompt) {
+      return;
+    }
 
     final isCorrect = widget.sentenceManager.checkAnswer(userInput);
     final currentSentence = widget.sentenceManager.currentSentence;
@@ -400,7 +402,8 @@ class _PracticeContentState extends State<PracticeContent> {
                     _textController,
                     _checkAnswer,
                     "", // Empty feedback since we'll show it separately
-                    _isCheckButtonEnabled,
+                    _isCheckButtonEnabled &&
+                        widget.sentenceManager.hasAvailablePrompt,
                   ),
                   // Feedback message and button
                   if (_feedback.isNotEmpty) ...[

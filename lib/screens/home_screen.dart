@@ -233,8 +233,8 @@ class _HomeScreenState extends State<HomeScreen> {
         'route': '/challenges/audio',
       },
       {
-        'title': 'Translate',
-        'description': 'Practice local phrase packs by voice or text',
+        'title': 'Phrases',
+        'description': 'Practice conversation packs by voice or text',
         'icon': Icons.translate,
         'color': Colors.orange.shade100,
         'route': '/challenges/translate',

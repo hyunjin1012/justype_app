@@ -101,7 +101,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
 
   void _checkAnswer() async {
     final userInput = _textController.text;
-    if (userInput.isEmpty) return;
+    if (userInput.isEmpty || !_sentenceManager.hasAvailablePrompt) return;
 
     final currentSentence = _sentenceManager.currentSentence;
     final wordCount = _countWords(currentSentence);
@@ -299,7 +299,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
                   onCheck: _checkAnswer,
                   feedback: "", // Empty feedback since we'll show it separately
                   labelText: 'Type or speak what you see/hear',
-                  isCheckButtonEnabled: _isCheckButtonEnabled,
+                  isCheckButtonEnabled: _isCheckButtonEnabled &&
+                      _sentenceManager.hasAvailablePrompt,
                 ),
                 if (_feedback.isNotEmpty) ...[
                   const SizedBox(height: 8),

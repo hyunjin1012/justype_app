@@ -36,11 +36,131 @@
       "scenario": "Travel",
       "source": "Can you help me find the entrance.",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Which platform does the next train leave from?",
+      "target": "Which platform does the next train leave from?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "I need directions to the nearest pharmacy.",
+      "target": "I need directions to the nearest pharmacy."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Can I leave my bag here for a few minutes?",
+      "target": "Can I leave my bag here for a few minutes?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "The reservation is under my name.",
+      "target": "The reservation is under my name."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Could I have the bill when you have a moment?",
+      "target": "Could I have the bill when you have a moment?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Is there a table available near the window?",
+      "target": "Is there a table available near the window?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "I ordered tea, but this looks like coffee.",
+      "target": "I ordered tea, but this looks like coffee."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "I will be home a little later than planned.",
+      "target": "I will be home a little later than planned."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Please remind me to charge my phone tonight.",
+      "target": "Please remind me to charge my phone tonight."
+    },
+    {
+      "scenario": "Work",
+      "source": "The meeting moved to tomorrow morning.",
+      "target": "The meeting moved to tomorrow morning."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Do you have this in a smaller size?",
+      "target": "Do you have this in a smaller size?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Can I return this if it does not fit?",
+      "target": "Can I return this if it does not fit?"
+    },
+    {
+      "scenario": "Work",
+      "source": "I can send the updated file before noon.",
+      "target": "I can send the updated file before noon."
+    },
+    {
+      "scenario": "Work",
+      "source": "Let us confirm the deadline before we start.",
+      "target": "Let us confirm the deadline before we start."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Could you explain that example one more time?",
+      "target": "Could you explain that example one more time?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "I finished the reading but not the worksheet.",
+      "target": "I finished the reading but not the worksheet."
+    },
+    {
+      "scenario": "Health",
+      "source": "I have had a headache since this morning.",
+      "target": "I have had a headache since this morning."
+    },
+    {
+      "scenario": "Health",
+      "source": "Is there a clinic open on Sunday?",
+      "target": "Is there a clinic open on Sunday?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "That sounds exciting, but also a little stressful.",
+      "target": "That sounds exciting, but also a little stressful."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "How was your first week in the new apartment?",
+      "target": "How was your first week in the new apartment?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "I should have listened before giving advice.",
+      "target": "I should have listened before giving advice."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Thank you for being patient with me today.",
+      "target": "Thank you for being patient with me today."
+    },
+    {
+      "scenario": "Interview",
+      "source": "I am comfortable learning new tools quickly.",
+      "target": "I am comfortable learning new tools quickly."
+    },
+    {
+      "scenario": "Interview",
+      "source": "My strongest skill is staying organized under pressure.",
+      "target": "My strongest skill is staying organized under pressure."
     }
   ],
   "es": [
     {
-      "source": "El aprendizaje mejora con sesiones pequenas cada dia.",
+      "source": "El aprendizaje mejora con sesiones pequeñas cada día.",
       "target": "Learning improves with small daily sessions."
     },
     {
@@ -48,27 +168,27 @@
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Una rutina constante hace que la practica sea mas facil de repetir.",
+      "source": "Una rutina constante hace que la práctica sea más fácil de repetir.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Travel",
-      "source": "Necesito comprar un boleto para el proximo tren.",
+      "source": "Necesito comprar un boleto para el próximo tren.",
       "target": "I need to buy a ticket for the next train."
     },
     {
       "scenario": "Travel",
-      "source": "Puede indicarme donde esta la puerta de embarque.",
+      "source": "¿Puede indicarme dónde está la puerta de embarque?",
       "target": "Can you show me where the boarding gate is."
     },
     {
       "scenario": "Interview",
-      "source": "Tengo experiencia trabajando con equipos pequenos.",
+      "source": "Tengo experiencia trabajando con equipos pequeños.",
       "target": "I have experience working with small teams."
     },
     {
       "scenario": "Interview",
-      "source": "Me gustaria explicar por que soy una buena opcion.",
+      "source": "Me gustaría explicar por qué soy una buena opción.",
       "target": "I would like to explain why I am a good fit."
     },
     {
@@ -78,17 +198,17 @@
     },
     {
       "scenario": "Daily Life",
-      "source": "Voy a preparar la cena despues de terminar mi practica.",
+      "source": "Voy a preparar la cena después de terminar mi práctica.",
       "target": "I will make dinner after I finish my practice."
     },
     {
       "scenario": "Cafe",
-      "source": "Quiero un cafe sin azucar, por favor.",
+      "source": "Quiero un café sin azúcar, por favor.",
       "target": "I would like a coffee without sugar, please."
     },
     {
       "scenario": "Small Talk",
-      "source": "Puedo llamar despues de las siete si todavia quieres hablar.",
+      "source": "Puedo llamar después de las siete si todavía quieres hablar.",
       "target": "I can call after seven if you still want to talk."
     },
     {
@@ -103,65 +223,305 @@
     },
     {
       "scenario": "Travel",
-      "source": "Puede ayudarme a encontrar la entrada.",
+      "source": "¿Puede ayudarme a encontrar la entrada?",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "¿De qué andén sale el próximo tren?",
+      "target": "Which platform does the next train leave from?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "Necesito indicaciones para llegar a la farmacia más cercana.",
+      "target": "I need directions to the nearest pharmacy."
+    },
+    {
+      "scenario": "Travel",
+      "source": "¿Puedo dejar mi bolso aquí por unos minutos?",
+      "target": "Can I leave my bag here for a few minutes?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "La reserva está a mi nombre.",
+      "target": "The reservation is under my name."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "¿Podría traerme la cuenta cuando tenga un momento?",
+      "target": "Could I have the bill when you have a moment?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "¿Hay una mesa disponible cerca de la ventana?",
+      "target": "Is there a table available near the window?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Pedí té, pero esto parece café.",
+      "target": "I ordered tea, but this looks like coffee."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Llegaré a casa un poco más tarde de lo planeado.",
+      "target": "I will be home a little later than planned."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Por favor, recuérdame cargar mi teléfono esta noche.",
+      "target": "Please remind me to charge my phone tonight."
+    },
+    {
+      "scenario": "Work",
+      "source": "La reunión se cambió para mañana por la mañana.",
+      "target": "The meeting moved to tomorrow morning."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "¿Tiene esto en una talla más pequeña?",
+      "target": "Do you have this in a smaller size?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "¿Puedo devolver esto si no me queda bien?",
+      "target": "Can I return this if it does not fit?"
+    },
+    {
+      "scenario": "Work",
+      "source": "Puedo enviar el archivo actualizado antes del mediodía.",
+      "target": "I can send the updated file before noon."
+    },
+    {
+      "scenario": "Work",
+      "source": "Confirmemos la fecha límite antes de empezar.",
+      "target": "Let us confirm the deadline before we start."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "¿Podría explicar ese ejemplo una vez más?",
+      "target": "Could you explain that example one more time?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Terminé la lectura, pero no la hoja de ejercicios.",
+      "target": "I finished the reading but not the worksheet."
+    },
+    {
+      "scenario": "Health",
+      "source": "Me duele la cabeza desde esta mañana.",
+      "target": "I have had a headache since this morning."
+    },
+    {
+      "scenario": "Health",
+      "source": "¿Hay una clínica abierta el domingo?",
+      "target": "Is there a clinic open on Sunday?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Eso suena emocionante, pero también un poco estresante.",
+      "target": "That sounds exciting, but also a little stressful."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "¿Cómo fue tu primera semana en el nuevo apartamento?",
+      "target": "How was your first week in the new apartment?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "Debería haber escuchado antes de dar consejos.",
+      "target": "I should have listened before giving advice."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Gracias por tener paciencia conmigo hoy.",
+      "target": "Thank you for being patient with me today."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Me siento cómodo aprendiendo herramientas nuevas rápidamente.",
+      "target": "I am comfortable learning new tools quickly."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Mi habilidad más fuerte es mantenerme organizado bajo presión.",
+      "target": "My strongest skill is staying organized under pressure."
     }
   ],
   "fr": [
     {
-      "source": "L apprentissage progresse avec de courtes seances quotidiennes.",
+      "source": "L'apprentissage progresse avec de courtes séances quotidiennes.",
       "target": "Learning improves with small daily sessions."
     },
     {
-      "source": "Une parole claire aide l auditeur a comprendre chaque phrase.",
+      "source": "Une parole claire aide l'auditeur à comprendre chaque phrase.",
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Une routine stable rend la pratique plus facile a repeter.",
+      "source": "Une routine stable rend la pratique plus facile à répéter.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Cafe",
-      "source": "Je voudrais un cafe sans sucre, s il vous plait.",
+      "source": "Je voudrais un café sans sucre, s'il vous plaît.",
       "target": "I would like a coffee without sugar, please."
     },
     {
       "scenario": "Small Talk",
-      "source": "Je peux appeler apres sept heures si tu veux encore parler.",
+      "source": "Je peux appeler après sept heures si tu veux encore parler.",
       "target": "I can call after seven if you still want to talk."
     },
     {
       "scenario": "Apology",
-      "source": "Je suis desole d avoir repondu si tard.",
+      "source": "Je suis désolé d'avoir répondu si tard.",
       "target": "I am sorry I answered so late."
     },
     {
       "scenario": "Interview",
-      "source": "J ai besoin d une minute pour reflechir avant de repondre clairement.",
+      "source": "J'ai besoin d'une minute pour réfléchir avant de répondre clairement.",
       "target": "I need a minute to think before I answer clearly."
     },
     {
       "scenario": "Travel",
-      "source": "Pouvez vous m aider a trouver l entree.",
+      "source": "Pouvez-vous m'aider à trouver l'entrée?",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "De quel quai part le prochain train ?",
+      "target": "Which platform does the next train leave from?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "J'ai besoin d'indications pour aller à la pharmacie la plus proche.",
+      "target": "I need directions to the nearest pharmacy."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Puis-je laisser mon sac ici pendant quelques minutes ?",
+      "target": "Can I leave my bag here for a few minutes?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "La réservation est à mon nom.",
+      "target": "The reservation is under my name."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Pourriez-vous m'apporter l'addition quand vous aurez un moment ?",
+      "target": "Could I have the bill when you have a moment?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Y a-t-il une table disponible près de la fenêtre ?",
+      "target": "Is there a table available near the window?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "J'ai commandé du thé, mais cela ressemble à du café.",
+      "target": "I ordered tea, but this looks like coffee."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Je rentrerai à la maison un peu plus tard que prévu.",
+      "target": "I will be home a little later than planned."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Rappelle-moi de charger mon téléphone ce soir, s'il te plaît.",
+      "target": "Please remind me to charge my phone tonight."
+    },
+    {
+      "scenario": "Work",
+      "source": "La réunion a été déplacée à demain matin.",
+      "target": "The meeting moved to tomorrow morning."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Avez-vous ceci dans une taille plus petite ?",
+      "target": "Do you have this in a smaller size?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Puis-je le retourner si cela ne me va pas ?",
+      "target": "Can I return this if it does not fit?"
+    },
+    {
+      "scenario": "Work",
+      "source": "Je peux envoyer le fichier mis à jour avant midi.",
+      "target": "I can send the updated file before noon."
+    },
+    {
+      "scenario": "Work",
+      "source": "Confirmons la date limite avant de commencer.",
+      "target": "Let us confirm the deadline before we start."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Pourriez-vous expliquer cet exemple encore une fois ?",
+      "target": "Could you explain that example one more time?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "J'ai terminé la lecture, mais pas la fiche d'exercices.",
+      "target": "I finished the reading but not the worksheet."
+    },
+    {
+      "scenario": "Health",
+      "source": "J'ai mal à la tête depuis ce matin.",
+      "target": "I have had a headache since this morning."
+    },
+    {
+      "scenario": "Health",
+      "source": "Y a-t-il une clinique ouverte le dimanche ?",
+      "target": "Is there a clinic open on Sunday?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Cela semble excitant, mais aussi un peu stressant.",
+      "target": "That sounds exciting, but also a little stressful."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Comment s'est passée ta première semaine dans le nouvel appartement ?",
+      "target": "How was your first week in the new apartment?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "J'aurais dû écouter avant de donner des conseils.",
+      "target": "I should have listened before giving advice."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Merci d'avoir été patient avec moi aujourd'hui.",
+      "target": "Thank you for being patient with me today."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Je suis à l'aise pour apprendre rapidement de nouveaux outils.",
+      "target": "I am comfortable learning new tools quickly."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Ma plus grande force est de rester organisé sous pression.",
+      "target": "My strongest skill is staying organized under pressure."
     }
   ],
   "de": [
     {
-      "source": "Lernen wird durch kleine tagliche Ubungen besser.",
+      "source": "Lernen wird durch kleine tägliche Übungen besser.",
       "target": "Learning improves with small daily sessions."
     },
     {
-      "source": "Klare Sprache hilft dem Zuhorer, jeden Satz zu verstehen.",
+      "source": "Klare Sprache hilft dem Zuhörer, jeden Satz zu verstehen.",
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Eine feste Routine macht das Uben leichter zu wiederholen.",
+      "source": "Eine feste Routine macht das Üben leichter zu wiederholen.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Cafe",
-      "source": "Ich mochte bitte einen Kaffee ohne Zucker.",
+      "source": "Ich möchte bitte einen Kaffee ohne Zucker.",
       "target": "I would like a coffee without sugar, please."
     },
     {
@@ -171,7 +531,7 @@
     },
     {
       "scenario": "Apology",
-      "source": "Es tut mir leid, dass ich so spat geantwortet habe.",
+      "source": "Es tut mir leid, dass ich so spät geantwortet habe.",
       "target": "I am sorry I answered so late."
     },
     {
@@ -181,26 +541,146 @@
     },
     {
       "scenario": "Travel",
-      "source": "Konnen Sie mir helfen, den Eingang zu finden.",
+      "source": "Können Sie mir helfen, den Eingang zu finden?",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Von welchem Bahnsteig fährt der nächste Zug ab?",
+      "target": "Which platform does the next train leave from?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "Ich brauche eine Wegbeschreibung zur nächsten Apotheke.",
+      "target": "I need directions to the nearest pharmacy."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Kann ich meine Tasche hier ein paar Minuten lassen?",
+      "target": "Can I leave my bag here for a few minutes?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "Die Reservierung läuft auf meinen Namen.",
+      "target": "The reservation is under my name."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Könnte ich bitte die Rechnung bekommen, wenn Sie einen Moment haben?",
+      "target": "Could I have the bill when you have a moment?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Ist ein Tisch am Fenster frei?",
+      "target": "Is there a table available near the window?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Ich habe Tee bestellt, aber das sieht nach Kaffee aus.",
+      "target": "I ordered tea, but this looks like coffee."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Ich komme etwas später nach Hause als geplant.",
+      "target": "I will be home a little later than planned."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Bitte erinnere mich daran, mein Handy heute Abend aufzuladen.",
+      "target": "Please remind me to charge my phone tonight."
+    },
+    {
+      "scenario": "Work",
+      "source": "Das Meeting wurde auf morgen früh verschoben.",
+      "target": "The meeting moved to tomorrow morning."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Haben Sie das in einer kleineren Größe?",
+      "target": "Do you have this in a smaller size?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Kann ich das zurückgeben, wenn es nicht passt?",
+      "target": "Can I return this if it does not fit?"
+    },
+    {
+      "scenario": "Work",
+      "source": "Ich kann die aktualisierte Datei vor Mittag schicken.",
+      "target": "I can send the updated file before noon."
+    },
+    {
+      "scenario": "Work",
+      "source": "Lass uns die Frist bestätigen, bevor wir anfangen.",
+      "target": "Let us confirm the deadline before we start."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Könnten Sie dieses Beispiel noch einmal erklären?",
+      "target": "Could you explain that example one more time?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Ich habe die Lektüre beendet, aber nicht das Arbeitsblatt.",
+      "target": "I finished the reading but not the worksheet."
+    },
+    {
+      "scenario": "Health",
+      "source": "Ich habe seit heute Morgen Kopfschmerzen.",
+      "target": "I have had a headache since this morning."
+    },
+    {
+      "scenario": "Health",
+      "source": "Gibt es sonntags eine geöffnete Klinik?",
+      "target": "Is there a clinic open on Sunday?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Das klingt aufregend, aber auch ein bisschen stressig.",
+      "target": "That sounds exciting, but also a little stressful."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Wie war deine erste Woche in der neuen Wohnung?",
+      "target": "How was your first week in the new apartment?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "Ich hätte zuhören sollen, bevor ich Ratschläge gebe.",
+      "target": "I should have listened before giving advice."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Danke, dass du heute geduldig mit mir warst.",
+      "target": "Thank you for being patient with me today."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Ich lerne gerne schnell neue Werkzeuge.",
+      "target": "I am comfortable learning new tools quickly."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Meine stärkste Fähigkeit ist, unter Druck organisiert zu bleiben.",
+      "target": "My strongest skill is staying organized under pressure."
     }
   ],
   "it": [
     {
-      "source": "L apprendimento migliora con piccole sessioni quotidiane.",
+      "source": "L'apprendimento migliora con piccole sessioni quotidiane.",
       "target": "Learning improves with small daily sessions."
     },
     {
-      "source": "Un parlare chiaro aiuta l ascoltatore a capire ogni frase.",
+      "source": "Un parlare chiaro aiuta l'ascoltatore a capire ogni frase.",
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Una routine costante rende la pratica piu facile da ripetere.",
+      "source": "Una routine costante rende la pratica più facile da ripetere.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Cafe",
-      "source": "Vorrei un caffe senza zucchero, per favore.",
+      "source": "Vorrei un caffè senza zucchero, per favore.",
       "target": "I would like a coffee without sugar, please."
     },
     {
@@ -210,7 +690,7 @@
     },
     {
       "scenario": "Apology",
-      "source": "Mi dispiace di aver risposto cosi tardi.",
+      "source": "Mi dispiace di aver risposto così tardi.",
       "target": "I am sorry I answered so late."
     },
     {
@@ -220,223 +700,1107 @@
     },
     {
       "scenario": "Travel",
-      "source": "Puo aiutarmi a trovare l ingresso.",
+      "source": "Può aiutarmi a trovare l'ingresso?",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Da quale binario parte il prossimo treno?",
+      "target": "Which platform does the next train leave from?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "Ho bisogno di indicazioni per la farmacia più vicina.",
+      "target": "I need directions to the nearest pharmacy."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Posso lasciare qui la mia borsa per qualche minuto?",
+      "target": "Can I leave my bag here for a few minutes?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "La prenotazione è a mio nome.",
+      "target": "The reservation is under my name."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Potrei avere il conto quando ha un momento?",
+      "target": "Could I have the bill when you have a moment?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "C'è un tavolo disponibile vicino alla finestra?",
+      "target": "Is there a table available near the window?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Ho ordinato tè, ma questo sembra caffè.",
+      "target": "I ordered tea, but this looks like coffee."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Tornerò a casa un po' più tardi del previsto.",
+      "target": "I will be home a little later than planned."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Per favore, ricordami di caricare il telefono stasera.",
+      "target": "Please remind me to charge my phone tonight."
+    },
+    {
+      "scenario": "Work",
+      "source": "La riunione è stata spostata a domani mattina.",
+      "target": "The meeting moved to tomorrow morning."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Lo avete in una taglia più piccola?",
+      "target": "Do you have this in a smaller size?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Posso restituirlo se non mi sta bene?",
+      "target": "Can I return this if it does not fit?"
+    },
+    {
+      "scenario": "Work",
+      "source": "Posso inviare il file aggiornato prima di mezzogiorno.",
+      "target": "I can send the updated file before noon."
+    },
+    {
+      "scenario": "Work",
+      "source": "Confermiamo la scadenza prima di iniziare.",
+      "target": "Let us confirm the deadline before we start."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Potrebbe spiegare quell'esempio ancora una volta?",
+      "target": "Could you explain that example one more time?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Ho finito la lettura, ma non il foglio di esercizi.",
+      "target": "I finished the reading but not the worksheet."
+    },
+    {
+      "scenario": "Health",
+      "source": "Ho mal di testa da stamattina.",
+      "target": "I have had a headache since this morning."
+    },
+    {
+      "scenario": "Health",
+      "source": "C'è una clinica aperta la domenica?",
+      "target": "Is there a clinic open on Sunday?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Sembra emozionante, ma anche un po' stressante.",
+      "target": "That sounds exciting, but also a little stressful."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Com'è stata la tua prima settimana nel nuovo appartamento?",
+      "target": "How was your first week in the new apartment?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "Avrei dovuto ascoltare prima di dare consigli.",
+      "target": "I should have listened before giving advice."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Grazie per essere stato paziente con me oggi.",
+      "target": "Thank you for being patient with me today."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Mi trovo a mio agio nell'imparare rapidamente nuovi strumenti.",
+      "target": "I am comfortable learning new tools quickly."
+    },
+    {
+      "scenario": "Interview",
+      "source": "La mia abilità più forte è restare organizzato sotto pressione.",
+      "target": "My strongest skill is staying organized under pressure."
     }
   ],
   "ja": [
     {
-      "source": "Mainichi no chiisana renshu de gakushu wa yoku narimasu.",
+      "source": "毎日の小さな練習で学習はよくなります。",
+      "romanization": "Mainichi no chiisana renshu de gakushu wa yoku narimasu.",
       "target": "Learning improves with small daily sessions."
     },
     {
-      "source": "Hakkiri hanasu to kikite wa bun o rikai shiyasuku narimasu.",
+      "source": "はっきり話すと聞き手は文を理解しやすくなります。",
+      "romanization": "Hakkiri hanasu to kikite wa bun o rikai shiyasuku narimasu.",
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Anteishita shukan wa renshu o kurikaeshi yasuku shimasu.",
+      "source": "安定した習慣は練習を繰り返しやすくします。",
+      "romanization": "Anteishita shukan wa renshu o kurikaeshi yasuku shimasu.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Cafe",
-      "source": "Satou nashi no koohii o onegaishimasu.",
+      "source": "砂糖なしのコーヒーをお願いします。",
+      "romanization": "Satou nashi no koohii o onegaishimasu.",
       "target": "I would like a coffee without sugar, please."
     },
     {
       "scenario": "Small Talk",
-      "source": "Mada hanashitai nara shichiji no ato ni denwa dekimasu.",
+      "source": "まだ話したいなら、七時の後に電話できます。",
+      "romanization": "Mada hanashitai nara shichiji no ato ni denwa dekimasu.",
       "target": "I can call after seven if you still want to talk."
     },
     {
       "scenario": "Apology",
-      "source": "Henshin ga osokunatte sumimasen.",
+      "source": "返信が遅くなってすみません。",
+      "romanization": "Henshin ga osokunatte sumimasen.",
       "target": "I am sorry I answered so late."
     },
     {
       "scenario": "Interview",
-      "source": "Hakkiri kotaeru mae ni kangaeru jikan ga ichibun hitsuyou desu.",
+      "source": "はっきり答える前に、考える時間が一分必要です。",
+      "romanization": "Hakkiri kotaeru mae ni kangaeru jikan ga ichibun hitsuyou desu.",
       "target": "I need a minute to think before I answer clearly."
     },
     {
       "scenario": "Travel",
-      "source": "Iriguchi o mitsukeru no o tetsudatte kuremasu ka.",
+      "source": "入口を見つけるのを手伝ってくれますか。",
+      "romanization": "Iriguchi o mitsukeru no o tetsudatte kuremasu ka.",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "次の電車は何番ホームから出ますか。",
+      "target": "Which platform does the next train leave from?",
+      "romanization": "Tsugi no densha wa nanban hoomu kara demasu ka."
+    },
+    {
+      "scenario": "Travel",
+      "source": "一番近い薬局への道を教えてください。",
+      "target": "I need directions to the nearest pharmacy.",
+      "romanization": "Ichiban chikai yakkyoku e no michi o oshiete kudasai."
+    },
+    {
+      "scenario": "Travel",
+      "source": "このバッグを数分ここに置いてもいいですか。",
+      "target": "Can I leave my bag here for a few minutes?",
+      "romanization": "Kono baggu o suufun koko ni oitemo ii desu ka."
+    },
+    {
+      "scenario": "Travel",
+      "source": "予約は私の名前です。",
+      "target": "The reservation is under my name.",
+      "romanization": "Yoyaku wa watashi no namae desu."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "お時間があるときにお会計をお願いします。",
+      "target": "Could I have the bill when you have a moment?",
+      "romanization": "Ojikan ga aru toki ni okaikei o onegaishimasu."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "窓の近くに空いている席はありますか。",
+      "target": "Is there a table available near the window?",
+      "romanization": "Mado no chikaku ni aite iru seki wa arimasu ka."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "紅茶を注文しましたが、これはコーヒーのようです。",
+      "target": "I ordered tea, but this looks like coffee.",
+      "romanization": "Koucha o chumon shimashita ga, kore wa koohii no you desu."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "予定より少し遅く帰ります。",
+      "target": "I will be home a little later than planned.",
+      "romanization": "Yotei yori sukoshi osoku kaerimasu."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "今夜、携帯を充電するように思い出させてください。",
+      "target": "Please remind me to charge my phone tonight.",
+      "romanization": "Konya, keitai o juuden suru you ni omoidasasete kudasai."
+    },
+    {
+      "scenario": "Work",
+      "source": "会議は明日の朝に変更されました。",
+      "target": "The meeting moved to tomorrow morning.",
+      "romanization": "Kaigi wa ashita no asa ni henkou saremashita."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "これの小さいサイズはありますか。",
+      "target": "Do you have this in a smaller size?",
+      "romanization": "Kore no chiisai saizu wa arimasu ka."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "合わなければ返品できますか。",
+      "target": "Can I return this if it does not fit?",
+      "romanization": "Awanakereba henpin dekimasu ka."
+    },
+    {
+      "scenario": "Work",
+      "source": "正午までに更新したファイルを送れます。",
+      "target": "I can send the updated file before noon.",
+      "romanization": "Shougo made ni koushin shita fairu o okuremasu."
+    },
+    {
+      "scenario": "Work",
+      "source": "始める前に締め切りを確認しましょう。",
+      "target": "Let us confirm the deadline before we start.",
+      "romanization": "Hajimeru mae ni shimekiri o kakunin shimashou."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "その例をもう一度説明していただけますか。",
+      "target": "Could you explain that example one more time?",
+      "romanization": "Sono rei o mou ichido setsumei shite itadakemasu ka."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "読み物は終わりましたが、ワークシートはまだです。",
+      "target": "I finished the reading but not the worksheet.",
+      "romanization": "Yomimono wa owarimashita ga, waakushiito wa mada desu."
+    },
+    {
+      "scenario": "Health",
+      "source": "今朝から頭が痛いです。",
+      "target": "I have had a headache since this morning.",
+      "romanization": "Kesa kara atama ga itai desu."
+    },
+    {
+      "scenario": "Health",
+      "source": "日曜日に開いているクリニックはありますか。",
+      "target": "Is there a clinic open on Sunday?",
+      "romanization": "Nichiyoubi ni aite iru kurinikku wa arimasu ka."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "それは楽しそうですが、少しストレスもありそうです。",
+      "target": "That sounds exciting, but also a little stressful.",
+      "romanization": "Sore wa tanoshisou desu ga, sukoshi sutoresu mo arisou desu."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "新しいアパートでの最初の週はどうでしたか。",
+      "target": "How was your first week in the new apartment?",
+      "romanization": "Atarashii apaato de no saisho no shuu wa dou deshita ka."
+    },
+    {
+      "scenario": "Apology",
+      "source": "助言する前に聞くべきでした。",
+      "target": "I should have listened before giving advice.",
+      "romanization": "Jogen suru mae ni kiku beki deshita."
+    },
+    {
+      "scenario": "Apology",
+      "source": "今日、辛抱強くいてくれてありがとうございます。",
+      "target": "Thank you for being patient with me today.",
+      "romanization": "Kyou, shinbouzuyoku ite kurete arigatou gozaimasu."
+    },
+    {
+      "scenario": "Interview",
+      "source": "新しい道具をすばやく学ぶことには慣れています。",
+      "target": "I am comfortable learning new tools quickly.",
+      "romanization": "Atarashii dougu o subayaku manabu koto ni wa narete imasu."
+    },
+    {
+      "scenario": "Interview",
+      "source": "私の一番の強みは、プレッシャーの中でも整理して動けることです。",
+      "target": "My strongest skill is staying organized under pressure.",
+      "romanization": "Watashi no ichiban no tsuyomi wa, puresshaa no naka demo seiri shite ugokeru koto desu."
     }
   ],
   "zh": [
     {
-      "source": "Meitian duan shijian lianxi neng bangzhu xuexi jinbu.",
+      "source": "每天短时间练习能帮助学习进步。",
+      "romanization": "Meitian duan shijian lianxi neng bangzhu xuexi jinbu.",
       "target": "Learning improves with small daily sessions."
     },
     {
-      "source": "Qingchu de shuohua bangzhu tingzhe lijie mei ge juzi.",
+      "source": "清楚地说话帮助听者理解每个句子。",
+      "romanization": "Qingchu de shuohua bangzhu tingzhe lijie mei ge juzi.",
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Wending de xiguan rang lianxi geng rongyi chongfu.",
+      "source": "稳定的习惯让练习更容易重复。",
+      "romanization": "Wending de xiguan rang lianxi geng rongyi chongfu.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Cafe",
-      "source": "Qing gei wo yi bei bu jia tang de kafei.",
+      "source": "请给我一杯不加糖的咖啡。",
+      "romanization": "Qing gei wo yi bei bu jia tang de kafei.",
       "target": "I would like a coffee without sugar, please."
     },
     {
       "scenario": "Small Talk",
-      "source": "Ruguo ni hai xiang liao, wo keyi qi dian hou da dianhua.",
+      "source": "如果你还想聊，我可以七点后打电话。",
+      "romanization": "Ruguo ni hai xiang liao, wo keyi qi dian hou da dianhua.",
       "target": "I can call after seven if you still want to talk."
     },
     {
       "scenario": "Apology",
-      "source": "Hen bao qian wo hui fu wan le.",
+      "source": "很抱歉我回复晚了。",
+      "romanization": "Hen bao qian wo hui fu wan le.",
       "target": "I am sorry I answered so late."
     },
     {
       "scenario": "Interview",
-      "source": "Wo xuyao yi fenzhong xiang qingchu zai huida.",
+      "source": "我需要一分钟想清楚再回答。",
+      "romanization": "Wo xuyao yi fenzhong xiang qingchu zai huida.",
       "target": "I need a minute to think before I answer clearly."
     },
     {
       "scenario": "Travel",
-      "source": "Ni neng bang wo zhao dao rukou ma.",
+      "source": "你能帮我找到入口吗？",
+      "romanization": "Ni neng bang wo zhao dao rukou ma.",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "下一班火车从哪个站台出发？",
+      "target": "Which platform does the next train leave from?",
+      "romanization": "Xia yi ban huoche cong nage zhantai chufa?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "我需要去最近药店的路线。",
+      "target": "I need directions to the nearest pharmacy.",
+      "romanization": "Wo xuyao qu zuijin yaodian de luxian."
+    },
+    {
+      "scenario": "Travel",
+      "source": "我可以把包放在这里几分钟吗？",
+      "target": "Can I leave my bag here for a few minutes?",
+      "romanization": "Wo keyi ba bao fang zai zheli ji fenzhong ma?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "预订是在我的名字下。",
+      "target": "The reservation is under my name.",
+      "romanization": "Yuding shi zai wo de mingzi xia."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "你有空的时候可以给我账单吗？",
+      "target": "Could I have the bill when you have a moment?",
+      "romanization": "Ni you kong de shihou keyi gei wo zhangdan ma?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "靠窗有空桌吗？",
+      "target": "Is there a table available near the window?",
+      "romanization": "Kao chuang you kong zhuo ma?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "我点的是茶，但这个看起来像咖啡。",
+      "target": "I ordered tea, but this looks like coffee.",
+      "romanization": "Wo dian de shi cha, dan zhege kan qilai xiang kafei."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "我会比计划晚一点回家。",
+      "target": "I will be home a little later than planned.",
+      "romanization": "Wo hui bi jihua wan yidian hui jia."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "请提醒我今晚给手机充电。",
+      "target": "Please remind me to charge my phone tonight.",
+      "romanization": "Qing tixing wo jinwan gei shouji chongdian."
+    },
+    {
+      "scenario": "Work",
+      "source": "会议改到明天早上了。",
+      "target": "The meeting moved to tomorrow morning.",
+      "romanization": "Huiyi gai dao mingtian zaoshang le."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "这个有小一点的尺码吗？",
+      "target": "Do you have this in a smaller size?",
+      "romanization": "Zhege you xiao yidian de chima ma?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "如果不合适，我可以退货吗？",
+      "target": "Can I return this if it does not fit?",
+      "romanization": "Ruguo bu heshi, wo keyi tuihuo ma?"
+    },
+    {
+      "scenario": "Work",
+      "source": "我可以在中午前发送更新后的文件。",
+      "target": "I can send the updated file before noon.",
+      "romanization": "Wo keyi zai zhongwu qian fasong gengxin hou de wenjian."
+    },
+    {
+      "scenario": "Work",
+      "source": "开始之前，我们先确认截止日期。",
+      "target": "Let us confirm the deadline before we start.",
+      "romanization": "Kaishi zhiqian, women xian queren jiezhi riqi."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "你可以再解释一次那个例子吗？",
+      "target": "Could you explain that example one more time?",
+      "romanization": "Ni keyi zai jieshi yici nage lizi ma?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "我读完了材料，但还没完成练习表。",
+      "target": "I finished the reading but not the worksheet.",
+      "romanization": "Wo du wan le cailiao, dan hai mei wancheng lianxi biao."
+    },
+    {
+      "scenario": "Health",
+      "source": "我从今天早上开始头痛。",
+      "target": "I have had a headache since this morning.",
+      "romanization": "Wo cong jintian zaoshang kaishi toutong."
+    },
+    {
+      "scenario": "Health",
+      "source": "星期天有开的诊所吗？",
+      "target": "Is there a clinic open on Sunday?",
+      "romanization": "Xingqitian you kai de zhensuo ma?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "那听起来很令人兴奋，但也有点压力。",
+      "target": "That sounds exciting, but also a little stressful.",
+      "romanization": "Na ting qilai hen lingren xingfen, dan ye youdian yali."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "你在新公寓的第一周怎么样？",
+      "target": "How was your first week in the new apartment?",
+      "romanization": "Ni zai xin gongyu de di yi zhou zenmeyang?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "我应该先听你说，再给建议。",
+      "target": "I should have listened before giving advice.",
+      "romanization": "Wo yinggai xian ting ni shuo, zai gei jianyi."
+    },
+    {
+      "scenario": "Apology",
+      "source": "谢谢你今天对我有耐心。",
+      "target": "Thank you for being patient with me today.",
+      "romanization": "Xiexie ni jintian dui wo you naixin."
+    },
+    {
+      "scenario": "Interview",
+      "source": "我能够很快学习新的工具。",
+      "target": "I am comfortable learning new tools quickly.",
+      "romanization": "Wo nenggou hen kuai xuexi xin de gongju."
+    },
+    {
+      "scenario": "Interview",
+      "source": "我最强的能力是在压力下保持有条理。",
+      "target": "My strongest skill is staying organized under pressure.",
+      "romanization": "Wo zui qiang de nengli shi zai yali xia baochi you tiaoli."
     }
   ],
   "ru": [
     {
-      "source": "Obuchenie stanovitsya luchshe blagodarya nebolshim ezhednevnym zanyatiyam.",
+      "source": "Обучение становится лучше благодаря небольшим ежедневным занятиям.",
+      "romanization": "Obuchenie stanovitsya luchshe blagodarya nebolshim ezhednevnym zanyatiyam.",
       "target": "Learning improves with small daily sessions."
     },
     {
-      "source": "Chetkaya rech pomogaet slushatelyu ponyat kazhdoe predlozhenie.",
+      "source": "Четкая речь помогает слушателю понять каждое предложение.",
+      "romanization": "Chetkaya rech pomogaet slushatelyu ponyat kazhdoe predlozhenie.",
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Ustoychivaya rutina delaet praktiku prosche dlya povtoreniya.",
+      "source": "Устойчивая рутина делает практику проще для повторения.",
+      "romanization": "Ustoychivaya rutina delaet praktiku prosche dlya povtoreniya.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Cafe",
-      "source": "Mne pozhaluysta kofe bez sakhara.",
+      "source": "Мне, пожалуйста, кофе без сахара.",
+      "romanization": "Mne pozhaluysta kofe bez sakhara.",
       "target": "I would like a coffee without sugar, please."
     },
     {
       "scenario": "Small Talk",
-      "source": "Ya mogu pozvonit posle semi, esli ty vse eshche khochesh pogovorit.",
+      "source": "Я могу позвонить после семи, если ты все еще хочешь поговорить.",
+      "romanization": "Ya mogu pozvonit posle semi, esli ty vse eshche khochesh pogovorit.",
       "target": "I can call after seven if you still want to talk."
     },
     {
       "scenario": "Apology",
-      "source": "Prostite chto ya tak pozdno otvetil.",
+      "source": "Простите, что я так поздно ответил.",
+      "romanization": "Prostite chto ya tak pozdno otvetil.",
       "target": "I am sorry I answered so late."
     },
     {
       "scenario": "Interview",
-      "source": "Mne nuzhna minuta chtoby podumat i jasno otvetit.",
+      "source": "Мне нужна минута, чтобы подумать и ясно ответить.",
+      "romanization": "Mne nuzhna minuta chtoby podumat i jasno otvetit.",
       "target": "I need a minute to think before I answer clearly."
     },
     {
       "scenario": "Travel",
-      "source": "Vy mozhete pomoch mne nayti vhod.",
+      "source": "Вы можете помочь мне найти вход?",
+      "romanization": "Vy mozhete pomoch mne nayti vhod.",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "С какой платформы отправляется следующий поезд?",
+      "target": "Which platform does the next train leave from?",
+      "romanization": "S kakoy platformy otpravlyaetsya sleduyushchiy poyezd?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "Мне нужны указания до ближайшей аптеки.",
+      "target": "I need directions to the nearest pharmacy.",
+      "romanization": "Mne nuzhny ukazaniya do blizhayshey apteki."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Можно оставить мою сумку здесь на несколько минут?",
+      "target": "Can I leave my bag here for a few minutes?",
+      "romanization": "Mozhno ostavit moyu sumku zdes na neskolko minut?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "Бронирование оформлено на мое имя.",
+      "target": "The reservation is under my name.",
+      "romanization": "Bronirovanie oformleno na moe imya."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Можно принести счет, когда у вас будет минутка?",
+      "target": "Could I have the bill when you have a moment?",
+      "romanization": "Mozhno prinesti schet, kogda u vas budet minutka?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Есть свободный столик у окна?",
+      "target": "Is there a table available near the window?",
+      "romanization": "Est svobodnyy stolik u okna?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Я заказал чай, но это похоже на кофе.",
+      "target": "I ordered tea, but this looks like coffee.",
+      "romanization": "Ya zakazal chay, no eto pokhozhe na kofe."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Я буду дома немного позже, чем планировалось.",
+      "target": "I will be home a little later than planned.",
+      "romanization": "Ya budu doma nemnogo pozzhe, chem planirovalos."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Пожалуйста, напомни мне зарядить телефон сегодня вечером.",
+      "target": "Please remind me to charge my phone tonight.",
+      "romanization": "Pozhaluysta, napomni mne zaryadit telefon segodnya vecherom."
+    },
+    {
+      "scenario": "Work",
+      "source": "Встречу перенесли на завтра утром.",
+      "target": "The meeting moved to tomorrow morning.",
+      "romanization": "Vstrechu perenesli na zavtra utrom."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "У вас есть это в меньшем размере?",
+      "target": "Do you have this in a smaller size?",
+      "romanization": "U vas est eto v menshem razmere?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "Можно вернуть это, если не подойдет?",
+      "target": "Can I return this if it does not fit?",
+      "romanization": "Mozhno vernut eto, esli ne podoydet?"
+    },
+    {
+      "scenario": "Work",
+      "source": "Я могу отправить обновленный файл до полудня.",
+      "target": "I can send the updated file before noon.",
+      "romanization": "Ya mogu otpravit obnovlennyy fayl do poludnya."
+    },
+    {
+      "scenario": "Work",
+      "source": "Давайте подтвердим срок, прежде чем начнем.",
+      "target": "Let us confirm the deadline before we start.",
+      "romanization": "Davayte podtverdim srok, prezhde chem nachnem."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Можете объяснить этот пример еще раз?",
+      "target": "Could you explain that example one more time?",
+      "romanization": "Mozhete obyasnit etot primer eshche raz?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Я закончил чтение, но не рабочий лист.",
+      "target": "I finished the reading but not the worksheet.",
+      "romanization": "Ya zakonchil chtenie, no ne rabochiy list."
+    },
+    {
+      "scenario": "Health",
+      "source": "У меня болит голова с сегодняшнего утра.",
+      "target": "I have had a headache since this morning.",
+      "romanization": "U menya bolit golova s segodnyashnego utra."
+    },
+    {
+      "scenario": "Health",
+      "source": "Есть клиника, открытая в воскресенье?",
+      "target": "Is there a clinic open on Sunday?",
+      "romanization": "Est klinika, otkrytaya v voskresene?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Это звучит захватывающе, но и немного напряженно.",
+      "target": "That sounds exciting, but also a little stressful.",
+      "romanization": "Eto zvuchit zakhvatyvayushche, no i nemnogo napryazhenno."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Как прошла твоя первая неделя в новой квартире?",
+      "target": "How was your first week in the new apartment?",
+      "romanization": "Kak proshla tvoya pervaya nedelya v novoy kvartire?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "Мне стоило выслушать, прежде чем давать совет.",
+      "target": "I should have listened before giving advice.",
+      "romanization": "Mne stoilo vyslushat, prezhde chem davat sovet."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Спасибо, что сегодня был терпелив со мной.",
+      "target": "Thank you for being patient with me today.",
+      "romanization": "Spasibo, chto segodnya byl terpeliv so mnoy."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Мне комфортно быстро учиться новым инструментам.",
+      "target": "I am comfortable learning new tools quickly.",
+      "romanization": "Mne komfortno bystro uchitsya novym instrumentam."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Моя сильнейшая сторона - сохранять организованность под давлением.",
+      "target": "My strongest skill is staying organized under pressure.",
+      "romanization": "Moya silneyshaya storona - sokhranyat organizovannost pod davleniem."
     }
   ],
   "ar": [
     {
-      "source": "Al taallum yatahasan maa jalsat saghira yawmiyya.",
+      "source": "يتحسن التعلم مع جلسات صغيرة يومية.",
+      "romanization": "Al taallum yatahasan maa jalsat saghira yawmiyya.",
       "target": "Learning improves with small daily sessions."
     },
     {
-      "source": "Al kalam al wadih yusaeid al mustami ala fahm kull jumlah.",
+      "source": "الكلام الواضح يساعد المستمع على فهم كل جملة.",
+      "romanization": "Al kalam al wadih yusaeid al mustami ala fahm kull jumlah.",
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Al rotina al thabita tajal al mumarasa ashal lil tikrar.",
+      "source": "الروتين الثابت يجعل الممارسة أسهل للتكرار.",
+      "romanization": "Al rotina al thabita tajal al mumarasa ashal lil tikrar.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Cafe",
-      "source": "Ureed qahwa bila sukkar min fadlik.",
+      "source": "أريد قهوة بلا سكر من فضلك.",
+      "romanization": "Ureed qahwa bila sukkar min fadlik.",
       "target": "I would like a coffee without sugar, please."
     },
     {
       "scenario": "Small Talk",
-      "source": "Yumkinuni al ittisal baad al sabia idha kunta turid al kalam.",
+      "source": "يمكنني الاتصال بعد السابعة إذا كنت ما زلت تريد الكلام.",
+      "romanization": "Yumkinuni al ittisal baad al sabia idha kunta turid al kalam.",
       "target": "I can call after seven if you still want to talk."
     },
     {
       "scenario": "Apology",
-      "source": "Ana aasif li raddi al mutaakhir.",
+      "source": "أنا آسف لردي المتأخر.",
+      "romanization": "Ana aasif li raddi al mutaakhir.",
       "target": "I am sorry I answered so late."
     },
     {
       "scenario": "Interview",
-      "source": "Ahtaju ila daqiqa li afakkir qabla an ujeeb bi wuduh.",
+      "source": "أحتاج إلى دقيقة لأفكر قبل أن أجيب بوضوح.",
+      "romanization": "Ahtaju ila daqiqa li afakkir qabla an ujeeb bi wuduh.",
       "target": "I need a minute to think before I answer clearly."
     },
     {
       "scenario": "Travel",
-      "source": "Hal yumkinuk musa adati fi ijad al madkhal.",
+      "source": "هل يمكنك مساعدتي في إيجاد المدخل؟",
+      "romanization": "Hal yumkinuk musa adati fi ijad al madkhal.",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "من أي رصيف يغادر القطار التالي؟",
+      "target": "Which platform does the next train leave from?",
+      "romanization": "Min ayyi raseef yughadir al-qitar al-tali?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "أحتاج إلى الاتجاهات إلى أقرب صيدلية.",
+      "target": "I need directions to the nearest pharmacy.",
+      "romanization": "Ahtaj ila al-ittijahat ila aqrab saydaliyya."
+    },
+    {
+      "scenario": "Travel",
+      "source": "هل يمكنني ترك حقيبتي هنا لبضع دقائق؟",
+      "target": "Can I leave my bag here for a few minutes?",
+      "romanization": "Hal yumkinuni tark haqibati huna libid daqaiq?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "الحجز باسمي.",
+      "target": "The reservation is under my name.",
+      "romanization": "Al-hajz bi-ismi."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "هل يمكنني الحصول على الفاتورة عندما يكون لديك وقت؟",
+      "target": "Could I have the bill when you have a moment?",
+      "romanization": "Hal yumkinuni al-husul ala al-fatura indama yakun ladayka waqt?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "هل توجد طاولة متاحة قرب النافذة؟",
+      "target": "Is there a table available near the window?",
+      "romanization": "Hal tujad tawila mutaha qurb al-nafidha?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "طلبت الشاي، لكن هذا يبدو مثل القهوة.",
+      "target": "I ordered tea, but this looks like coffee.",
+      "romanization": "Talabtu al-shay, lakin hatha yabdu mithl al-qahwa."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "سأصل إلى المنزل متأخرا قليلا عن المخطط.",
+      "target": "I will be home a little later than planned.",
+      "romanization": "Saasil ila al-manzil mutaakhiran qalilan an al-mukhattat."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "من فضلك ذكرني بشحن هاتفي الليلة.",
+      "target": "Please remind me to charge my phone tonight.",
+      "romanization": "Min fadlik dhakkirni bishahn hatifi al-layla."
+    },
+    {
+      "scenario": "Work",
+      "source": "تم نقل الاجتماع إلى صباح الغد.",
+      "target": "The meeting moved to tomorrow morning.",
+      "romanization": "Tam naql al-ijtima ila sabah al-ghad."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "هل لديكم هذا بمقاس أصغر؟",
+      "target": "Do you have this in a smaller size?",
+      "romanization": "Hal ladaykum hatha bimiqas asghar?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "هل يمكنني إرجاعه إذا لم يناسبني؟",
+      "target": "Can I return this if it does not fit?",
+      "romanization": "Hal yumkinuni irjaahu idha lam yunasibni?"
+    },
+    {
+      "scenario": "Work",
+      "source": "يمكنني إرسال الملف المحدث قبل الظهر.",
+      "target": "I can send the updated file before noon.",
+      "romanization": "Yumkinuni irsal al-malaf al-muhaddath qabl al-zuhr."
+    },
+    {
+      "scenario": "Work",
+      "source": "لنؤكد الموعد النهائي قبل أن نبدأ.",
+      "target": "Let us confirm the deadline before we start.",
+      "romanization": "Linuakkid al-mawid al-nihai qabl an nabda."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "هل يمكنك شرح ذلك المثال مرة أخرى؟",
+      "target": "Could you explain that example one more time?",
+      "romanization": "Hal yumkinuka sharh dhalika al-mithal marra ukhra?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "أنهيت القراءة، لكنني لم أنه ورقة التمارين.",
+      "target": "I finished the reading but not the worksheet.",
+      "romanization": "Anhaytu al-qiraa, lakinni lam unhi waraqat al-tamarin."
+    },
+    {
+      "scenario": "Health",
+      "source": "أعاني من صداع منذ هذا الصباح.",
+      "target": "I have had a headache since this morning.",
+      "romanization": "Uani min suda mundhu hatha al-sabah."
+    },
+    {
+      "scenario": "Health",
+      "source": "هل توجد عيادة مفتوحة يوم الأحد؟",
+      "target": "Is there a clinic open on Sunday?",
+      "romanization": "Hal tujad iyada maftuha yawm al-ahad?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "يبدو ذلك مثيرا، لكنه مرهق قليلا أيضا.",
+      "target": "That sounds exciting, but also a little stressful.",
+      "romanization": "Yabdu dhalika muthiran, lakinnahu murhiq qalilan aydan."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "كيف كان أسبوعك الأول في الشقة الجديدة؟",
+      "target": "How was your first week in the new apartment?",
+      "romanization": "Kayfa kana usbuuka al-awwal fi al-shaqqa al-jadida?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "كان يجب أن أستمع قبل أن أقدم النصيحة.",
+      "target": "I should have listened before giving advice.",
+      "romanization": "Kana yajibu an astami qabl an uqaddim al-nasiha."
+    },
+    {
+      "scenario": "Apology",
+      "source": "شكرا لصبرك معي اليوم.",
+      "target": "Thank you for being patient with me today.",
+      "romanization": "Shukran lisabrika mai al-yawm."
+    },
+    {
+      "scenario": "Interview",
+      "source": "أرتاح لتعلم أدوات جديدة بسرعة.",
+      "target": "I am comfortable learning new tools quickly.",
+      "romanization": "Artah litaallum adawat jadida bisura."
+    },
+    {
+      "scenario": "Interview",
+      "source": "أقوى مهاراتي هي البقاء منظما تحت الضغط.",
+      "target": "My strongest skill is staying organized under pressure.",
+      "romanization": "Aqwa maharati hiya al-baqa munazzaman taht al-daght."
     }
   ],
   "ko": [
     {
-      "source": "Maeil jageun yeonseubeuro baeumi deo joajimnida.",
+      "source": "매일 작은 연습으로 배움이 더 좋아집니다.",
+      "romanization": "Maeil jageun yeonseubeuro baeumi deo joajimnida.",
       "target": "Learning improves with small daily sessions."
     },
     {
-      "source": "Bunmyeonghan mareun deutneun sarami gak munjangeul ihaehage dowajumnida.",
+      "source": "분명한 말은 듣는 사람이 각 문장을 이해하게 도와줍니다.",
+      "romanization": "Bunmyeonghan mareun deutneun sarami gak munjangeul ihaehage dowajumnida.",
       "target": "Clear speech helps the listener understand each sentence."
     },
     {
-      "source": "Anjeongdoen routine eun yeonseubeul deo swipge banbokhage hamnida.",
+      "source": "안정된 루틴은 연습을 더 쉽게 반복하게 합니다.",
+      "romanization": "Anjeongdoen routine eun yeonseubeul deo swipge banbokhage hamnida.",
       "target": "A steady routine makes practice easier to repeat."
     },
     {
       "scenario": "Travel",
-      "source": "Daeum gicha pyoreul sago sipseumnida.",
+      "source": "다음 기차 표를 사고 싶습니다.",
+      "romanization": "Daeum gicha pyoreul sago sipseumnida.",
       "target": "I would like to buy a ticket for the next train."
     },
     {
       "scenario": "Interview",
-      "source": "Jeoneun jageun tim gwa hamkke ilhae bon gyeongheomi itseumnida.",
+      "source": "저는 작은 팀과 함께 일해 본 경험이 있습니다.",
+      "romanization": "Jeoneun jageun tim gwa hamkke ilhae bon gyeongheomi itseumnida.",
       "target": "I have experience working with small teams."
     },
     {
       "scenario": "Classroom",
-      "source": "Oneul sukje e daehae jilmuni itseumnida.",
+      "source": "오늘 숙제에 대해 질문이 있습니다.",
+      "romanization": "Oneul sukje e daehae jilmuni itseumnida.",
       "target": "I have a question about today's assignment."
     },
     {
       "scenario": "Daily Life",
-      "source": "Yeonseubeul kkeunnaego jeonyeok eul junbi hal geoyeyo.",
+      "source": "연습을 끝내고 저녁을 준비할 거예요.",
+      "romanization": "Yeonseubeul kkeunnaego jeonyeok eul junbi hal geoyeyo.",
       "target": "I will make dinner after I finish my practice."
     },
     {
       "scenario": "Cafe",
-      "source": "Seoltang eomneun keopi han jan juseyo.",
+      "source": "설탕 없는 커피 한 잔 주세요.",
+      "romanization": "Seoltang eomneun keopi han jan juseyo.",
       "target": "I would like a coffee without sugar, please."
     },
     {
       "scenario": "Small Talk",
-      "source": "Ajik yaegi hago sipeumyeon ilgop si ihu e jeonhwa hal su itseoyo.",
+      "source": "아직 이야기하고 싶으면 일곱 시 이후에 전화할 수 있어요.",
+      "romanization": "Ajik yaegi hago sipeumyeon ilgop si ihu e jeonhwa hal su itseoyo.",
       "target": "I can call after seven if you still want to talk."
     },
     {
       "scenario": "Apology",
-      "source": "Neuje dapaeseo joesonghamnida.",
+      "source": "늦게 답해서 죄송합니다.",
+      "romanization": "Neuje dapaeseo joesonghamnida.",
       "target": "I am sorry I answered so late."
     },
     {
       "scenario": "Interview",
-      "source": "Bunmyeonghage daedaphagi jeon e saenggakhal sigani jamkkan piryohaeyo.",
+      "source": "분명하게 대답하기 전에 생각할 시간이 잠깐 필요해요.",
+      "romanization": "Bunmyeonghage daedaphagi jeon e saenggakhal sigani jamkkan piryohaeyo.",
       "target": "I need a minute to think before I answer clearly."
     },
     {
       "scenario": "Travel",
-      "source": "Ipgu chatneun geoseul dowa jusil su innayo.",
+      "source": "입구 찾는 것을 도와주실 수 있나요?",
+      "romanization": "Ipgu chatneun geoseul dowa jusil su innayo.",
       "target": "Can you help me find the entrance."
+    },
+    {
+      "scenario": "Travel",
+      "source": "다음 기차는 어느 플랫폼에서 출발하나요?",
+      "target": "Which platform does the next train leave from?",
+      "romanization": "Daeum gichaneun eoneu peullaetpomeseo chulbalhanayo?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "가장 가까운 약국으로 가는 길을 알려 주세요.",
+      "target": "I need directions to the nearest pharmacy.",
+      "romanization": "Gajang gakkaun yakgugeuro ganeun gireul allyeo juseyo."
+    },
+    {
+      "scenario": "Travel",
+      "source": "제 가방을 여기 몇 분 동안 두어도 될까요?",
+      "target": "Can I leave my bag here for a few minutes?",
+      "romanization": "Je gabangeul yeogi myeot bun dongan dueodo doelkkayo?"
+    },
+    {
+      "scenario": "Travel",
+      "source": "예약은 제 이름으로 되어 있습니다.",
+      "target": "The reservation is under my name.",
+      "romanization": "Yeyageun je ireumeuro doeeo itseumnida."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "시간 되실 때 계산서를 받을 수 있을까요?",
+      "target": "Could I have the bill when you have a moment?",
+      "romanization": "Sigan doesil ttae gyesanseoreul badeul su isseulkkayo?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "창가 근처에 빈 테이블이 있나요?",
+      "target": "Is there a table available near the window?",
+      "romanization": "Changga geuncheoe bin teibeuri innayo?"
+    },
+    {
+      "scenario": "Cafe",
+      "source": "저는 차를 주문했는데 이것은 커피처럼 보여요.",
+      "target": "I ordered tea, but this looks like coffee.",
+      "romanization": "Jeoneun chareul jumunhaenneunde igeoseun keopicheoreom boyeoyo."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "예정보다 조금 늦게 집에 갈게요.",
+      "target": "I will be home a little later than planned.",
+      "romanization": "Yejeongboda jogeum neutge jibe galgeyo."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "오늘 밤에 휴대폰을 충전하라고 알려 주세요.",
+      "target": "Please remind me to charge my phone tonight.",
+      "romanization": "Oneul bame hyudaeponeul chungjeonharago allyeo juseyo."
+    },
+    {
+      "scenario": "Work",
+      "source": "회의가 내일 아침으로 옮겨졌어요.",
+      "target": "The meeting moved to tomorrow morning.",
+      "romanization": "Hoeuiga naeil achimeuro omgyeojyeosseoyo."
+    },
+    {
+      "scenario": "Shopping",
+      "source": "이것보다 작은 사이즈가 있나요?",
+      "target": "Do you have this in a smaller size?",
+      "romanization": "Igeotboda jageun saijeuga innayo?"
+    },
+    {
+      "scenario": "Shopping",
+      "source": "맞지 않으면 반품할 수 있나요?",
+      "target": "Can I return this if it does not fit?",
+      "romanization": "Matji aneumyeon banpumhal su innayo?"
+    },
+    {
+      "scenario": "Work",
+      "source": "정오 전에 업데이트된 파일을 보낼 수 있습니다.",
+      "target": "I can send the updated file before noon.",
+      "romanization": "Jeong-o jeone eopdeiteudoen paireul bonael su itseumnida."
+    },
+    {
+      "scenario": "Work",
+      "source": "시작하기 전에 마감일을 확인합시다.",
+      "target": "Let us confirm the deadline before we start.",
+      "romanization": "Sijakagi jeone magamireul hwaginhapshida."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "그 예를 한 번 더 설명해 주실 수 있나요?",
+      "target": "Could you explain that example one more time?",
+      "romanization": "Geu yereul han beon deo seolmyeonghae jusil su innayo?"
+    },
+    {
+      "scenario": "Classroom",
+      "source": "읽기는 끝냈지만 학습지는 아직 못 했어요.",
+      "target": "I finished the reading but not the worksheet.",
+      "romanization": "Ilgineun kkeutnaetjiman hakseupjineun ajik mot haesseoyo."
+    },
+    {
+      "scenario": "Health",
+      "source": "오늘 아침부터 머리가 아파요.",
+      "target": "I have had a headache since this morning.",
+      "romanization": "Oneul achimbuteo meoriga apayo."
+    },
+    {
+      "scenario": "Health",
+      "source": "일요일에 여는 병원이 있나요?",
+      "target": "Is there a clinic open on Sunday?",
+      "romanization": "Iryoile yeoneun byeongwoni innayo?"
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "신나게 들리지만 조금 스트레스도 될 것 같아요.",
+      "target": "That sounds exciting, but also a little stressful.",
+      "romanization": "Sinnage deullijiman jogeum seuteureseudo doel geot gatayo."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "새 아파트에서의 첫 주는 어땠어요?",
+      "target": "How was your first week in the new apartment?",
+      "romanization": "Sae apateueseoui cheot juneun eottaesseoyo?"
+    },
+    {
+      "scenario": "Apology",
+      "source": "조언하기 전에 먼저 들었어야 했어요.",
+      "target": "I should have listened before giving advice.",
+      "romanization": "Joeonhagi jeone meonjeo deureosseoya haesseoyo."
+    },
+    {
+      "scenario": "Apology",
+      "source": "오늘 저에게 인내심을 보여 줘서 고마워요.",
+      "target": "Thank you for being patient with me today.",
+      "romanization": "Oneul jeoege innaesimeul boyeo jwoseo gomawoyo."
+    },
+    {
+      "scenario": "Interview",
+      "source": "저는 새로운 도구를 빠르게 배우는 데 익숙합니다.",
+      "target": "I am comfortable learning new tools quickly.",
+      "romanization": "Jeoneun saeroun dogureul ppareuge baeuneun de iksukhamnida."
+    },
+    {
+      "scenario": "Interview",
+      "source": "제 가장 강한 능력은 압박 속에서도 정리된 상태를 유지하는 것입니다.",
+      "target": "My strongest skill is staying organized under pressure.",
+      "romanization": "Je gajang ganghan neungnyeogeun apbak sogeseodo jeongnidoen sangtaereul yujihaneun geosimnida."
     }
   ]
 }

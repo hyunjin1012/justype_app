@@ -136,7 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           const SizedBox(height: 16),
                           const Text(
-                            'An offline-first practice app for text precision, listening recall, and translation shadowing.',
+                            'An offline-first practice app for text precision, listening recall, and conversation phrase practice.',
                           ),
                         ],
                       );

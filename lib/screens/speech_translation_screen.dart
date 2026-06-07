@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import '../services/speech_translation_service.dart';
+import 'package:go_router/go_router.dart';
+
+import '../services/feedback_service.dart';
 import '../services/practice_service.dart';
 import '../services/progress_service.dart';
-import '../services/feedback_service.dart';
-import '../widgets/speech_input_area.dart';
-import '../widgets/sentence_display_card.dart';
-import '../widgets/enhanced_feedback.dart';
+import '../services/speech_translation_service.dart';
 import '../widgets/app_surface.dart';
-import 'package:go_router/go_router.dart';
+import '../widgets/enhanced_feedback.dart';
+import '../widgets/speech_input_area.dart';
 
 class SpeechTranslationScreen extends StatefulWidget {
   const SpeechTranslationScreen({super.key});
@@ -18,22 +18,18 @@ class SpeechTranslationScreen extends StatefulWidget {
 }
 
 class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
-  late final SpeechTranslationService _speechService;
+  late final SpeechTranslationService _phraseService;
   final PracticeService _practiceService = PracticeService();
   final ProgressService _progressService = ProgressService();
   final FeedbackService _feedbackService = FeedbackService();
   final TextEditingController _textController = TextEditingController();
 
   String _sourcePrompt = '';
-  String _recognizedText = '';
-  String _translatedText = '';
+  String _sourceRomanization = '';
+  String _targetPrompt = '';
   String _feedback = '';
   bool _isCheckButtonEnabled = false;
-  bool _isRecordButtonEnabled = true;
   bool _isLoading = false;
-  bool _isInitialized = false;
-  bool _isListening = false;
-  bool _isProcessing = false;
   String _selectedLanguage = 'es';
   String _selectedScenario = 'All';
   List<String> _scenarios = ['All'];
@@ -41,7 +37,6 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   DateTime? _sessionStartedAt;
 
   final Map<String, String> _languages = {
-    'en': 'English',
     'es': 'Spanish',
     'fr': 'French',
     'de': 'German',
@@ -51,91 +46,37 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
     'ru': 'Russian',
     'ar': 'Arabic',
     'ko': 'Korean',
+    'en': 'English',
   };
 
   @override
   void initState() {
     super.initState();
-    _speechService = SpeechTranslationService();
+    _phraseService = SpeechTranslationService();
     _feedbackService.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAvailability();
+      _loadPhrasePrompt();
     });
   }
 
-  void _checkAvailability() {
-    _initializeSpeechService();
-  }
-
-  Future<void> _initializeSpeechService() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
-
-    try {
-      final isAvailable = await _speechService.initialize();
-
-      if (!mounted) return;
-
-      if (isAvailable) {
-        setState(() {
-          _isInitialized = true;
-        });
-        await _loadTranslationPrompt();
-      } else {
-        final error = _speechService.error ?? 'Unknown error occurred';
-        setState(() {
-          _errorMessage = '''
-Failed to initialize speech recognition: $error
-
-Please ensure:
-1. You are running the app on a physical device (not an emulator)
-2. Microphone permissions are enabled in your device settings
-3. Your device supports speech recognition
-
-Tap the refresh button to try again.''';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _errorMessage = '''
-Failed to initialize speech recognition: $e
-
-Please ensure:
-1. You are running the app on a physical device (not an emulator)
-2. Microphone permissions are enabled in your device settings
-3. Your device supports speech recognition
-
-Tap the refresh button to try again.''';
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _loadTranslationPrompt() async {
+  Future<void> _loadPhrasePrompt() async {
     if (!mounted) return;
 
     setState(() {
       _isLoading = true;
       _sourcePrompt = '';
-      _recognizedText = '';
-      _translatedText = '';
+      _sourceRomanization = '';
+      _targetPrompt = '';
       _textController.clear();
       _feedback = '';
+      _errorMessage = '';
       _isCheckButtonEnabled = false;
-      _isRecordButtonEnabled = true;
       _sessionStartedAt = DateTime.now();
     });
 
     try {
-      final scenarios = await _speechService.getScenarios();
-      await _speechService.preparePrompt();
+      final scenarios = await _phraseService.getScenarios();
+      await _phraseService.preparePrompt();
 
       if (!mounted) return;
 
@@ -144,106 +85,58 @@ Tap the refresh button to try again.''';
         if (!_scenarios.contains(_selectedScenario)) {
           _selectedScenario = 'All';
         }
-        _sourcePrompt = _speechService.sourcePromptText;
+        _sourcePrompt = _phraseService.sourcePromptText;
+        _sourceRomanization = _phraseService.sourcePromptRomanization;
+        _targetPrompt = _phraseService.targetPromptText;
+        _isCheckButtonEnabled = _targetPrompt.isNotEmpty;
         _isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
 
       setState(() {
-        _errorMessage = 'Unable to load a local translation prompt: $e';
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
         _isLoading = false;
       });
     }
   }
 
-  Future<void> _startListening() async {
-    if (!_isInitialized) {
-      await _initializeSpeechService();
-      if (!_isInitialized) return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
-
-    try {
-      await _speechService.startListening();
-      setState(() {
-        _isListening = true;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Error starting speech recognition: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _stopListening() async {
-    setState(() {
-      _isLoading = true;
-      _isProcessing = true;
-    });
-
-    try {
-      await _speechService.stopListening();
-      setState(() {
-        _isListening = false;
-        _isLoading = false;
-        _isProcessing = false;
-        _recognizedText = _speechService.lastRecognizedWords;
-        _translatedText = _speechService.translatedText;
-        _isCheckButtonEnabled = true;
-        _isRecordButtonEnabled = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Error stopping speech recognition: $e';
-        _isLoading = false;
-        _isProcessing = false;
-      });
-    }
-  }
-
-  void _checkAnswer() async {
+  Future<void> _checkAnswer() async {
     final userInput = _textController.text;
-    if (userInput.isEmpty || _translatedText.isEmpty) return;
+    if (userInput.isEmpty || _targetPrompt.isEmpty) return;
 
-    final isCorrect = _practiceService.checkAnswer(userInput, _translatedText);
-    final wordCount = _countWords(_translatedText);
+    final isCorrect = _practiceService.checkAnswer(userInput, _targetPrompt);
+    final wordCount = _countWords(_targetPrompt);
     final elapsedSeconds = _elapsedSeconds();
 
     if (isCorrect) {
       await _feedbackService.playCorrectSound();
       await _progressService.completeExercise(
         practiceType: 'translation',
-        prompt: _translatedText,
+        prompt: _targetPrompt,
+        promptKey: _phraseService.currentPromptPracticeKey,
         wordCount: wordCount,
         elapsedSeconds: elapsedSeconds,
       );
       if (!mounted) return;
       setState(() {
-        _feedback = _buildCompletionMessage(_translatedText);
+        _feedback = _buildCompletionMessage(_targetPrompt);
         _isCheckButtonEnabled = false;
-        _isRecordButtonEnabled = false;
       });
     } else {
       await _progressService.recordAnswerAttempt(
         false,
         practiceType: 'translation',
-        prompt: _translatedText,
+        prompt: _targetPrompt,
+        promptKey: _phraseService.currentPromptPracticeKey,
         wordCount: wordCount,
         elapsedSeconds: elapsedSeconds,
       );
       await _feedbackService.playWrongSound();
       if (!mounted) return;
       setState(() {
-        _feedback = "Not quite right. Try again or record a new sentence.";
+        _feedback = 'Not quite right. Try this phrase once more.';
         _isCheckButtonEnabled = true;
-        _isRecordButtonEnabled = false;
       });
     }
   }
@@ -251,13 +144,13 @@ Tap the refresh button to try again.''';
   String _buildCompletionMessage(String sentence) {
     final startedAt = _sessionStartedAt;
     if (startedAt == null) {
-      return "Correct! Great job.";
+      return 'Correct! Great job.';
     }
 
     final elapsedSeconds = _elapsedSeconds();
     final wordCount = _countWords(sentence);
 
-    return "Correct! $wordCount words matched in ${elapsedSeconds}s.";
+    return 'Correct! $wordCount words matched in ${elapsedSeconds}s.';
   }
 
   int _elapsedSeconds() {
@@ -276,36 +169,28 @@ Tap the refresh button to try again.''';
         .length;
   }
 
-  void _clearState() async {
+  Future<void> _nextPhrase() async {
     await _feedbackService.playLoadSound();
-    await _loadTranslationPrompt();
+    await _loadPhrasePrompt();
   }
 
   void _onLanguageChanged(String? value) {
-    if (value != null) {
-      setState(() {
-        _selectedLanguage = value;
-        _selectedScenario = 'All';
-        _sourcePrompt = '';
-        _recognizedText = '';
-        _translatedText = '';
-      });
-      _speechService.setLanguages(value, 'en');
-      _loadTranslationPrompt();
-    }
+    if (value == null) return;
+
+    setState(() {
+      _selectedLanguage = value;
+      _selectedScenario = 'All';
+    });
+    _phraseService.setLanguages(value, 'en');
+    _loadPhrasePrompt();
   }
 
-  void _onScenarioChanged(String? value) {
-    if (value != null) {
-      setState(() {
-        _selectedScenario = value;
-        _sourcePrompt = '';
-        _recognizedText = '';
-        _translatedText = '';
-      });
-      _speechService.setScenario(value);
-      _loadTranslationPrompt();
-    }
+  void _onScenarioChanged(String scenario) {
+    setState(() {
+      _selectedScenario = scenario;
+    });
+    _phraseService.setScenario(scenario);
+    _loadPhrasePrompt();
   }
 
   void _showEnhancedFeedback() {
@@ -319,10 +204,10 @@ Tap the refresh button to try again.''';
             children: [
               EnhancedFeedback(
                 userInput: _textController.text,
-                correctSentence: _translatedText,
+                correctSentence: _targetPrompt,
                 isCorrect: _practiceService.checkAnswer(
                   _textController.text,
-                  _translatedText,
+                  _targetPrompt,
                 ),
               ),
               const SizedBox(height: 16),
@@ -339,7 +224,7 @@ Tap the refresh button to try again.''';
 
   @override
   void dispose() {
-    _speechService.dispose();
+    _phraseService.dispose();
     _textController.dispose();
     _feedbackService.dispose();
     super.dispose();
@@ -347,9 +232,11 @@ Tap the refresh button to try again.''';
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Translation Practice'),
+        title: const Text('Phrase Practice'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => GoRouter.of(context).go('/challenges'),
@@ -361,205 +248,52 @@ Tap the refresh button to try again.''';
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (_errorMessage.isNotEmpty)
+                  if (_errorMessage.isNotEmpty) ...[
                     AppSurface(
-                      color: Theme.of(context).colorScheme.errorContainer,
+                      color: theme.colorScheme.errorContainer,
                       child: Row(
                         children: [
                           Icon(
-                            Icons.error_outline,
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer,
+                            Icons.info_outline,
+                            color: theme.colorScheme.onErrorContainer,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _errorMessage,
                               style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onErrorContainer,
+                                color: theme.colorScheme.onErrorContainer,
                               ),
                             ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.refresh),
-                            onPressed: _initializeSpeechService,
+                            onPressed: _loadPhrasePrompt,
                           ),
                         ],
                       ),
                     ),
-                  const SizedBox(height: 16),
-
-                  // Language selection
-                  AppSurface(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Source Language',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedLanguage,
-                          items: _languages.entries.map((entry) {
-                            return DropdownMenuItem(
-                              value: entry.key,
-                              child: Text(entry.value),
-                            );
-                          }).toList(),
-                          onChanged: _isLoading ? null : _onLanguageChanged,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Scenario',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedScenario,
-                          items: _scenarios.map((scenario) {
-                            return DropdownMenuItem(
-                              value: scenario,
-                              child: Text(scenario),
-                            );
-                          }).toList(),
-                          onChanged: _isLoading ? null : _onScenarioChanged,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  if (_sourcePrompt.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 24.0),
-                      child: AppSurface(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Source Prompt',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(_sourcePrompt),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  // Record button
-                  ElevatedButton.icon(
-                    onPressed: (_isLoading || !_isRecordButtonEnabled)
-                        ? null
-                        : _isListening
-                            ? _stopListening
-                            : _startListening,
-                    icon: Icon(_isListening ? Icons.stop : Icons.mic),
-                    label: Text(_isListening
-                        ? 'Stop Recording'
-                        : 'Record Source Prompt'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      backgroundColor:
-                          _isListening ? Colors.red.shade100 : null,
-                    ),
-                  ),
-
-                  if (_isLoading) ...[
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                    Text(
-                      _isProcessing
-                          ? 'Processing your speech...'
-                          : 'Initializing speech recognition...',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ] else if (_isListening) ...[
                     const SizedBox(height: 16),
-                    const Text(
-                      'Start speaking now...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ],
-
-                  // Recognized text
-                  if (_recognizedText.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: AppSurface(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'You Said',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(_recognizedText),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  // Translated text
-                  if (_translatedText.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: SentenceDisplayCard(
-                        sentence: _translatedText,
-                        textStyle: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
+                  _buildScenarioPanel(context),
+                  const SizedBox(height: 16),
+                  if (_isLoading)
+                    const Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (_sourcePrompt.isNotEmpty)
+                    _buildPhrasePrompt(context),
+                  if (_targetPrompt.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _buildPracticeHint(context),
+                  ],
                 ],
               ),
             ),
           ),
-
-          // Input area and feedback - stays at bottom
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -568,28 +302,40 @@ Tap the refresh button to try again.''';
                   controller: _textController,
                   onCheck: _checkAnswer,
                   feedback: _feedback,
-                  labelText: 'Type or speak the translated sentence',
+                  labelText: 'English phrase',
                   isCheckButtonEnabled:
-                      _isCheckButtonEnabled && _translatedText.isNotEmpty,
+                      _isCheckButtonEnabled && _targetPrompt.isNotEmpty,
                 ),
                 if (_feedback.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
                     _feedback,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: _practiceService.checkAnswer(
                         _textController.text,
-                        _translatedText,
+                        _targetPrompt,
                       )
                           ? Colors.green
                           : Colors.red,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    onPressed: _showEnhancedFeedback,
-                    icon: const Icon(Icons.feedback),
-                    label: const Text('View Detailed Feedback'),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: _showEnhancedFeedback,
+                        icon: const Icon(Icons.feedback),
+                        label: const Text('Details'),
+                      ),
+                      FilledButton.icon(
+                        onPressed: _nextPhrase,
+                        icon: const Icon(Icons.arrow_forward),
+                        label: const Text('Next Phrase'),
+                      ),
+                    ],
                   ),
                 ],
               ],
@@ -598,10 +344,144 @@ Tap the refresh button to try again.''';
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _clearState,
-        tooltip: 'New Prompt',
+        onPressed: _isLoading ? null : _nextPhrase,
+        tooltip: 'New Phrase',
         icon: const Icon(Icons.refresh),
         label: const Text('New'),
+      ),
+    );
+  }
+
+  Widget _buildScenarioPanel(BuildContext context) {
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Conversation Pack',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              SizedBox(
+                width: 142,
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedLanguage,
+                  items: _languages.entries.map((entry) {
+                    return DropdownMenuItem(
+                      value: entry.key,
+                      child: Text(entry.value),
+                    );
+                  }).toList(),
+                  onChanged: _isLoading ? null : _onLanguageChanged,
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final scenario in _scenarios)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(scenario),
+                      selected: _selectedScenario == scenario,
+                      onSelected: _isLoading
+                          ? null
+                          : (_) => _onScenarioChanged(scenario),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhrasePrompt(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AppSurface(
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _selectedScenario == 'All' ? 'Phrase' : _selectedScenario,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _sourcePrompt,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+            textDirection: _selectedLanguage == 'ar'
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+          ),
+          if (_sourceRomanization.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              _sourceRomanization,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+                height: 1.35,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Text(
+            'Practice the English response by typing or speaking it.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPracticeHint(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AppSurface(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Icon(
+            Icons.keyboard_voice,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Type or speak the English version below.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

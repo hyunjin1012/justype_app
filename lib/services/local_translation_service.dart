@@ -3,10 +3,13 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 
+import 'progress_service.dart';
+
 class TranslationPrompt {
   final String sourceLanguage;
   final String targetLanguage;
   final String sourceText;
+  final String sourceRomanization;
   final String targetText;
   final String scenario;
 
@@ -14,6 +17,7 @@ class TranslationPrompt {
     required this.sourceLanguage,
     required this.targetLanguage,
     required this.sourceText,
+    this.sourceRomanization = '',
     required this.targetText,
     required this.scenario,
   });
@@ -37,18 +41,42 @@ class LocalTranslationService {
         : prompts.where((prompt) => prompt.scenario == scenario).toList();
     final availablePrompts =
         scenarioPrompts.isEmpty ? prompts : scenarioPrompts;
+    final progressService = ProgressService();
+    await progressService.loadProgress();
+    final unpracticedPrompts = availablePrompts
+        .where((prompt) =>
+            !progressService.hasPracticedPrompt(practiceKeyForPrompt(prompt)))
+        .toList();
 
     if (availablePrompts.isEmpty) {
       return TranslationPrompt(
         sourceLanguage: sourceLanguage,
         targetLanguage: targetLanguage,
         sourceText: 'Learning improves with small daily sessions.',
+        sourceRomanization: '',
         targetText: 'Learning improves with small daily sessions.',
         scenario: 'Core',
       );
     }
 
-    return availablePrompts[_random.nextInt(availablePrompts.length)];
+    if (unpracticedPrompts.isEmpty) {
+      throw Exception(
+        'You have practiced every prompt in this phrase pack.',
+      );
+    }
+
+    return unpracticedPrompts[_random.nextInt(unpracticedPrompts.length)];
+  }
+
+  static String practiceKeyForPrompt(TranslationPrompt prompt) {
+    return [
+      'translation',
+      prompt.sourceLanguage,
+      prompt.targetLanguage,
+      prompt.scenario,
+      prompt.sourceText,
+      prompt.targetText,
+    ].join(' | ');
   }
 
   Future<List<String>> getScenarios(String sourceLanguage) async {
@@ -74,7 +102,8 @@ class LocalTranslationService {
     final normalizedInput = _normalize(text);
 
     for (final prompt in prompts) {
-      if (_normalize(prompt.sourceText) == normalizedInput) {
+      if (_normalize(prompt.sourceText) == normalizedInput ||
+          _normalize(prompt.sourceRomanization) == normalizedInput) {
         return prompt.targetText;
       }
     }
@@ -97,6 +126,7 @@ class LocalTranslationService {
           sourceLanguage: language,
           targetLanguage: 'en',
           sourceText: data['source'] as String,
+          sourceRomanization: data['romanization'] as String? ?? '',
           targetText: data['target'] as String,
           scenario: data['scenario'] as String? ?? 'Core',
         );

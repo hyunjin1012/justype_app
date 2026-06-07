@@ -92,6 +92,7 @@ class ProgressService extends ChangeNotifier {
       {}; // Map of achievement ID to timestamp
   List<PracticeSession> _sessionHistory = [];
   List<String> _weakPrompts = [];
+  Set<String> _practicedPromptKeys = {};
   String _lastSpeechTranslationDate =
       ''; // Add new field for tracking last speech translation
 
@@ -100,7 +101,7 @@ class ProgressService extends ChangeNotifier {
     'text_10': 'Completed 10 text challenges!',
     'text_20': 'Completed 20 text challenges!',
     'audio_10': 'Completed 10 audio challenges!',
-    'translation_10': 'Completed 10 translation challenges!',
+    'translation_10': 'Completed 10 phrase challenges!',
     'exercises_5': 'Completed 5 exercises!',
     'exercises_10': 'Completed 10 exercises!',
     'exercises_50': 'Completed 50 exercises!',
@@ -140,6 +141,8 @@ class ProgressService extends ChangeNotifier {
     _lastSpeechTranslationDate =
         prefs.getString('lastSpeechTranslationDate') ?? '';
     _weakPrompts = prefs.getStringList('weakPrompts') ?? [];
+    _practicedPromptKeys =
+        (prefs.getStringList('practicedPromptKeys') ?? []).toSet();
 
     // Load recent achievements if stored
     _recentAchievements = prefs.getStringList('recentAchievements') ?? [];
@@ -165,6 +168,10 @@ class ProgressService extends ChangeNotifier {
           .toList();
     } catch (e) {
       _sessionHistory = [];
+    }
+
+    for (final session in _sessionHistory) {
+      _markPromptPracticed(session.prompt);
     }
 
     // Ensure all achievements have timestamps
@@ -208,6 +215,10 @@ class ProgressService extends ChangeNotifier {
     await prefs.setString(
         'lastSpeechTranslationDate', _lastSpeechTranslationDate);
     await prefs.setStringList('weakPrompts', _weakPrompts);
+    await prefs.setStringList(
+      'practicedPromptKeys',
+      _practicedPromptKeys.toList(),
+    );
     await prefs.setString(
       'sessionHistory',
       json.encode(_sessionHistory.map((session) => session.toJson()).toList()),
@@ -229,6 +240,7 @@ class ProgressService extends ChangeNotifier {
     bool isCorrect, {
     String practiceType = 'general',
     String prompt = '',
+    String? promptKey,
     int wordCount = 0,
     int elapsedSeconds = 0,
   }) async {
@@ -236,6 +248,7 @@ class ProgressService extends ChangeNotifier {
     _recordSessionInMemory(
       practiceType: practiceType,
       prompt: prompt,
+      promptKey: promptKey,
       isCorrect: isCorrect,
       wordCount: wordCount,
       elapsedSeconds: elapsedSeconds,
@@ -251,6 +264,7 @@ class ProgressService extends ChangeNotifier {
   Future<void> completeExercise({
     String practiceType = 'general',
     String prompt = '',
+    String? promptKey,
     int wordCount = 0,
     int elapsedSeconds = 0,
   }) async {
@@ -261,6 +275,7 @@ class ProgressService extends ChangeNotifier {
     _recordSessionInMemory(
       practiceType: practiceType,
       prompt: prompt,
+      promptKey: promptKey,
       isCorrect: true,
       wordCount: wordCount,
       elapsedSeconds: elapsedSeconds,
@@ -404,6 +419,26 @@ class ProgressService extends ChangeNotifier {
     return List.unmodifiable(_weakPrompts);
   }
 
+  bool hasPracticedPrompt(String prompt) {
+    return _practicedPromptKeys.contains(normalizePromptKey(prompt));
+  }
+
+  int getPracticedPromptCount(Iterable<String> prompts) {
+    return prompts.where(hasPracticedPrompt).length;
+  }
+
+  List<String> getUnpracticedPrompts(Iterable<String> prompts) {
+    return prompts.where((prompt) => !hasPracticedPrompt(prompt)).toList();
+  }
+
+  static String normalizePromptKey(String prompt) {
+    return prompt
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s]'), '')
+        .replaceAll(RegExp(r'\s+'), ' ');
+  }
+
   /// Resets all progress data to initial values
   Future<void> resetAllProgress() async {
     // Reset all tracked statistics to initial values
@@ -430,6 +465,7 @@ class ProgressService extends ChangeNotifier {
     _achievementData = {};
     _sessionHistory = [];
     _weakPrompts = [];
+    _practicedPromptKeys = {};
 
     // Clear data from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
@@ -455,6 +491,7 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('achievementData');
     await prefs.remove('sessionHistory');
     await prefs.remove('weakPrompts');
+    await prefs.remove('practicedPromptKeys');
 
     // Clear streak tracking data
     await prefs.remove('lastPracticeDay');
@@ -501,6 +538,7 @@ class ProgressService extends ChangeNotifier {
   void _recordSessionInMemory({
     required String practiceType,
     required String prompt,
+    String? promptKey,
     required bool isCorrect,
     required int wordCount,
     required int elapsedSeconds,
@@ -513,6 +551,8 @@ class ProgressService extends ChangeNotifier {
       elapsedSeconds: elapsedSeconds,
       timestamp: DateTime.now().millisecondsSinceEpoch,
     );
+
+    _markPromptPracticed(promptKey ?? prompt);
 
     _sessionHistory.insert(0, session);
     if (_sessionHistory.length > 40) {
@@ -538,6 +578,13 @@ class ProgressService extends ChangeNotifier {
 
     if (_weakPrompts.length > 20) {
       _weakPrompts = _weakPrompts.take(20).toList();
+    }
+  }
+
+  void _markPromptPracticed(String prompt) {
+    final key = normalizePromptKey(prompt);
+    if (key.isNotEmpty) {
+      _practicedPromptKeys.add(key);
     }
   }
 

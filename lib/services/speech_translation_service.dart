@@ -21,7 +21,12 @@ class SpeechTranslationService extends ChangeNotifier {
   String get lastRecognizedWords => _lastRecognizedWords;
   String get translatedText => _translatedText;
   String get sourcePromptText => _currentPrompt?.sourceText ?? '';
+  String get sourcePromptRomanization =>
+      _currentPrompt?.sourceRomanization ?? '';
   String get targetPromptText => _currentPrompt?.targetText ?? '';
+  String get currentPromptPracticeKey => _currentPrompt == null
+      ? ''
+      : LocalTranslationService.practiceKeyForPrompt(_currentPrompt!);
   String get scenario => _scenario;
   String? get error => _error;
 

@@ -92,17 +92,17 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         ],
       },
       {
-        'title': 'Speech Translation',
-        'description': 'Shadow local phrase packs into English',
+        'title': 'Phrase Practice',
+        'description': 'Answer local conversation prompts in English',
         'icon': Icons.translate,
         'color': Colors.orange.shade100,
         'route': '/challenges/translate',
         'progress': translationChallenges,
         'total': 25,
-        'subtitle': 'Bilingual shadowing',
+        'subtitle': 'Scenario conversation',
         'modes': [
           {
-            'name': 'Translation',
+            'name': 'Phrase Packs',
             'available': true,
             'limit': 'Unlimited',
           },
@@ -160,7 +160,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Offline drills for typing, dictation, listening recall, and translation shadowing.',
+                      'Offline drills for typing, dictation, listening recall, and conversation phrases.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme

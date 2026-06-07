@@ -5,9 +5,13 @@ import 'package:flutter/services.dart';
 
 import '../models/book.dart';
 import '../models/books_response.dart';
+import 'progress_service.dart';
 
 class LocalLibraryService {
-  static const String _assetPath = 'assets/corpus/books.json';
+  static const List<String> _assetPaths = [
+    'assets/corpus/books.json',
+    'assets/corpus/original_packs.json',
+  ];
 
   final Random _random = Random();
   List<_LocalBookRecord>? _catalog;
@@ -59,16 +63,25 @@ class LocalLibraryService {
 
   Future<Map<String, String>> fetchRandomSentence() async {
     final books = await _loadCatalog();
-    final book = books[_random.nextInt(books.length)];
-    final sentences = _extractSentences(book.content);
+    final candidates = books
+        .expand((book) => _extractSentences(book.content).map(
+              (sentence) => _LocalSentenceCandidate(
+                sentence: sentence,
+                title: book.title,
+                author: book.author,
+                bookId: book.id.toString(),
+              ),
+            ))
+        .toList();
+
+    final candidate = await _pickUnpracticedCandidate(candidates);
 
     return {
-      'sentence': sentences.isEmpty
-          ? 'Reliable practice starts with one accurate sentence.'
-          : sentences[_random.nextInt(sentences.length)],
-      'title': book.title,
-      'author': book.author,
-      'bookId': book.id.toString(),
+      'sentence': candidate?.sentence ??
+          'You have practiced every local library prompt. Try Generated for a fresh sentence.',
+      'title': candidate?.title ?? 'Library Complete',
+      'author': candidate?.author ?? 'JusType',
+      'bookId': candidate?.bookId ?? '',
     };
   }
 
@@ -76,12 +89,21 @@ class LocalLibraryService {
     try {
       if (bookId != null) {
         final book = await fetchBook(bookId);
-        final sentences = _extractSentences(book.content);
+        final candidates = _extractSentences(book.content)
+            .map(
+              (sentence) => _LocalSentenceCandidate(
+                sentence: sentence,
+                title: book.title,
+                author: book.author,
+                bookId: book.id,
+              ),
+            )
+            .toList();
+        final candidate = await _pickUnpracticedCandidate(candidates);
 
         return {
-          'sentence': sentences.isEmpty
-              ? 'No suitable sentences found in this book.'
-              : sentences[_random.nextInt(sentences.length)],
+          'sentence': candidate?.sentence ??
+              'You have practiced every prompt in this book.',
           'title': book.title,
           'author': book.author,
           'bookId': book.id,
@@ -104,20 +126,25 @@ class LocalLibraryService {
       return _catalog!;
     }
 
-    final raw = await rootBundle.loadString(_assetPath);
-    final decoded = json.decode(raw) as List<dynamic>;
+    final records = <_LocalBookRecord>[];
 
-    _catalog = decoded.map((entry) {
-      final data = entry as Map<String, dynamic>;
-      return _LocalBookRecord(
-        id: data['id'] as int,
-        title: data['title'] as String,
-        author: data['author'] as String,
-        subjects: List<String>.from(data['subjects'] as List<dynamic>),
-        content: data['content'] as String,
-        displayStyle: data['displayStyle'] as String? ?? 'prose',
-      );
-    }).toList();
+    for (final assetPath in _assetPaths) {
+      final raw = await rootBundle.loadString(assetPath);
+      final decoded = json.decode(raw) as List<dynamic>;
+      records.addAll(decoded.map((entry) {
+        final data = entry as Map<String, dynamic>;
+        return _LocalBookRecord(
+          id: data['id'] as int,
+          title: data['title'] as String,
+          author: data['author'] as String,
+          subjects: List<String>.from(data['subjects'] as List<dynamic>),
+          content: data['content'] as String,
+          displayStyle: data['displayStyle'] as String? ?? 'prose',
+        );
+      }));
+    }
+
+    _catalog = records;
 
     return _catalog!;
   }
@@ -214,6 +241,29 @@ class LocalLibraryService {
       return true;
     }).toList();
   }
+
+  Future<_LocalSentenceCandidate?> _pickUnpracticedCandidate(
+    List<_LocalSentenceCandidate> candidates,
+  ) async {
+    if (candidates.isEmpty) {
+      return null;
+    }
+
+    final progressService = ProgressService();
+    await progressService.loadProgress();
+
+    final unpracticed = candidates
+        .where((candidate) => !progressService.hasPracticedPrompt(
+              candidate.sentence,
+            ))
+        .toList();
+
+    if (unpracticed.isEmpty) {
+      return null;
+    }
+
+    return unpracticed[_random.nextInt(unpracticed.length)];
+  }
 }
 
 class _LocalBookRecord {
@@ -231,6 +281,20 @@ class _LocalBookRecord {
     required this.subjects,
     required this.content,
     required this.displayStyle,
+  });
+}
+
+class _LocalSentenceCandidate {
+  final String sentence;
+  final String title;
+  final String author;
+  final String bookId;
+
+  const _LocalSentenceCandidate({
+    required this.sentence,
+    required this.title,
+    required this.author,
+    required this.bookId,
   });
 }
 

@@ -1,4 +1,5 @@
 import '../models/book.dart';
+import 'progress_service.dart';
 import 'sentence_manager.dart';
 import 'local_library_service.dart';
 import 'dart:math';
@@ -10,6 +11,7 @@ class BookSentenceManager extends SentenceManager {
   String _bookTitle = "";
   String _bookAuthor = "";
   List<String> _sentences = [];
+  List<String> _allSentences = [];
   final Random _random = Random();
 
   Future<void> initializeWithBook(Book book) async {
@@ -18,13 +20,14 @@ class BookSentenceManager extends SentenceManager {
     _bookAuthor = book.author;
 
     // Extract sentences from the book content we already have
-    _sentences = extractSentencesFromText(book.content);
+    _allSentences = extractSentencesFromText(book.content);
+    _sentences = await _unpracticedSentences();
 
     // Get the first sentence
     if (_sentences.isNotEmpty) {
       _currentSentence = _sentences[_random.nextInt(_sentences.length)];
     } else {
-      _currentSentence = "No suitable sentences found in this book.";
+      _currentSentence = "You have practiced every prompt in this book.";
     }
   }
 
@@ -38,6 +41,8 @@ class BookSentenceManager extends SentenceManager {
     if (onLoadingChanged != null) {
       onLoadingChanged(true);
     }
+
+    _sentences = await _unpracticedSentences();
 
     if (_sentences.isEmpty && _bookId.isNotEmpty) {
       // Only fetch from the service if we don't have sentences but have a book ID
@@ -75,6 +80,8 @@ class BookSentenceManager extends SentenceManager {
 
   // Get the next sentence
   Future<void> getNextSentence() async {
+    _sentences = await _unpracticedSentences();
+
     if (_sentences.isNotEmpty) {
       // Simply get another random sentence from our existing list
       _currentSentence = _sentences[_random.nextInt(_sentences.length)];
@@ -82,7 +89,16 @@ class BookSentenceManager extends SentenceManager {
       // Only fetch if we don't have sentences
       await fetchContent(forceRefresh: true);
     } else {
-      _currentSentence = "No suitable sentences found in this book.";
+      _currentSentence = "You have practiced every prompt in this book.";
     }
+  }
+
+  Future<List<String>> _unpracticedSentences() async {
+    final progressService = ProgressService();
+    await progressService.loadProgress();
+
+    return _allSentences
+        .where((sentence) => !progressService.hasPracticedPrompt(sentence))
+        .toList();
   }
 }
