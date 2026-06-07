@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../services/theme_service.dart';
 import '../services/progress_service.dart';
+import '../services/app_preferences.dart';
 import '../widgets/app_surface.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -28,6 +30,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _getAppVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
+    if (!mounted) return;
+
     setState(() {
       _appVersion = packageInfo.version;
     });
@@ -85,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          _buildSectionHeader(context, 'User Data'),
+          _buildSectionHeader(context, 'Privacy & Data'),
           Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -93,12 +97,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
                 children: [
+                  const ListTile(
+                    title: Text('Offline Practice'),
+                    subtitle: Text(
+                      'Library, generated prompts, phrase packs, and progress stay on this device.',
+                    ),
+                    leading: Icon(Icons.offline_pin),
+                  ),
+                  const Divider(height: 1),
+                  const ListTile(
+                    title: Text('Microphone'),
+                    subtitle: Text(
+                      'Voice input is only used when you tap Record. You can always type instead.',
+                    ),
+                    leading: Icon(Icons.mic),
+                  ),
+                  const Divider(height: 1),
                   ListTile(
-                    title: const Text('Clear History'),
-                    subtitle: const Text('Remove all your saved data'),
+                    title: const Text('Clear Practice History'),
+                    subtitle: const Text(
+                      'Reset stats, achievements, weak drills, and practiced prompts',
+                    ),
                     leading:
                         Icon(Icons.restart_alt, color: Colors.red.shade400),
                     onTap: () => _showResetConfirmation(context),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    title: const Text('Replay Onboarding'),
+                    subtitle: const Text('Show the intro flow again'),
+                    leading: Icon(
+                      Icons.slideshow,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    onTap: _replayOnboarding,
                   ),
                 ],
               ),
@@ -197,9 +229,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear History'),
+        title: const Text('Clear Practice History'),
         content: const Text(
-          'Are you sure you want to clear all your saved data? This action cannot be undone.',
+          'This resets stats, achievements, weak drills, and practiced prompt history. Appearance and onboarding settings will stay the same.',
         ),
         actions: [
           TextButton(
@@ -227,5 +259,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _replayOnboarding() async {
+    await AppPreferences.resetOnboarding();
+
+    if (!mounted) return;
+
+    GoRouter.of(context).go('/onboarding');
   }
 }

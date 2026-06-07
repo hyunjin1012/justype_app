@@ -4,21 +4,15 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 class SpeechInputArea extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback onCheck;
-  final String feedback;
   final String labelText;
   final bool isCheckButtonEnabled;
-  final VoidCallback? onNext;
-  final String nextLabel;
 
   const SpeechInputArea({
     super.key,
     required this.controller,
     required this.onCheck,
-    required this.feedback,
     this.labelText = 'Speak what you see/hear to score points',
     this.isCheckButtonEnabled = true,
-    this.onNext,
-    this.nextLabel = 'New prompt',
   });
 
   @override
@@ -173,17 +167,6 @@ class SpeechInputAreaState extends State<SpeechInputArea> {
               ),
             ],
           ),
-          if (widget.onNext != null) ...[
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: widget.onNext,
-                icon: const Icon(Icons.arrow_forward),
-                label: Text(widget.nextLabel),
-              ),
-            ),
-          ],
         ],
       ),
     );

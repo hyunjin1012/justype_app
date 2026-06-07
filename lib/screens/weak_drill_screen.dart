@@ -5,6 +5,7 @@ import '../services/feedback_service.dart';
 import '../services/practice_service.dart';
 import '../services/progress_service.dart';
 import '../widgets/enhanced_feedback.dart';
+import '../widgets/practice_session_scaffold.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/speech_input_area.dart';
 
@@ -174,132 +175,98 @@ class _WeakDrillScreenState extends State<WeakDrillScreen> {
   Widget build(BuildContext context) {
     final prompt = _currentPrompt;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Weak Drills'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => GoRouter.of(context).go('/challenges'),
+    if (_isLoading || prompt.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Weak Drills'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => GoRouter.of(context).go('/challenges'),
+          ),
         ),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : prompt.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          size: 64,
-                          color: Colors.green.shade400,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No weak prompts yet',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Missed answers from other modes will appear here for focused review.',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: () =>
-                              GoRouter.of(context).go('/challenges'),
-                          icon: const Icon(Icons.arrow_back),
-                          label: const Text('Back to Challenges'),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : SafeArea(
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.psychology,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      '${_weakPrompts.length} prompts need review',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              SentenceDisplayCard(
-                                sentence: prompt,
-                                textStyle:
-                                    Theme.of(context).textTheme.titleLarge,
-                              ),
-                            ],
-                          ),
-                        ),
+                      Icon(
+                        Icons.check_circle,
+                        size: 64,
+                        color: Colors.green.shade400,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            SpeechInputArea(
-                              controller: _textController,
-                              onCheck: _checkAnswer,
-                              feedback: _feedback,
-                              labelText: 'Type or speak this weak prompt',
-                              isCheckButtonEnabled: _isCheckButtonEnabled,
-                              onNext: _nextPrompt,
-                              nextLabel: 'Next prompt',
-                            ),
-                            if (_feedback.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                _feedback,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: _practiceService.checkAnswer(
-                                    _textController.text,
-                                    prompt,
-                                  )
-                                      ? Colors.green
-                                      : Colors.red,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                alignment: WrapAlignment.center,
-                                spacing: 8,
-                                children: [
-                                  OutlinedButton.icon(
-                                    onPressed: _showEnhancedFeedback,
-                                    icon: const Icon(Icons.feedback),
-                                    label: const Text('Details'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
-                        ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No weak prompts yet',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Missed answers from other modes will appear here for focused review.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => GoRouter.of(context).go('/challenges'),
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Back to Challenges'),
                       ),
                     ],
                   ),
                 ),
+              ),
+      );
+    }
+
+    return PracticeSessionScaffold(
+      title: 'Weak Drills',
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => GoRouter.of(context).go('/challenges'),
+      ),
+      content: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.psychology,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${_weakPrompts.length} prompts need review',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SentenceDisplayCard(
+            sentence: prompt,
+            textStyle: Theme.of(context).textTheme.titleLarge,
+          ),
+        ],
+      ),
+      inputArea: SpeechInputArea(
+        controller: _textController,
+        onCheck: _checkAnswer,
+        labelText: 'Type or speak this weak prompt',
+        isCheckButtonEnabled: _isCheckButtonEnabled,
+      ),
+      feedback: _feedback,
+      isFeedbackCorrect: _feedback.isEmpty
+          ? null
+          : _practiceService.checkAnswer(
+              _textController.text,
+              prompt,
+            ),
+      onShowDetails: _feedback.isEmpty ? null : _showEnhancedFeedback,
+      onNext: _nextPrompt,
+      nextLabel: 'Next prompt',
     );
   }
 }

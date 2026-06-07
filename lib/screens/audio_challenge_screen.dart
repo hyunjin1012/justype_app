@@ -77,11 +77,10 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
         );
       },
       // Use the speech input area widget instead of typing
-      inputArea: (controller, checkAnswer, feedback, isCheckButtonEnabled) =>
+      inputArea: (controller, checkAnswer, isCheckButtonEnabled) =>
           SpeechInputArea(
         controller: controller,
         onCheck: checkAnswer,
-        feedback: feedback,
         labelText: 'Type or speak what you hear',
         isCheckButtonEnabled: isCheckButtonEnabled,
       ),

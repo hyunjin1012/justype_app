@@ -7,6 +7,7 @@ import '../services/progress_service.dart';
 import '../services/speech_translation_service.dart';
 import '../widgets/app_surface.dart';
 import '../widgets/enhanced_feedback.dart';
+import '../widgets/practice_session_scaffold.dart';
 import '../widgets/speech_input_area.dart';
 
 class SpeechTranslationScreen extends StatefulWidget {
@@ -234,112 +235,73 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Phrase Practice'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => GoRouter.of(context).go('/challenges'),
-        ),
+    return PracticeSessionScaffold(
+      title: 'Phrase Practice',
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => GoRouter.of(context).go('/challenges'),
       ),
-      body: Column(
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+          if (_errorMessage.isNotEmpty) ...[
+            AppSurface(
+              color: theme.colorScheme.errorContainer,
+              child: Row(
                 children: [
-                  if (_errorMessage.isNotEmpty) ...[
-                    AppSurface(
-                      color: theme.colorScheme.errorContainer,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: theme.colorScheme.onErrorContainer,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _errorMessage,
-                              style: TextStyle(
-                                color: theme.colorScheme.onErrorContainer,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.refresh),
-                            onPressed: _loadPhrasePrompt,
-                          ),
-                        ],
+                  Icon(
+                    Icons.info_outline,
+                    color: theme.colorScheme.onErrorContainer,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage,
+                      style: TextStyle(
+                        color: theme.colorScheme.onErrorContainer,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                  ],
-                  _buildScenarioPanel(context),
-                  const SizedBox(height: 16),
-                  if (_isLoading)
-                    const Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (_sourcePrompt.isNotEmpty)
-                    _buildPhrasePrompt(context),
-                  if (_targetPrompt.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    _buildPracticeHint(context),
-                  ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _loadPhrasePrompt,
+                  ),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                SpeechInputArea(
-                  controller: _textController,
-                  onCheck: _checkAnswer,
-                  feedback: _feedback,
-                  labelText: 'English phrase',
-                  isCheckButtonEnabled:
-                      _isCheckButtonEnabled && _targetPrompt.isNotEmpty,
-                  onNext: _isLoading ? null : _nextPhrase,
-                  nextLabel: 'New phrase',
-                ),
-                if (_feedback.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _feedback,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: _practiceService.checkAnswer(
-                        _textController.text,
-                        _targetPrompt,
-                      )
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _showEnhancedFeedback,
-                        icon: const Icon(Icons.feedback),
-                        label: const Text('Details'),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
+            const SizedBox(height: 16),
+          ],
+          _buildScenarioPanel(context),
+          const SizedBox(height: 16),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_sourcePrompt.isNotEmpty)
+            _buildPhrasePrompt(context),
+          if (_targetPrompt.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildPracticeHint(context),
+          ],
         ],
       ),
+      inputArea: SpeechInputArea(
+        controller: _textController,
+        onCheck: _checkAnswer,
+        labelText: 'English phrase',
+        isCheckButtonEnabled: _isCheckButtonEnabled && _targetPrompt.isNotEmpty,
+      ),
+      feedback: _feedback,
+      isFeedbackCorrect: _feedback.isEmpty
+          ? null
+          : _practiceService.checkAnswer(
+              _textController.text,
+              _targetPrompt,
+            ),
+      onShowDetails: _feedback.isEmpty ? null : _showEnhancedFeedback,
+      onNext: _isLoading ? null : _nextPhrase,
+      nextLabel: 'New phrase',
     );
   }
 

@@ -9,6 +9,7 @@ import '../services/book_sentence_manager.dart';
 import '../services/progress_service.dart';
 import '../services/feedback_service.dart';
 import 'enhanced_feedback.dart';
+import 'practice_session_scaffold.dart';
 import '../widgets/speech_input_area.dart';
 
 class BookPracticeModal extends StatefulWidget {
@@ -54,6 +55,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     });
 
     await _sentenceManager.initializeWithBook(widget.book);
+
+    if (!mounted) return;
 
     setState(() {
       _currentSentence = _sentenceManager.currentSentence;
@@ -113,10 +116,12 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       // Play correct sound and haptic feedback
       await _feedbackService.playCorrectSound();
 
-      setState(() {
-        _feedback = _buildCompletionMessage(currentSentence);
-        _isCheckButtonEnabled = false; // Disable button if answer is correct
-      });
+      if (mounted) {
+        setState(() {
+          _feedback = _buildCompletionMessage(currentSentence);
+          _isCheckButtonEnabled = false; // Disable button if answer is correct
+        });
+      }
 
       // Record progress when the answer is correct
       // Determine the practice type based on the current mode
@@ -141,6 +146,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       // Play wrong sound and haptic feedback
       await _feedbackService.playWrongSound();
 
+      if (!mounted) return;
+
       setState(() {
         _feedback = "Not quite right. Try again or get a new sentence.";
       });
@@ -158,6 +165,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
 
     // Play load sound and haptic feedback when content is updated
     await _feedbackService.playLoadSound();
+
+    if (!mounted) return;
 
     setState(() {
       _currentSentence = _sentenceManager.currentSentence;
@@ -224,109 +233,74 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Type with ${widget.book.title}'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-      body: Column(
+    return PracticeSessionScaffold(
+      title: 'Type with ${widget.book.title}',
+      automaticallyImplyLeading: false,
+      scrollController: widget.scrollController,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ],
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Mode selector
           PracticeModeSelector(
             isListeningMode: _isListeningMode,
             onSelectionChanged: (Set<bool> selection) {
               _toggleMode();
             },
           ),
-
-          // Main content
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Loading indicator
-                    if (_isLoading)
-                      const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    else
-                    // Sentence display section
-                    if (_isListeningMode)
-                      Column(
-                        children: [
-                          _ttsService.buildSpeakButton(
-                              context, _speakSentence, _ttsService.isSpeaking),
-                          const SizedBox(height: 16),
-                          VisibilityToggle(
-                            isVisible: _isTextVisible,
-                            onToggle: _toggleTextVisibility,
-                          ),
-                          if (_isTextVisible)
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: SentenceDisplayCard(
-                                  sentence: _currentSentence),
-                            ),
-                        ],
-                      )
-                    else
-                      SentenceDisplayCard(
-                        sentence: _currentSentence,
-                        textStyle: Theme.of(context).textTheme.titleLarge,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Input area and feedback - stays at bottom
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_isListeningMode)
+            Column(
               children: [
-                SpeechInputArea(
-                  controller: _textController,
-                  onCheck: _checkAnswer,
-                  feedback: "", // Empty feedback since we'll show it separately
-                  labelText: 'Type or speak what you see/hear',
-                  isCheckButtonEnabled: _isCheckButtonEnabled &&
-                      _sentenceManager.hasAvailablePrompt,
-                  onNext: _isLoading ? null : _getNextSentence,
-                  nextLabel: 'New sentence',
+                _ttsService.buildSpeakButton(
+                  context,
+                  _speakSentence,
+                  _ttsService.isSpeaking,
                 ),
-                if (_feedback.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _feedback,
-                    style: TextStyle(
-                      color: _practiceService.checkAnswer(_textController.text,
-                              _sentenceManager.currentSentence)
-                          ? Colors.green
-                          : Colors.red,
-                    ),
+                const SizedBox(height: 16),
+                VisibilityToggle(
+                  isVisible: _isTextVisible,
+                  onToggle: _toggleTextVisibility,
+                ),
+                if (_isTextVisible)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SentenceDisplayCard(sentence: _currentSentence),
                   ),
-                  const SizedBox(height: 8),
-                  TextButton.icon(
-                    onPressed: _showEnhancedFeedback,
-                    icon: const Icon(Icons.feedback),
-                    label: const Text('Details'),
-                  ),
-                ],
               ],
+            )
+          else
+            SentenceDisplayCard(
+              sentence: _currentSentence,
+              textStyle: Theme.of(context).textTheme.titleLarge,
             ),
-          ),
         ],
       ),
+      inputArea: SpeechInputArea(
+        controller: _textController,
+        onCheck: _checkAnswer,
+        labelText: 'Type or speak what you see/hear',
+        isCheckButtonEnabled:
+            _isCheckButtonEnabled && _sentenceManager.hasAvailablePrompt,
+      ),
+      feedback: _feedback,
+      isFeedbackCorrect: _feedback.isEmpty
+          ? null
+          : _practiceService.checkAnswer(
+              _textController.text,
+              _sentenceManager.currentSentence,
+            ),
+      onShowDetails: _feedback.isEmpty ? null : _showEnhancedFeedback,
+      onNext: _isLoading ? null : _getNextSentence,
+      nextLabel: 'New sentence',
     );
   }
 }

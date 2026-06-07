@@ -115,8 +115,8 @@ class SpeechTranslationService extends ChangeNotifier {
             await _translateText(_lastRecognizedWords);
           }
         },
-        localeId: _sourceLanguage,
         listenOptions: SpeechListenOptions(
+          localeId: _sourceLanguage,
           listenMode: ListenMode.confirmation,
           cancelOnError: true,
           partialResults: true,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'router/app_router.dart';
 import 'package:provider/provider.dart';
+import 'services/app_preferences.dart';
 import 'services/theme_service.dart';
 import 'services/progress_service.dart';
 
@@ -16,9 +16,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Check if first launch to show onboarding
-  final prefs = await SharedPreferences.getInstance();
-  final bool showOnboarding = prefs.getBool('first_launch') ?? true;
+  final bool showOnboarding = await AppPreferences.shouldShowOnboarding();
 
   runApp(
     MultiProvider(

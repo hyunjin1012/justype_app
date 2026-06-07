@@ -26,11 +26,10 @@ class _TextChallengeScreenState extends State<TextChallengeScreen> {
         textStyle: Theme.of(context).textTheme.titleLarge,
       ),
       // Use the speech input area widget instead of typing
-      inputArea: (controller, checkAnswer, feedback, isCheckButtonEnabled) =>
+      inputArea: (controller, checkAnswer, isCheckButtonEnabled) =>
           SpeechInputArea(
         controller: controller,
         onCheck: checkAnswer,
-        feedback: feedback,
         labelText: 'Type or speak the sentence above',
         isCheckButtonEnabled: isCheckButtonEnabled,
       ),

@@ -52,4 +52,32 @@ void main() {
     expect(progressService.getSessionHistory(limit: 1).single.prompt,
         visiblePrompt);
   });
+
+  test('reset progress clears weak prompts and practiced prompt keys',
+      () async {
+    SharedPreferences.setMockInitialValues({});
+    final progressService = ProgressService();
+    await progressService.resetAllProgress();
+
+    const missedPrompt = 'Please send the quiet version before lunch.';
+
+    await progressService.recordAnswerAttempt(
+      false,
+      practiceType: 'text',
+      prompt: missedPrompt,
+      wordCount: 8,
+      elapsedSeconds: 12,
+    );
+
+    expect(progressService.getWeakPrompts(), contains(missedPrompt));
+    expect(progressService.hasPracticedPrompt(missedPrompt), isTrue);
+    expect(progressService.getSessionHistory(limit: 1), hasLength(1));
+
+    await progressService.resetAllProgress();
+
+    expect(progressService.getWeakPrompts(), isEmpty);
+    expect(progressService.hasPracticedPrompt(missedPrompt), isFalse);
+    expect(progressService.getSessionHistory(limit: 1), isEmpty);
+    expect(progressService.getTotalExercises(), 0);
+  });
 }

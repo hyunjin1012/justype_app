@@ -5,15 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../services/progress_service.dart';
 import 'app_surface.dart';
 import 'enhanced_feedback.dart';
+import 'practice_session_scaffold.dart';
 
 class PracticeContent extends StatefulWidget {
   final String title;
   final Widget Function(String sentence) sentenceDisplay;
-  final Widget Function(
-      TextEditingController controller,
-      Function() checkAnswer,
-      String feedback,
-      bool isCheckButtonEnabled) inputArea;
+  final Widget Function(TextEditingController controller,
+      Function() checkAnswer, bool isCheckButtonEnabled) inputArea;
   final Function() onRefresh;
   final String? heroTag;
   final SentenceManager sentenceManager;
@@ -116,6 +114,8 @@ class _PracticeContentState extends State<PracticeContent> {
       // Play wrong sound and haptic feedback
       await _feedbackService.playWrongSound();
 
+      if (!mounted) return;
+
       setState(() {
         _feedback = "Not quite right. Try again or get a new sentence.";
       });
@@ -163,18 +163,20 @@ class _PracticeContentState extends State<PracticeContent> {
         }
       },
       onContentUpdated: () async {
-        if (mounted) {
-          // Play load sound and haptic feedback when content is updated
-          await _feedbackService.playLoadSound();
+        if (!mounted) return;
 
-          setState(() {
-            _loadingMessage = "";
-            // Update current book information
-            _currentBookTitle = widget.sentenceManager.bookTitle;
-            _currentBookAuthor = widget.sentenceManager.bookAuthor;
-            _currentBookId = widget.sentenceManager.currentBookId;
-          });
-        }
+        // Play load sound and haptic feedback when content is updated
+        await _feedbackService.playLoadSound();
+
+        if (!mounted) return;
+
+        setState(() {
+          _loadingMessage = "";
+          // Update current book information
+          _currentBookTitle = widget.sentenceManager.bookTitle;
+          _currentBookAuthor = widget.sentenceManager.bookAuthor;
+          _currentBookId = widget.sentenceManager.currentBookId;
+        });
       },
     );
   }
@@ -321,124 +323,73 @@ class _PracticeContentState extends State<PracticeContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        leading: widget.leading,
-        actions: widget.appBarActions,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Scrollable content area
-            Expanded(
-              child: SingleChildScrollView(
-                controller: widget.scrollController,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      // Source selector (optional)
-                      if (widget.showSourceSelector)
-                        _buildSourceSelector(
-                          widget.sentenceManager.selectedSource,
-                          (newSource) {
-                            widget.sentenceManager.setSource(newSource);
-                            _fetchRandomSentence();
-                          },
-                        ),
-                      const SizedBox(height: 32),
-                      // Display book source info (optional)
-                      if (widget.showSourceSelector)
-                        _buildBookSourceInfo(
-                          context,
-                          _currentBookTitle,
-                          _currentBookAuthor,
-                          _currentBookId,
-                          _navigateToBookDetail,
-                          widget.sentenceManager.selectedSource,
-                        ),
-                      // Loading indicator or sentence display
-                      _isLoading
-                          ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(32.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const CircularProgressIndicator(),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      _loadingMessage,
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : widget.sentenceDisplay(
-                              widget.sentenceManager.currentSentence),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
+    return PracticeSessionScaffold(
+      title: widget.title,
+      leading: widget.leading,
+      actions: widget.appBarActions,
+      scrollController: widget.scrollController,
+      content: Column(
+        children: [
+          // Source selector (optional)
+          if (widget.showSourceSelector)
+            _buildSourceSelector(
+              widget.sentenceManager.selectedSource,
+              (newSource) {
+                widget.sentenceManager.setSource(newSource);
+                _fetchRandomSentence();
+              },
             ),
-            // Input area with feedback
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Input area using the provided builder
-                  widget.inputArea(
-                    _textController,
-                    _checkAnswer,
-                    "", // Empty feedback since we'll show it separately
-                    _isCheckButtonEnabled &&
-                        widget.sentenceManager.hasAvailablePrompt,
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: _isLoading ? null : _fetchRandomSentence,
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text('New sentence'),
-                    ),
-                  ),
-                  // Feedback message and button
-                  if (_feedback.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _feedback,
-                      style: TextStyle(
-                        color: widget.sentenceManager
-                                .checkAnswer(_textController.text)
-                            ? Colors.green
-                            : Colors.red,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: _showEnhancedFeedback,
-                      icon: const Icon(Icons.feedback),
-                      label: const Text('Details'),
-                    ),
-                  ],
-                ],
-              ),
+          const SizedBox(height: 32),
+          // Display book source info (optional)
+          if (widget.showSourceSelector)
+            _buildBookSourceInfo(
+              context,
+              _currentBookTitle,
+              _currentBookAuthor,
+              _currentBookId,
+              _navigateToBookDetail,
+              widget.sentenceManager.selectedSource,
             ),
-          ],
-        ),
+          // Loading indicator or sentence display
+          _isLoading
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          _loadingMessage,
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : widget.sentenceDisplay(widget.sentenceManager.currentSentence),
+          const SizedBox(height: 32),
+        ],
       ),
+      inputArea: widget.inputArea(
+        _textController,
+        _checkAnswer,
+        _isCheckButtonEnabled && widget.sentenceManager.hasAvailablePrompt,
+      ),
+      feedback: _feedback,
+      isFeedbackCorrect: _feedback.isEmpty
+          ? null
+          : widget.sentenceManager.checkAnswer(_textController.text),
+      onShowDetails: _feedback.isEmpty ? null : _showEnhancedFeedback,
+      onNext: _isLoading ? null : _fetchRandomSentence,
+      nextLabel: 'New sentence',
     );
   }
 }
