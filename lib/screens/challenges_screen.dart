@@ -56,6 +56,8 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'progress': textChallenges,
         'total': 25,
         'subtitle': 'Precision practice',
+        'available': true,
+        'status': '$textChallenges sessions completed',
         'modes': [
           {
             'name': 'Library',
@@ -78,6 +80,8 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'progress': audioChallenges,
         'total': 25,
         'subtitle': 'Listening recall',
+        'available': true,
+        'status': '$audioChallenges sessions completed',
         'modes': [
           {
             'name': 'Library',
@@ -100,6 +104,8 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'progress': translationChallenges,
         'total': 25,
         'subtitle': 'Scenario conversation',
+        'available': true,
+        'status': '$translationChallenges phrase sessions completed',
         'modes': [
           {
             'name': 'Phrase Packs',
@@ -117,6 +123,10 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         'progress': weakPromptCount,
         'total': weakPromptCount == 0 ? 1 : weakPromptCount,
         'subtitle': 'Focused review',
+        'available': weakPromptCount > 0,
+        'status': weakPromptCount == 0
+            ? 'Missed prompts will appear here'
+            : '$weakPromptCount prompts waiting',
         'lockedMessage':
             'No weak prompts yet. Miss an answer in another mode to build this drill.',
         'modes': [
@@ -172,59 +182,6 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               ),
             ),
 
-            // Statistics section
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SectionTitle(title: 'Your Progress'),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _buildStatCard(
-                        context,
-                        'Total Sessions',
-                        _progressService.getTotalExercises().toString(),
-                        Icons.emoji_events,
-                        Colors.amber,
-                      ),
-                      const SizedBox(width: 16),
-                      _buildStatCard(
-                        context,
-                        'Current Streak',
-                        '${_progressService.getCurrentStreak()} days',
-                        Icons.local_fire_department,
-                        Colors.red,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _buildStatCard(
-                        context,
-                        'Accuracy',
-                        _progressService.getAnswerAttempts() == 0
-                            ? '--'
-                            : '${_progressService.getAccuracyPercentage().round()}%',
-                        Icons.track_changes,
-                        Colors.indigo,
-                      ),
-                      const SizedBox(width: 16),
-                      _buildStatCard(
-                        context,
-                        'Attempts',
-                        '${_progressService.getAnswerAttempts()}',
-                        Icons.fact_check,
-                        Colors.teal,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
             // Challenges grid
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -239,9 +196,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                     itemCount: challenges.length,
                     itemBuilder: (context, index) {
                       final challenge = challenges[index];
-                      final modes = challenge['modes'] as List<dynamic>;
-                      final isLocked =
-                          modes.every((mode) => !mode['available']);
+                      final isLocked = challenge['available'] == false;
                       final Color accentColor = challenge['color'] as Color;
 
                       return Padding(
@@ -315,39 +270,35 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                                 const SizedBox(height: 12),
-                                ...modes.map<Widget>((mode) {
-                                  final isAvailable = mode['available'] as bool;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          isAvailable
-                                              ? Icons.check_circle
-                                              : Icons.schedule,
-                                          size: 16,
-                                          color: isAvailable
-                                              ? Colors.green
-                                              : Colors.orange,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            '${mode['name']}: ${mode['limit']}',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurfaceVariant,
-                                                ),
-                                          ),
-                                        ),
-                                      ],
+                                Row(
+                                  children: [
+                                    Icon(
+                                      isLocked
+                                          ? Icons.schedule
+                                          : Icons.check_circle,
+                                      size: 16,
+                                      color: isLocked
+                                          ? Theme.of(context).colorScheme.error
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .primary,
                                     ),
-                                  );
-                                }).toList(),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        challenge['status'],
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 if (isLocked)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4.0),
@@ -374,40 +325,6 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Expanded(
-      child: AppSurface(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
             ),
           ],
         ),

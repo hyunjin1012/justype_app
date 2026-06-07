@@ -264,6 +264,8 @@ class _WeakDrillScreenState extends State<WeakDrillScreen> {
                               feedback: _feedback,
                               labelText: 'Type or speak this weak prompt',
                               isCheckButtonEnabled: _isCheckButtonEnabled,
+                              onNext: _nextPrompt,
+                              nextLabel: 'Next prompt',
                             ),
                             if (_feedback.isNotEmpty) ...[
                               const SizedBox(height: 8),
@@ -284,15 +286,10 @@ class _WeakDrillScreenState extends State<WeakDrillScreen> {
                                 alignment: WrapAlignment.center,
                                 spacing: 8,
                                 children: [
-                                  ElevatedButton.icon(
+                                  OutlinedButton.icon(
                                     onPressed: _showEnhancedFeedback,
                                     icon: const Icon(Icons.feedback),
                                     label: const Text('Details'),
-                                  ),
-                                  ElevatedButton.icon(
-                                    onPressed: _nextPrompt,
-                                    icon: const Icon(Icons.arrow_forward),
-                                    label: const Text('Next'),
                                   ),
                                 ],
                               ),
@@ -303,14 +300,6 @@ class _WeakDrillScreenState extends State<WeakDrillScreen> {
                     ],
                   ),
                 ),
-      floatingActionButton: prompt.isEmpty
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: _nextPrompt,
-              tooltip: 'Next Weak Prompt',
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('Next'),
-            ),
     );
   }
 }

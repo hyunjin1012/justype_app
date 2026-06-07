@@ -305,6 +305,8 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
                   labelText: 'English phrase',
                   isCheckButtonEnabled:
                       _isCheckButtonEnabled && _targetPrompt.isNotEmpty,
+                  onNext: _isLoading ? null : _nextPhrase,
+                  nextLabel: 'New phrase',
                 ),
                 if (_feedback.isNotEmpty) ...[
                   const SizedBox(height: 8),
@@ -330,11 +332,6 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
                         icon: const Icon(Icons.feedback),
                         label: const Text('Details'),
                       ),
-                      FilledButton.icon(
-                        onPressed: _nextPhrase,
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Next Phrase'),
-                      ),
                     ],
                   ),
                 ],
@@ -342,12 +339,6 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isLoading ? null : _nextPhrase,
-        tooltip: 'New Phrase',
-        icon: const Icon(Icons.refresh),
-        label: const Text('New'),
       ),
     );
   }

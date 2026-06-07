@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeService extends ChangeNotifier {
+  static const String _themeModeKey = 'themeMode';
+  static const String _accentColorKey = 'accentColor';
+
   ThemeMode _themeMode = ThemeMode.light;
   Color _accentColor = const Color(0xFF0F766E);
+
+  ThemeService() {
+    _loadSettings();
+  }
 
   ThemeMode get themeMode => _themeMode;
   Color get accentColor => _accentColor;
@@ -11,12 +19,42 @@ class ThemeService extends ChangeNotifier {
   void toggleTheme() {
     _themeMode =
         _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    _saveSettings();
     notifyListeners();
   }
 
   void setAccentColor(Color color) {
     _accentColor = color;
+    _saveSettings();
     notifyListeners();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedThemeMode = prefs.getString(_themeModeKey);
+    final savedAccentColor = prefs.getInt(_accentColorKey);
+
+    if (savedThemeMode == 'dark') {
+      _themeMode = ThemeMode.dark;
+    } else if (savedThemeMode == 'light') {
+      _themeMode = ThemeMode.light;
+    }
+
+    if (savedAccentColor != null) {
+      _accentColor = Color(savedAccentColor);
+    }
+
+    notifyListeners();
+  }
+
+  void _saveSettings() {
+    SharedPreferences.getInstance().then((prefs) async {
+      await prefs.setString(
+        _themeModeKey,
+        _themeMode == ThemeMode.dark ? 'dark' : 'light',
+      );
+      await prefs.setInt(_accentColorKey, _accentColor.toARGB32());
+    });
   }
 
   ThemeData getThemeData() {

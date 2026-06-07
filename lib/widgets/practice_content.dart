@@ -405,6 +405,15 @@ class _PracticeContentState extends State<PracticeContent> {
                     _isCheckButtonEnabled &&
                         widget.sentenceManager.hasAvailablePrompt,
                   ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: _isLoading ? null : _fetchRandomSentence,
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text('New sentence'),
+                    ),
+                  ),
                   // Feedback message and button
                   if (_feedback.isNotEmpty) ...[
                     const SizedBox(height: 8),
@@ -418,10 +427,10 @@ class _PracticeContentState extends State<PracticeContent> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    ElevatedButton.icon(
+                    TextButton.icon(
                       onPressed: _showEnhancedFeedback,
                       icon: const Icon(Icons.feedback),
-                      label: const Text('View Detailed Feedback'),
+                      label: const Text('Details'),
                     ),
                   ],
                 ],
@@ -429,12 +438,6 @@ class _PracticeContentState extends State<PracticeContent> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isLoading ? null : _fetchRandomSentence,
-        tooltip: 'Next Sentence',
-        icon: const Icon(Icons.arrow_forward),
-        label: const Text('Next'),
       ),
     );
   }

@@ -264,18 +264,10 @@ class _BookListScreenState extends State<BookListScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Expanded(
-                                    child: Container(
-                                      width: double.infinity,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primaryContainer,
-                                      child: Icon(
-                                        Icons.menu_book,
-                                        size: 64,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                      ),
+                                    child: _buildBookCover(
+                                      context,
+                                      book,
+                                      index,
                                     ),
                                   ),
                                   Padding(
@@ -324,5 +316,94 @@ class _BookListScreenState extends State<BookListScreen> {
                   ),
                 ),
     );
+  }
+
+  Widget _buildBookCover(
+    BuildContext context,
+    BookItem book,
+    int index,
+  ) {
+    final theme = Theme.of(context);
+    final coverColor = _coverColor(context, book, index);
+    final subject = book.subjects.isEmpty ? 'Practice' : book.subjects.first;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      color: coverColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.8),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              _coverIcon(book),
+              size: 22,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            subject.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _coverColor(BuildContext context, BookItem book, int index) {
+    final theme = Theme.of(context);
+    final palette = [
+      theme.colorScheme.tertiaryContainer,
+      theme.colorScheme.secondaryContainer,
+      theme.colorScheme.primaryContainer,
+      theme.colorScheme.surfaceContainerHighest,
+      theme.colorScheme.errorContainer,
+    ];
+
+    return palette[(book.id + index) % palette.length];
+  }
+
+  IconData _coverIcon(BookItem book) {
+    final searchable = [
+      book.title,
+      ...book.subjects,
+    ].join(' ').toLowerCase();
+
+    if (searchable.contains('travel') || searchable.contains('city')) {
+      return Icons.train;
+    }
+    if (searchable.contains('work') || searchable.contains('office')) {
+      return Icons.work_outline;
+    }
+    if (searchable.contains('school') || searchable.contains('study')) {
+      return Icons.school_outlined;
+    }
+    if (searchable.contains('health') || searchable.contains('fitness')) {
+      return Icons.favorite_border;
+    }
+    if (searchable.contains('money') || searchable.contains('shopping')) {
+      return Icons.receipt_long;
+    }
+    if (searchable.contains('conversation') ||
+        searchable.contains('messages')) {
+      return Icons.chat_bubble_outline;
+    }
+    if (searchable.contains('mystery')) {
+      return Icons.search;
+    }
+
+    return Icons.menu_book;
   }
 }

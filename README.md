@@ -24,7 +24,7 @@ The next high-value additions are:
 
 The core practice flows do not depend on OpenAI, ElevenLabs, Gutendex, Project Gutenberg APIs, or unofficial translation endpoints.
 
-- Text and audio practice use the bundled local library in `assets/corpus/books.json`.
+- Text and audio practice use bundled local library packs in `assets/corpus/books.json` and `assets/corpus/original_packs.json`.
 - Generated practice uses `GeneratedSentenceService`, a local sentence generator.
 - Phrase practice uses bundled scenario packs in `assets/translations/phrase_packs.json`.
 - Audio playback uses platform text-to-speech through `flutter_tts`.

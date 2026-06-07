@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:confetti/confetti.dart';
-import '../services/feedback_service.dart';
 
-class EnhancedFeedback extends StatefulWidget {
+import 'app_surface.dart';
+
+class EnhancedFeedback extends StatelessWidget {
   final String userInput;
   final String correctSentence;
   final bool isCorrect;
@@ -15,232 +15,99 @@ class EnhancedFeedback extends StatefulWidget {
   });
 
   @override
-  State<EnhancedFeedback> createState() => _EnhancedFeedbackState();
-}
-
-class _EnhancedFeedbackState extends State<EnhancedFeedback>
-    with SingleTickerProviderStateMixin {
-  late ConfettiController _confettiController;
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<Offset> _slideAnimation;
-  final FeedbackService _feedbackService = FeedbackService();
-
-  @override
-  void initState() {
-    super.initState();
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 2));
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.elasticOut,
-      ),
-    );
-
-    _rotationAnimation = Tween<double>(begin: -0.2, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutBack,
-      ),
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, -0.5),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutBack,
-      ),
-    );
-
-    // Initialize feedback service
-    _feedbackService.initialize();
-
-    if (widget.isCorrect) {
-      _confettiController.play();
-      _feedbackService.playCorrectSound();
-    } else {
-      _feedbackService.playWrongSound();
-    }
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _confettiController.dispose();
-    _animationController.dispose();
-    _feedbackService.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Confetti animation for correct answers
-        Align(
-          alignment: Alignment.topCenter,
-          child: ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            particleDrag: 0.05,
-            emissionFrequency: 0.05,
-            numberOfParticles: 20,
-            gravity: 0.1,
-            colors: const [
-              Colors.green,
-              Colors.blue,
-              Colors.pink,
-              Colors.orange,
-              Colors.purple
-            ],
-          ),
-        ),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final statusColor = isCorrect ? colorScheme.primary : colorScheme.error;
 
-        // Animated feedback content
-        SlideTransition(
-          position: _slideAnimation,
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: RotationTransition(
-              turns: _rotationAnimation,
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: widget.isCorrect
-                      ? Colors.green.shade50
-                      : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                    color: widget.isCorrect ? Colors.green : Colors.red,
-                    width: 1.0,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: widget.isCorrect
-                          ? Colors.green.withValues(alpha: 0.3)
-                          : Colors.red.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Feedback header with bounce animation
-                    Row(
-                      children: [
-                        AnimatedBuilder(
-                          animation: _animationController,
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: 1.0 + (_animationController.value * 0.2),
-                              child: Icon(
-                                widget.isCorrect
-                                    ? Icons.check_circle
-                                    : Icons.error,
-                                color: widget.isCorrect
-                                    ? Colors.green
-                                    : Colors.red,
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.isCorrect ? 'Correct!' : 'Not quite right',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: widget.isCorrect ? Colors.green : Colors.red,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Only show difference analysis for incorrect answers
-                    if (!widget.isCorrect) ...[
-                      const Text(
-                        'Here\'s what was different:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildDifferenceHighlight(
-                          widget.userInput, widget.correctSentence),
-                    ],
-
-                    // Show encouragement for correct answers
-                    if (widget.isCorrect) ...[
-                      const Text(
-                        'Great job! Keep practicing to improve your skills.',
-                        style: TextStyle(color: Colors.green),
-                      ),
-                    ],
-                  ],
+    return AppSurface(
+      color: isCorrect
+          ? colorScheme.primaryContainer.withValues(alpha: 0.36)
+          : colorScheme.errorContainer.withValues(alpha: 0.48),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isCorrect ? Icons.check_circle : Icons.error_outline,
+                color: statusColor,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isCorrect ? 'Matched exactly' : 'Review the differences',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: statusColor,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 14),
+          if (isCorrect)
+            Text(
+              'Your answer matches the prompt. Move on while the rhythm is fresh.',
+              style: theme.textTheme.bodyMedium,
+            )
+          else ...[
+            _buildDifferenceBlock(
+              context,
+              title: 'Your answer',
+              words: _highlightDifferences(
+                _splitWords(userInput),
+                _splitWords(correctSentence),
+                isUserInput: true,
+                theme: theme,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildDifferenceBlock(
+              context,
+              title: 'Expected answer',
+              words: _highlightDifferences(
+                _splitWords(correctSentence),
+                _splitWords(userInput),
+                isUserInput: false,
+                theme: theme,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
-  Widget _buildDifferenceHighlight(String userInput, String correctSentence) {
-    // Simple difference highlighting - in a real app, you'd use a more sophisticated algorithm
-    final List<String> userWords = userInput.split(' ');
-    final List<String> correctWords = correctSentence.split(' ');
+  Widget _buildDifferenceBlock(
+    BuildContext context, {
+    required String title,
+    required List<TextSpan> words,
+  }) {
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Your input
-        const Text(
-          'Your input:',
-          style: TextStyle(fontWeight: FontWeight.w500),
+        Text(
+          title,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+          ),
         ),
+        const SizedBox(height: 6),
         Container(
-          padding: const EdgeInsets.all(8.0),
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4.0),
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(color: Colors.black),
-              children: _highlightDifferences(userWords, correctWords, true),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // Correct sentence
-        const Text(
-          'Correct sentence:',
-          style: TextStyle(fontWeight: FontWeight.w500),
-        ),
-        Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4.0),
-          ),
-          child: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: Colors.black),
-              children: _highlightDifferences(correctWords, userWords, false),
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+              children: words,
             ),
           ),
         ),
@@ -248,38 +115,49 @@ class _EnhancedFeedbackState extends State<EnhancedFeedback>
     );
   }
 
+  List<String> _splitWords(String value) {
+    return value.trim().split(RegExp(r'\s+')).where((word) {
+      return word.trim().isNotEmpty;
+    }).toList();
+  }
+
   List<TextSpan> _highlightDifferences(
     List<String> primaryWords,
-    List<String> comparisonWords,
-    bool isUserInput,
-  ) {
-    List<TextSpan> spans = [];
+    List<String> comparisonWords, {
+    required bool isUserInput,
+    required ThemeData theme,
+  }) {
+    final spans = <TextSpan>[];
+    final colorScheme = theme.colorScheme;
+    final differenceColor =
+        isUserInput ? colorScheme.error : colorScheme.primary;
+    final baseColor = colorScheme.onSurface;
 
-    for (int i = 0; i < primaryWords.length; i++) {
-      bool isDifferent = i >= comparisonWords.length ||
-          primaryWords[i].toLowerCase() != comparisonWords[i].toLowerCase();
+    for (var index = 0; index < primaryWords.length; index++) {
+      final word = primaryWords[index];
+      final comparisonWord =
+          index < comparisonWords.length ? comparisonWords[index] : '';
+      final isDifferent =
+          _normalizeWord(word) != _normalizeWord(comparisonWord);
 
       spans.add(
         TextSpan(
-          text: '${primaryWords[i]} ',
+          text: '$word ',
           style: TextStyle(
-            color: isDifferent
-                ? (isUserInput ? Colors.red : Colors.green)
-                : Colors.black,
-            fontWeight: isDifferent ? FontWeight.bold : FontWeight.normal,
+            color: isDifferent ? differenceColor : baseColor,
+            fontWeight: isDifferent ? FontWeight.w700 : FontWeight.normal,
             decoration: isDifferent ? TextDecoration.underline : null,
           ),
         ),
       );
     }
 
-    // If the correct sentence has more words than user input
     if (!isUserInput && comparisonWords.length < primaryWords.length) {
       spans.add(
-        const TextSpan(
-          text: ' (You missed some words)',
+        TextSpan(
+          text: '(missing words)',
           style: TextStyle(
-            color: Colors.orange,
+            color: colorScheme.tertiary,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -287,5 +165,9 @@ class _EnhancedFeedbackState extends State<EnhancedFeedback>
     }
 
     return spans;
+  }
+
+  String _normalizeWord(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '').trim();
   }
 }

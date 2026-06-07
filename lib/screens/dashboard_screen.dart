@@ -82,14 +82,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Progress'),
-        actions: [
-          // Add reset button in the app bar
-          IconButton(
-            icon: const Icon(Icons.delete_forever),
-            tooltip: 'Reset All Progress',
-            onPressed: _showResetConfirmationDialog,
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -619,54 +611,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     } else {
       final years = (difference.inDays / 365).floor();
       return "$years ${years == 1 ? 'year' : 'years'} ago";
-    }
-  }
-
-  Future<void> _showResetConfirmationDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Reset All Progress'),
-          content: const SingleChildScrollView(
-            child: Text(
-              'This will erase all your progress, achievements, and statistics. '
-              'This action cannot be undone. Are you sure you want to continue?',
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Reset Everything'),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _resetAllProgress();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _resetAllProgress() async {
-    await _progressService.resetAllProgress();
-    if (mounted) {
-      setState(() {
-        // Refresh UI after reset
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('All progress has been reset'),
-          duration: Duration(seconds: 2),
-        ),
-      );
     }
   }
 }

@@ -301,6 +301,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
                   labelText: 'Type or speak what you see/hear',
                   isCheckButtonEnabled: _isCheckButtonEnabled &&
                       _sentenceManager.hasAvailablePrompt,
+                  onNext: _isLoading ? null : _getNextSentence,
+                  nextLabel: 'New sentence',
                 ),
                 if (_feedback.isNotEmpty) ...[
                   const SizedBox(height: 8),
@@ -314,23 +316,16 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ElevatedButton.icon(
+                  TextButton.icon(
                     onPressed: _showEnhancedFeedback,
                     icon: const Icon(Icons.feedback),
-                    label: const Text('View Detailed Feedback'),
+                    label: const Text('Details'),
                   ),
                 ],
-                const SizedBox(height: 32), // Add spacing at the bottom
               ],
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _getNextSentence,
-        tooltip: 'Next Sentence',
-        icon: const Icon(Icons.arrow_forward),
-        label: const Text('Next'),
       ),
     );
   }

@@ -7,6 +7,8 @@ class SpeechInputArea extends StatefulWidget {
   final String feedback;
   final String labelText;
   final bool isCheckButtonEnabled;
+  final VoidCallback? onNext;
+  final String nextLabel;
 
   const SpeechInputArea({
     super.key,
@@ -15,6 +17,8 @@ class SpeechInputArea extends StatefulWidget {
     required this.feedback,
     this.labelText = 'Speak what you see/hear to score points',
     this.isCheckButtonEnabled = true,
+    this.onNext,
+    this.nextLabel = 'New prompt',
   });
 
   @override
@@ -33,21 +37,28 @@ class SpeechInputAreaState extends State<SpeechInputArea> {
   }
 
   Future<void> _initializeSpeech() async {
-    _isInitialized = await _speech.initialize(
+    final isInitialized = await _speech.initialize(
       onStatus: (status) {
-        if (status == 'done') {
+        if (!mounted) return;
+        if (status == 'done' || status == 'notListening') {
           setState(() {
             _isListening = false;
           });
         }
       },
       onError: (error) {
+        if (!mounted) return;
         setState(() {
           _isListening = false;
         });
       },
     );
-    setState(() {});
+
+    if (!mounted) return;
+
+    setState(() {
+      _isInitialized = isInitialized;
+    });
   }
 
   void _startListening() async {
@@ -65,12 +76,14 @@ class SpeechInputAreaState extends State<SpeechInputArea> {
     }
 
     try {
+      if (!mounted) return;
       setState(() {
         _isListening = true;
       });
 
       await _speech.listen(
         onResult: (result) {
+          if (!mounted) return;
           setState(() {
             widget.controller.text = result.recognizedWords;
           });
@@ -82,6 +95,7 @@ class SpeechInputAreaState extends State<SpeechInputArea> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isListening = false;
       });
@@ -93,10 +107,12 @@ class SpeechInputAreaState extends State<SpeechInputArea> {
 
     try {
       await _speech.stop();
+      if (!mounted) return;
       setState(() {
         _isListening = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isListening = false;
       });
@@ -157,6 +173,17 @@ class SpeechInputAreaState extends State<SpeechInputArea> {
               ),
             ],
           ),
+          if (widget.onNext != null) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: widget.onNext,
+                icon: const Icon(Icons.arrow_forward),
+                label: Text(widget.nextLabel),
+              ),
+            ),
+          ],
         ],
       ),
     );

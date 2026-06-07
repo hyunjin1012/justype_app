@@ -453,29 +453,39 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildBookCard(BuildContext context, int index) {
     final List<Map<String, dynamic>> recommendedBooks = [
       {
-        'id': '1009',
-        'title': 'After Midnight',
+        'id': '1020',
+        'title': 'Missed Train',
         'author': 'JusType Originals',
+        'subject': 'Travel',
+        'icon': Icons.train,
       },
       {
-        'id': '1010',
-        'title': 'Train Platform',
+        'id': '1025',
+        'title': 'Cafe Argument',
         'author': 'JusType Originals',
+        'subject': 'Conversation',
+        'icon': Icons.chat_bubble_outline,
       },
       {
-        'id': '1011',
-        'title': 'Cafe Replies',
+        'id': '1030',
+        'title': 'Morning Brief',
         'author': 'JusType Originals',
+        'subject': 'Work',
+        'icon': Icons.work_outline,
       },
       {
-        'id': '1015',
-        'title': 'Tiny Mystery',
+        'id': '1037',
+        'title': 'Phone Call',
         'author': 'JusType Originals',
+        'subject': 'Family',
+        'icon': Icons.call_outlined,
       },
       {
-        'id': '1019',
-        'title': 'Classic Verse',
-        'author': 'Public Domain Classics',
+        'id': '1058',
+        'title': 'Elevator Pitch',
+        'author': 'JusType Originals',
+        'subject': 'Confidence',
+        'icon': Icons.record_voice_over,
       },
     ];
 
@@ -501,20 +511,44 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               height: 136,
               width: double.infinity,
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
+                color: _homeCoverColor(context, index),
                 borderRadius: BorderRadius.circular(8.0),
                 border: Border.all(
                   color: Theme.of(context).dividerTheme.color ??
                       Theme.of(context).colorScheme.outlineVariant,
                 ),
               ),
-              child: Center(
-                child: Icon(
-                  Icons.menu_book,
-                  size: 44,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withValues(alpha: 0.82),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      book['icon'],
+                      size: 22,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    book['subject'],
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 8),
@@ -540,5 +574,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Color _homeCoverColor(BuildContext context, int index) {
+    final theme = Theme.of(context);
+    final palette = [
+      theme.colorScheme.tertiaryContainer,
+      theme.colorScheme.secondaryContainer,
+      theme.colorScheme.primaryContainer,
+      theme.colorScheme.surfaceContainerHighest,
+      theme.colorScheme.errorContainer,
+    ];
+
+    return palette[index % palette.length];
   }
 }
