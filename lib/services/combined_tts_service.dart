@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
-import 'elevenlabs_service.dart';
 import 'tts_service.dart';
 
 class CombinedTtsService {
-  final ElevenLabsService _elevenLabsService = ElevenLabsService();
   final TtsService _ttsService = TtsService();
   bool _isSpeaking = false;
   bool _isLoading = false;
   Function? _onStateChangeCallback;
   bool _isInitialized = false;
-  bool _isUsingElevenLabs = true;
 
   bool get isSpeaking => _isSpeaking;
   bool get isLoading => _isLoading;
 
   Future<void> initialize() async {
     try {
-      await _elevenLabsService.initialize();
       await _ttsService.initialize();
       _isInitialized = true;
     } catch (e) {
@@ -51,37 +47,15 @@ class CombinedTtsService {
     });
 
     try {
-      // Try ElevenLabs first
-      _isUsingElevenLabs = true;
-      final success = await _elevenLabsService.speak(text, onStateChange: () {
-        if (_isUsingElevenLabs) {
-          _isSpeaking = _elevenLabsService.isSpeaking;
-          _isLoading = false;
-          _safeCallback();
-        }
-      });
-
-      // If ElevenLabs failed, fall back to Flutter TTS
-      if (!success) {
-        _isUsingElevenLabs = false;
-        await _ttsService.speak(text, onStateChange: () {
-          if (!_isUsingElevenLabs) {
-            _isSpeaking = _ttsService.isSpeaking;
-            _isLoading = false;
-            _safeCallback();
-          }
-        });
-      } else {}
-    } catch (e) {
-      // Fall back to Flutter TTS
-      _isUsingElevenLabs = false;
       await _ttsService.speak(text, onStateChange: () {
-        if (!_isUsingElevenLabs) {
-          _isSpeaking = _ttsService.isSpeaking;
-          _isLoading = false;
-          _safeCallback();
-        }
+        _isSpeaking = _ttsService.isSpeaking;
+        _isLoading = false;
+        _safeCallback();
       });
+    } catch (e) {
+      _isSpeaking = false;
+      _isLoading = false;
+      _safeCallback();
     }
   }
 
@@ -95,13 +69,6 @@ class CombinedTtsService {
       return;
     }
 
-    // Stop both services to ensure clean state
-    try {
-      await _elevenLabsService.stop();
-    } catch (e) {
-      debugPrint('CombinedTtsService: Error stopping ElevenLabs: $e');
-    }
-
     try {
       await _ttsService.stop();
     } catch (e) {
@@ -110,7 +77,6 @@ class CombinedTtsService {
 
     _isSpeaking = false;
     _isLoading = false;
-    _isUsingElevenLabs = true;
 
     _safeCallback();
   }
@@ -118,12 +84,6 @@ class CombinedTtsService {
   Future<void> dispose() async {
     if (!_isInitialized) {
       return;
-    }
-
-    try {
-      await _elevenLabsService.dispose();
-    } catch (e) {
-      debugPrint('CombinedTtsService: Error disposing ElevenLabs: $e');
     }
 
     try {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/practice_content.dart';
-import '../widgets/practice_input_area.dart';
+import '../widgets/speech_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../services/sentence_manager.dart';
 import 'package:go_router/go_router.dart';
@@ -25,13 +25,13 @@ class _TextChallengeScreenState extends State<TextChallengeScreen> {
         sentence: sentence,
         textStyle: Theme.of(context).textTheme.titleLarge,
       ),
-      // Use the shared input area widget with button state
+      // Use the speech input area widget instead of typing
       inputArea: (controller, checkAnswer, feedback, isCheckButtonEnabled) =>
-          PracticeInputArea(
+          SpeechInputArea(
         controller: controller,
         onCheck: checkAnswer,
         feedback: feedback,
-        labelText: 'Type the sentence above',
+        labelText: 'Type or speak the sentence above',
         isCheckButtonEnabled: isCheckButtonEnabled,
       ),
       onRefresh: () {

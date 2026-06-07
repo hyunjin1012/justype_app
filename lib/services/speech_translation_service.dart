@@ -1,23 +1,28 @@
 import 'package:flutter/foundation.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'openai_translation_service.dart';
+import 'local_translation_service.dart';
 
 class SpeechTranslationService extends ChangeNotifier {
   final SpeechToText _speech = SpeechToText();
-  final OpenAITranslationService _translator = OpenAITranslationService();
+  final LocalTranslationService _translator = LocalTranslationService();
 
   bool _isListening = false;
   bool _isInitialized = false;
   String _lastRecognizedWords = '';
   String _translatedText = '';
-  String _sourceLanguage = 'en';
+  String _sourceLanguage = 'es';
   String _targetLanguage = 'en';
+  String _scenario = 'All';
+  TranslationPrompt? _currentPrompt;
   String? _error;
 
   bool get isListening => _isListening;
   bool get isInitialized => _isInitialized;
   String get lastRecognizedWords => _lastRecognizedWords;
   String get translatedText => _translatedText;
+  String get sourcePromptText => _currentPrompt?.sourceText ?? '';
+  String get targetPromptText => _currentPrompt?.targetText ?? '';
+  String get scenario => _scenario;
   String? get error => _error;
 
   Function(String)? _onTranslatedTextChanged;
@@ -57,7 +62,28 @@ class SpeechTranslationService extends ChangeNotifier {
 
   void setLanguages(String source, String target) {
     _sourceLanguage = source;
-    _targetLanguage = 'en';
+    _targetLanguage = target;
+    _scenario = 'All';
+    _currentPrompt = null;
+    notifyListeners();
+  }
+
+  void setScenario(String scenario) {
+    _scenario = scenario;
+    _currentPrompt = null;
+    notifyListeners();
+  }
+
+  Future<List<String>> getScenarios() {
+    return _translator.getScenarios(_sourceLanguage);
+  }
+
+  Future<void> preparePrompt() async {
+    _currentPrompt = await _translator.getRandomPrompt(
+        _sourceLanguage, _targetLanguage, _scenario);
+    _lastRecognizedWords = '';
+    _translatedText = '';
+    _onTranslatedTextChanged?.call(_translatedText);
     notifyListeners();
   }
 
@@ -85,9 +111,11 @@ class SpeechTranslationService extends ChangeNotifier {
           }
         },
         localeId: _sourceLanguage,
-        listenMode: ListenMode.confirmation,
-        cancelOnError: true,
-        partialResults: true,
+        listenOptions: SpeechListenOptions(
+          listenMode: ListenMode.confirmation,
+          cancelOnError: true,
+          partialResults: true,
+        ),
       );
     } catch (e) {
       _isListening = false;
@@ -118,7 +146,9 @@ class SpeechTranslationService extends ChangeNotifier {
     if (text.isEmpty) return;
 
     try {
-      if (_sourceLanguage == _targetLanguage) {
+      if (_currentPrompt != null) {
+        _translatedText = _currentPrompt!.targetText;
+      } else if (_sourceLanguage == _targetLanguage) {
         _translatedText = text;
       } else {
         final translation = await _translator.translate(

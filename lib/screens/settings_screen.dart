@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/theme_service.dart';
 import '../services/progress_service.dart';
-import '../services/tts_service.dart';
+import '../widgets/app_surface.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -18,24 +18,11 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final ProgressService _progressService = ProgressService();
-  final TtsService _ttsService = TtsService();
   String _appVersion = '';
-
-  // Local state for settings
-  // double _speechRate = 1.0; // Default value is set to 1.0 (maximum speed)
-  // double _fontSize = 1.0; // Default value
 
   @override
   void initState() {
     super.initState();
-    // Initialize with current values
-    // _speechRate = widget.themeService.speechRate;
-    // _fontSize = widget.themeService.fontSize;
-
-    // Initialize TTS service
-    _ttsService.initialize();
-
-    // Get app version
     _getAppVersion();
   }
 
@@ -50,12 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-      ),
+      child: SectionTitle(title: title),
     );
   }
 
@@ -64,22 +46,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: ListView(
+        padding: const EdgeInsets.only(bottom: 24),
         children: [
-          // Theme section
           _buildSectionHeader(context, 'Appearance'),
-          Card(
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: AppSurface(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
                 children: [
-                  // Dark mode toggle
                   SwitchListTile(
                     title: const Text('Dark Mode'),
                     subtitle: const Text('Switch between light and dark theme'),
@@ -96,8 +74,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-
-                  // Accent color selector
                   ListTile(
                     title: const Text('Accent Color'),
                     subtitle: const Text('Choose your preferred accent color'),
@@ -109,36 +85,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-
-          // Comment out entire Reading & Typing section
-          /*
-          // Reading & Typing settings
-          _buildSectionHeader(context, 'Reading & Typing'),
-          Card(
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                children: [
-                  // Text-to-speech settings commented out
-                  // Font size settings commented out
-                ],
-              ),
-            ),
-          ),
-          */
-
-          // User Data settings
           _buildSectionHeader(context, 'User Data'),
-          Card(
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: AppSurface(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
                 children: [
@@ -153,29 +104,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-
-          // App info
           _buildSectionHeader(context, 'About'),
-          Card(
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: AppSurface(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
                 children: [
-                  const ListTile(
-                    title: Text('Version'),
-                    subtitle: Text('1.0.0'),
-                    leading: Icon(Icons.info_outline),
+                  ListTile(
+                    title: const Text('Version'),
+                    subtitle:
+                        Text(_appVersion.isEmpty ? 'Loading...' : _appVersion),
+                    leading: const Icon(Icons.info_outline),
                   ),
                   ListTile(
                     title: const Text('About'),
                     subtitle: const Text('Learn more about this app'),
                     leading: const Icon(Icons.info),
                     onTap: () {
-                      // Show about dialog
                       showAboutDialog(
                         context: context,
                         applicationName: 'JusType',
@@ -185,11 +132,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           width: 32,
                           height: 32,
                         ),
-                        applicationLegalese: '© 2025 JusType',
+                        applicationLegalese: '© 2026 JusType',
                         children: [
                           const SizedBox(height: 16),
                           const Text(
-                            'An interactive reading and typing application designed to enhance your experience with digital text.',
+                            'An offline-first practice app for text precision, listening recall, and translation shadowing.',
                           ),
                         ],
                       );
@@ -239,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             width: 2,
           ),
           boxShadow: isSelected
-              ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 4)]
+              ? [BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 4)]
               : null,
         ),
       ),

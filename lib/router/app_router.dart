@@ -9,6 +9,7 @@ import '../screens/home_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/speech_translation_screen.dart';
+import '../screens/weak_drill_screen.dart';
 import '../screens/challenges_screen.dart';
 import '../services/theme_service.dart';
 import 'package:provider/provider.dart';
@@ -22,92 +23,98 @@ class AppRouter {
   static const challengesScreen = ChallengesScreen();
   static const booksScreen = BookListScreen();
 
-  static final GoRouter router = GoRouter(
-    initialLocation: '/home',
-    navigatorKey: _rootNavigatorKey,
-    routes: [
-      // Onboarding route (shown only first time)
-      GoRoute(
-        path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
-      ),
+  static GoRouter createRouter(bool showOnboarding) {
+    return GoRouter(
+      initialLocation: showOnboarding ? '/onboarding' : '/home',
+      navigatorKey: _rootNavigatorKey,
+      routes: [
+        // Onboarding route (shown only first time)
+        GoRoute(
+          path: '/onboarding',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
 
-      // Use StatefulShellRoute for bottom navigation
-      StatefulShellRoute(
-        builder: (context, state, navigationShell) {
-          return ScaffoldWithBottomNavBar(navigationShell: navigationShell);
-        },
-        navigatorContainerBuilder: (context, navigationShell, children) {
-          return IndexedStack(
-            index: navigationShell.currentIndex,
-            children: children,
-          );
-        },
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/home',
-                builder: (context, state) => homeScreen,
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/dashboard',
-                builder: (context, state) => dashboardScreen,
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/challenges',
-                builder: (context, state) => challengesScreen,
-              ),
-              GoRoute(
-                path: '/challenges/text',
-                builder: (context, state) => const TextChallengeScreen(),
-              ),
-              GoRoute(
-                path: '/challenges/audio',
-                builder: (context, state) => const AudioChallengeScreen(),
-              ),
-              GoRoute(
-                path: '/challenges/translate',
-                builder: (context, state) => const SpeechTranslationScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/books',
-                builder: (context, state) => booksScreen,
-              ),
-              GoRoute(
-                path: '/book/:id',
-                builder: (context, state) => BookDetailScreen(
-                  bookId: state.pathParameters['id']!,
+        // Use StatefulShellRoute for bottom navigation
+        StatefulShellRoute(
+          builder: (context, state, navigationShell) {
+            return ScaffoldWithBottomNavBar(navigationShell: navigationShell);
+          },
+          navigatorContainerBuilder: (context, navigationShell, children) {
+            return IndexedStack(
+              index: navigationShell.currentIndex,
+              children: children,
+            );
+          },
+          branches: [
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/home',
+                  builder: (context, state) => homeScreen,
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/dashboard',
+                  builder: (context, state) => dashboardScreen,
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/challenges',
+                  builder: (context, state) => challengesScreen,
+                ),
+                GoRoute(
+                  path: '/challenges/text',
+                  builder: (context, state) => const TextChallengeScreen(),
+                ),
+                GoRoute(
+                  path: '/challenges/audio',
+                  builder: (context, state) => const AudioChallengeScreen(),
+                ),
+                GoRoute(
+                  path: '/challenges/translate',
+                  builder: (context, state) => const SpeechTranslationScreen(),
+                ),
+                GoRoute(
+                  path: '/challenges/weak',
+                  builder: (context, state) => const WeakDrillScreen(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/books',
+                  builder: (context, state) => booksScreen,
+                ),
+                GoRoute(
+                  path: '/book/:id',
+                  builder: (context, state) => BookDetailScreen(
+                    bookId: state.pathParameters['id']!,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
 
-      // Routes not part of the bottom navigation
-      GoRoute(
-        path: '/settings',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          return SettingsScreen(
-              themeService: Provider.of<ThemeService>(context));
-        },
-      ),
-    ],
-  );
+        // Routes not part of the bottom navigation
+        GoRoute(
+          path: '/settings',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            return SettingsScreen(
+                themeService: Provider.of<ThemeService>(context));
+          },
+        ),
+      ],
+    );
+  }
 }
 
 // New widget to replace ScaffoldWithNavBar
@@ -126,6 +133,9 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: navigationShell.currentIndex,
+        iconSize: 24,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
         onTap: (index) => _onTap(context, index),
         items: const [
           BottomNavigationBarItem(
@@ -142,7 +152,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.library_books),
-            label: 'Books',
+            label: 'Library',
           ),
         ],
       ),

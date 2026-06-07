@@ -126,8 +126,8 @@ class _EnhancedFeedbackState extends State<EnhancedFeedback>
                   boxShadow: [
                     BoxShadow(
                       color: widget.isCorrect
-                          ? Colors.green.withOpacity(0.3)
-                          : Colors.red.withOpacity(0.3),
+                          ? Colors.green.withValues(alpha: 0.3)
+                          : Colors.red.withValues(alpha: 0.3),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),

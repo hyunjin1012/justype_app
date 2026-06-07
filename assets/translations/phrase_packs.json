@@ -1,0 +1,192 @@
+{
+  "en": [
+    {
+      "source": "Learning improves with small daily sessions.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Clear speech helps the listener understand each sentence.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "A steady routine makes practice easier to repeat.",
+      "target": "A steady routine makes practice easier to repeat."
+    }
+  ],
+  "es": [
+    {
+      "source": "El aprendizaje mejora con sesiones pequenas cada dia.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Hablar con claridad ayuda al oyente a entender cada frase.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Una rutina constante hace que la practica sea mas facil de repetir.",
+      "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Necesito comprar un boleto para el proximo tren.",
+      "target": "I need to buy a ticket for the next train."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Puede indicarme donde esta la puerta de embarque.",
+      "target": "Can you show me where the boarding gate is."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Tengo experiencia trabajando con equipos pequenos.",
+      "target": "I have experience working with small teams."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Me gustaria explicar por que soy una buena opcion.",
+      "target": "I would like to explain why I am a good fit."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Tengo una pregunta sobre la tarea de hoy.",
+      "target": "I have a question about today's assignment."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Voy a preparar la cena despues de terminar mi practica.",
+      "target": "I will make dinner after I finish my practice."
+    }
+  ],
+  "fr": [
+    {
+      "source": "L apprentissage progresse avec de courtes seances quotidiennes.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Une parole claire aide l auditeur a comprendre chaque phrase.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Une routine stable rend la pratique plus facile a repeter.",
+      "target": "A steady routine makes practice easier to repeat."
+    }
+  ],
+  "de": [
+    {
+      "source": "Lernen wird durch kleine tagliche Ubungen besser.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Klare Sprache hilft dem Zuhorer, jeden Satz zu verstehen.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Eine feste Routine macht das Uben leichter zu wiederholen.",
+      "target": "A steady routine makes practice easier to repeat."
+    }
+  ],
+  "it": [
+    {
+      "source": "L apprendimento migliora con piccole sessioni quotidiane.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Un parlare chiaro aiuta l ascoltatore a capire ogni frase.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Una routine costante rende la pratica piu facile da ripetere.",
+      "target": "A steady routine makes practice easier to repeat."
+    }
+  ],
+  "ja": [
+    {
+      "source": "Mainichi no chiisana renshu de gakushu wa yoku narimasu.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Hakkiri hanasu to kikite wa bun o rikai shiyasuku narimasu.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Anteishita shukan wa renshu o kurikaeshi yasuku shimasu.",
+      "target": "A steady routine makes practice easier to repeat."
+    }
+  ],
+  "zh": [
+    {
+      "source": "Meitian duan shijian lianxi neng bangzhu xuexi jinbu.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Qingchu de shuohua bangzhu tingzhe lijie mei ge juzi.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Wending de xiguan rang lianxi geng rongyi chongfu.",
+      "target": "A steady routine makes practice easier to repeat."
+    }
+  ],
+  "ru": [
+    {
+      "source": "Obuchenie stanovitsya luchshe blagodarya nebolshim ezhednevnym zanyatiyam.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Chetkaya rech pomogaet slushatelyu ponyat kazhdoe predlozhenie.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Ustoychivaya rutina delaet praktiku prosche dlya povtoreniya.",
+      "target": "A steady routine makes practice easier to repeat."
+    }
+  ],
+  "ar": [
+    {
+      "source": "Al taallum yatahasan maa jalsat saghira yawmiyya.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Al kalam al wadih yusaeid al mustami ala fahm kull jumlah.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Al rotina al thabita tajal al mumarasa ashal lil tikrar.",
+      "target": "A steady routine makes practice easier to repeat."
+    }
+  ],
+  "ko": [
+    {
+      "source": "Maeil jageun yeonseubeuro baeumi deo joajimnida.",
+      "target": "Learning improves with small daily sessions."
+    },
+    {
+      "source": "Bunmyeonghan mareun deutneun sarami gak munjangeul ihaehage dowajumnida.",
+      "target": "Clear speech helps the listener understand each sentence."
+    },
+    {
+      "source": "Anjeongdoen routine eun yeonseubeul deo swipge banbokhage hamnida.",
+      "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Daeum gicha pyoreul sago sipseumnida.",
+      "target": "I would like to buy a ticket for the next train."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Jeoneun jageun tim gwa hamkke ilhae bon gyeongheomi itseumnida.",
+      "target": "I have experience working with small teams."
+    },
+    {
+      "scenario": "Classroom",
+      "source": "Oneul sukje e daehae jilmuni itseumnida.",
+      "target": "I have a question about today's assignment."
+    },
+    {
+      "scenario": "Daily Life",
+      "source": "Yeonseubeul kkeunnaego jeonyeok eul junbi hal geoyeyo.",
+      "target": "I will make dinner after I finish my practice."
+    }
+  ]
+}

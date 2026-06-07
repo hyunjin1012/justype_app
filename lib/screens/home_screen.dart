@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/achievement_banner.dart';
+import '../widgets/app_surface.dart';
 import '../services/progress_service.dart';
-import '../widgets/shimmer_loading_effect.dart';
 import 'package:provider/provider.dart';
 import '../services/theme_service.dart';
 
@@ -70,7 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('JusType'),
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings),
@@ -92,6 +91,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: _buildDailyGoalCard(context),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: _buildSkillSnapshot(context),
+                    ),
 
                     // Show achievement banner if there are recent achievements
                     if (showAchievementBanner && achievements.isNotEmpty)
@@ -112,14 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
 
                     // Practice modes section
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                      child: Text(
-                        'Start Typing',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                      child: SectionTitle(title: 'Today\'s Practice'),
                     ),
 
                     // Practice mode cards
@@ -128,17 +126,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Recommended books section
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                      child: Text(
-                        'Explore Stories',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                      child: SectionTitle(
+                        title: 'Explore Stories',
+                        actionLabel: 'View All',
+                        onAction: () => GoRouter.of(context).go('/books'),
                       ),
                     ),
 
                     // Recommended books carousel
                     SizedBox(
-                      height: 200,
+                      height: 224,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -167,63 +164,54 @@ class _HomeScreenState extends State<HomeScreen> {
     final goalText = '$dailyExercises/$dailyGoal sessions';
     final themeService = Provider.of<ThemeService>(context);
 
-    return GestureDetector(
-      onTap: () {
-        // Navigate to dashboard screen
-        GoRouter.of(context).push('/dashboard');
-      },
-      child: Card(
-        elevation: 4,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return AppSurface(
+      onTap: () => GoRouter.of(context).push('/dashboard'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Daily Progress',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    goalText,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
+              Text(
+                'Daily Goal',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: progress > 1.0 ? 1.0 : progress,
-                minHeight: 10,
-                backgroundColor: Colors.grey.shade200,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  progress >= 1.0
-                      ? themeService.accentColor
-                      : Theme.of(context).primaryColor,
-                ),
+              Text(
+                goalText,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 8),
-              if (progress >= 1.0)
-                Text(
-                  'Daily goal completed! Great job!',
-                  style: TextStyle(
-                    color: themeService.accentColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              else
-                Text(
-                  'Keep going! You\'re doing great!',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: progress > 1.0 ? 1.0 : progress,
+            minHeight: 10,
+            backgroundColor: Colors.grey.shade200,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              progress >= 1.0
+                  ? themeService.accentColor
+                  : Theme.of(context).primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (progress >= 1.0)
+            Text(
+              'Daily goal completed! Great job!',
+              style: TextStyle(
+                color: themeService.accentColor,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          else
+            Text(
+              'A short session is enough to keep the streak alive.',
+              style: TextStyle(
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -231,123 +219,263 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPracticeModeCards(BuildContext context) {
     final List<Map<String, dynamic>> practiceModes = [
       {
-        'title': 'Challenges',
-        'description': 'Try text, audio, or translation typing sessions',
-        'icon': Icons.games,
+        'title': 'Text',
+        'description': 'Read, type, or dictate precise sentences',
+        'icon': Icons.keyboard,
         'color': Colors.blue.shade100,
-        'route': '/challenges',
+        'route': '/challenges/text',
       },
       {
-        'title': 'Story Collection',
-        'description': 'Type through classic stories and inspiring quotes',
-        'icon': Icons.library_books,
+        'title': 'Listening',
+        'description': 'Hear a line and reproduce it accurately',
+        'icon': Icons.hearing,
+        'color': Colors.green.shade100,
+        'route': '/challenges/audio',
+      },
+      {
+        'title': 'Translate',
+        'description': 'Practice local phrase packs by voice or text',
+        'icon': Icons.translate,
+        'color': Colors.orange.shade100,
+        'route': '/challenges/translate',
+      },
+      {
+        'title': 'Weak Drills',
+        'description': _progressService.getWeakPrompts().isEmpty
+            ? 'Missed prompts will collect here'
+            : 'Review ${_progressService.getWeakPrompts().length} missed prompts',
+        'icon': Icons.psychology,
         'color': Colors.purple.shade100,
-        'route': '/books',
+        'route': '/challenges/weak',
       },
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.5,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: practiceModes.length,
-      itemBuilder: (context, index) {
-        final mode = practiceModes[index];
-        return GestureDetector(
-          onTap: () => GoRouter.of(context).go(mode['route']),
-          child: Card(
-            elevation: 2,
-            color: mode['color'],
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
+    final Map<String, dynamic> libraryMode = {
+      'title': 'Library',
+      'description': 'Browse bundled offline practice passages',
+      'icon': Icons.library_books,
+      'color': Colors.teal.shade100,
+      'route': '/books',
+    };
+
+    return Column(
+      children: [
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 1.32,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: practiceModes.length,
+          itemBuilder: (context, index) {
+            final mode = practiceModes[index];
+            return AppSurface(
+              onTap: () => GoRouter.of(context).go(mode['route']),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    mode['icon'],
-                    size: 28,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.black87
-                        : null,
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: (mode['color'] as Color).withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      mode['icon'],
+                      size: 21,
+                      color: Colors.black87,
+                    ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
                     mode['title'],
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.black87
-                          : null,
-                    ),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 2),
                   Text(
                     mode['description'],
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.black87
-                          : null,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: AppSurface(
+            onTap: () => GoRouter.of(context).go(libraryMode['route']),
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color:
+                        (libraryMode['color'] as Color).withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    libraryMode['icon'],
+                    size: 22,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        libraryMode['title'],
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        libraryMode['description'],
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSkillSnapshot(BuildContext context) {
+    final accuracy = _progressService.getAccuracyPercentage();
+    final attempts = _progressService.getAnswerAttempts();
+
+    return Row(
+      children: [
+        _buildMetricPill(
+          context,
+          label: 'Accuracy',
+          value: attempts == 0 ? '--' : '${accuracy.round()}%',
+          icon: Icons.track_changes,
+          color: Colors.indigo,
+        ),
+        const SizedBox(width: 8),
+        _buildMetricPill(
+          context,
+          label: 'Streak',
+          value: '${_progressService.getCurrentStreak()}d',
+          icon: Icons.local_fire_department,
+          color: Colors.deepOrange,
+        ),
+        const SizedBox(width: 8),
+        _buildMetricPill(
+          context,
+          label: 'Sessions',
+          value: '${_progressService.getTotalExercises()}',
+          icon: Icons.bolt,
+          color: Colors.teal,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricPill(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                  ),
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelSmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildBookCard(BuildContext context, int index) {
-    // Example book data - in a real app, you would fetch this from a service
     final List<Map<String, dynamic>> recommendedBooks = [
       {
-        'id': '1342', // Pride and Prejudice
-        'title': 'Pride and Prejudice',
-        'author': 'Jane Austen',
-        'coverUrl':
-            'https://www.gutenberg.org/cache/epub/1342/pg1342.cover.medium.jpg',
+        'id': '1001',
+        'title': 'Clarity Notes',
+        'author': 'JusType Library',
       },
       {
-        'id': '84', // Frankenstein
-        'title': 'Frankenstein',
-        'author': 'Mary Shelley',
-        'coverUrl':
-            'https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg',
+        'id': '1002',
+        'title': 'Workshop Ledger',
+        'author': 'JusType Library',
       },
       {
-        'id': '11', // Alice's Adventures in Wonderland
-        'title': 'Alice\'s Adventures in Wonderland',
-        'author': 'Lewis Carroll',
-        'coverUrl':
-            'https://www.gutenberg.org/cache/epub/11/pg11.cover.medium.jpg',
+        'id': '1003',
+        'title': 'City Sketches',
+        'author': 'JusType Library',
       },
       {
-        'id': '1661', // The Adventures of Sherlock Holmes
-        'title': 'The Adventures of Sherlock Holmes',
-        'author': 'Arthur Conan Doyle',
-        'coverUrl':
-            'https://www.gutenberg.org/cache/epub/1661/pg1661.cover.medium.jpg',
+        'id': '1004',
+        'title': 'Kitchen Practice',
+        'author': 'JusType Library',
       },
       {
-        'id': '2701', // Moby Dick
-        'title': 'Moby Dick',
-        'author': 'Herman Melville',
-        'coverUrl':
-            'https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg',
+        'id': '1005',
+        'title': 'Studio Log',
+        'author': 'JusType Library',
       },
     ];
 
@@ -364,52 +492,28 @@ class _HomeScreenState extends State<HomeScreen> {
         GoRouter.of(context).push('/book/${book['id']}');
       },
       child: Container(
-        width: 120,
+        width: 132,
         margin: const EdgeInsets.only(right: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Book cover
-            Expanded(
-              child: ClipRRect(
+            Container(
+              height: 136,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(8.0),
-                child: FutureBuilder(
-                  // Force a delay to show the skeleton loader
-                  future: Future.delayed(const Duration(milliseconds: 1500),
-                      () async {
-                    // Preload the image to avoid the blank state
-                    final imageProvider = NetworkImage(book['coverUrl']);
-                    try {
-                      // This will start loading the image
-                      if (mounted && context.mounted) {
-                        await precacheImage(imageProvider, context);
-                      }
-                      return imageProvider;
-                    } catch (e) {
-                      // Return null if there's an error loading the image
-                      return null;
-                    }
-                  }),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting ||
-                        !snapshot.hasData) {
-                      return _buildSkeletonLoader();
-                    }
-
-                    return Image(
-                      image: snapshot.data as ImageProvider,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey.shade200,
-                          child: const Center(
-                            child: Icon(Icons.book, size: 40),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                border: Border.all(
+                  color: Theme.of(context).dividerTheme.color ??
+                      Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.menu_book,
+                  size: 44,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
             ),
@@ -417,34 +521,22 @@ class _HomeScreenState extends State<HomeScreen> {
             // Book title
             Text(
               book['title'],
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             // Book author
             Text(
               book['author'],
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSkeletonLoader() {
-    return ShimmerLoadingEffect(
-      child: Container(
-        color: Colors.grey.shade200,
-        width: double.infinity,
-        height: double.infinity,
-        child: const Center(
-          child: Icon(Icons.book, size: 30, color: Colors.grey),
         ),
       ),
     );

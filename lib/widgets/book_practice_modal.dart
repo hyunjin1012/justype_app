@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/book.dart';
 import '../services/practice_service.dart';
 import '../services/combined_tts_service.dart';
-import '../widgets/practice_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/practice_mode_selector.dart';
@@ -10,6 +9,7 @@ import '../services/book_sentence_manager.dart';
 import '../services/progress_service.dart';
 import '../services/feedback_service.dart';
 import 'enhanced_feedback.dart';
+import '../widgets/speech_input_area.dart';
 
 class BookPracticeModal extends StatefulWidget {
   final Book book;
@@ -38,6 +38,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   bool _isCheckButtonEnabled = true;
   final ProgressService _progressService = ProgressService();
   bool _isLoading = false;
+  DateTime? _sessionStartedAt;
 
   @override
   void initState() {
@@ -52,21 +53,11 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       _isLoading = true;
     });
 
-    // Check if audio challenge is available when in listening mode
-    if (_isListeningMode &&
-        !_progressService.isBooksAudioChallengeAvailableToday()) {
-      setState(() {
-        _isLoading = false;
-        _feedback =
-            "You've already completed your daily Books audio challenge. Please try again tomorrow.";
-      });
-      return;
-    }
-
     await _sentenceManager.initializeWithBook(widget.book);
 
     setState(() {
       _currentSentence = _sentenceManager.currentSentence;
+      _sessionStartedAt = DateTime.now();
       _isLoading = false;
     });
   }
@@ -80,19 +71,6 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   }
 
   void _toggleMode() {
-    // Check if audio challenge is available when switching to listening mode
-    if (!_isListeningMode &&
-        !_progressService.isBooksAudioChallengeAvailableToday()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'You\'ve already completed your daily Books audio challenge. Please try again tomorrow.'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _isListeningMode = !_isListeningMode;
       // Reset visibility when switching to listening mode
@@ -126,6 +104,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
     if (userInput.isEmpty) return;
 
     final currentSentence = _sentenceManager.currentSentence;
+    final wordCount = _countWords(currentSentence);
+    final elapsedSeconds = _elapsedSeconds();
 
     final isCorrect = _practiceService.checkAnswer(userInput, currentSentence);
 
@@ -134,7 +114,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       await _feedbackService.playCorrectSound();
 
       setState(() {
-        _feedback = "Correct! Great job.";
+        _feedback = _buildCompletionMessage(currentSentence);
         _isCheckButtonEnabled = false; // Disable button if answer is correct
       });
 
@@ -143,13 +123,21 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       final practiceType = _isListeningMode ? 'audio' : 'text';
 
       // Update progress using the completeExercise method
-      await _progressService.completeExercise(practiceType: practiceType);
-
-      // If it was an audio challenge, update the last Books audio challenge date
-      if (_isListeningMode) {
-        await _progressService.updateLastBooksAudioChallengeDate();
-      }
+      await _progressService.completeExercise(
+        practiceType: practiceType,
+        prompt: currentSentence,
+        wordCount: wordCount,
+        elapsedSeconds: elapsedSeconds,
+      );
     } else {
+      await _progressService.recordAnswerAttempt(
+        false,
+        practiceType: _isListeningMode ? 'audio' : 'text',
+        prompt: currentSentence,
+        wordCount: wordCount,
+        elapsedSeconds: elapsedSeconds,
+      );
+
       // Play wrong sound and haptic feedback
       await _feedbackService.playWrongSound();
 
@@ -160,19 +148,6 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   }
 
   Future<void> _getNextSentence() async {
-    // Check if audio challenge is available when in listening mode
-    if (_isListeningMode &&
-        !_progressService.isBooksAudioChallengeAvailableToday()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'You\'ve already completed your daily Books audio challenge. Please try again tomorrow.'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _isLoading = true;
       _textController.clear();
@@ -186,9 +161,38 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
 
     setState(() {
       _currentSentence = _sentenceManager.currentSentence;
+      _sessionStartedAt = DateTime.now();
       _isLoading = false;
       _isCheckButtonEnabled = true;
     });
+  }
+
+  String _buildCompletionMessage(String sentence) {
+    final startedAt = _sessionStartedAt;
+    if (startedAt == null) {
+      return "Correct! Great job.";
+    }
+
+    final elapsedSeconds = _elapsedSeconds();
+    final wordCount = _countWords(sentence);
+
+    return "Correct! $wordCount words matched in ${elapsedSeconds}s.";
+  }
+
+  int _elapsedSeconds() {
+    final startedAt = _sessionStartedAt;
+    if (startedAt == null) {
+      return 1;
+    }
+
+    return DateTime.now().difference(startedAt).inSeconds.clamp(1, 999);
+  }
+
+  int _countWords(String sentence) {
+    return sentence
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .length;
   }
 
   void _showEnhancedFeedback() {
@@ -290,11 +294,11 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                PracticeInputArea(
+                SpeechInputArea(
                   controller: _textController,
                   onCheck: _checkAnswer,
                   feedback: "", // Empty feedback since we'll show it separately
-                  labelText: 'Type what you see/hear',
+                  labelText: 'Type or speak what you see/hear',
                   isCheckButtonEnabled: _isCheckButtonEnabled,
                 ),
                 if (_feedback.isNotEmpty) ...[

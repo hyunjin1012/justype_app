@@ -76,7 +76,7 @@ class TtsService {
       return;
     }
 
-    // Explicitly set speaking state before calling the API
+    // Explicitly set speaking state before invoking platform TTS
     _isSpeaking = true;
     _safeCallback();
 
@@ -134,7 +134,7 @@ class TtsService {
       style: ElevatedButton.styleFrom(
         backgroundColor: isSpeaking
             ? Colors.red.shade100
-            : Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
       ),
     );
   }

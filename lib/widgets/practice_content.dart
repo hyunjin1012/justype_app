@@ -3,6 +3,7 @@ import '../services/sentence_manager.dart';
 import '../services/feedback_service.dart';
 import 'package:go_router/go_router.dart';
 import '../services/progress_service.dart';
+import 'app_surface.dart';
 import 'enhanced_feedback.dart';
 
 class PracticeContent extends StatefulWidget {
@@ -50,6 +51,7 @@ class _PracticeContentState extends State<PracticeContent> {
   String _currentBookTitle = "";
   String _currentBookAuthor = "";
   String _currentBookId = "";
+  DateTime? _sessionStartedAt;
 
   @override
   void initState() {
@@ -74,14 +76,19 @@ class _PracticeContentState extends State<PracticeContent> {
     if (userInput.isEmpty) return;
 
     final isCorrect = widget.sentenceManager.checkAnswer(userInput);
+    final currentSentence = widget.sentenceManager.currentSentence;
+    final wordCount = _countWords(currentSentence);
+    final elapsedSeconds = _elapsedSeconds();
 
     if (isCorrect) {
       // Save progress based on practice type
       final practiceType = widget.title.contains('Text') ? 'text' : 'audio';
-      // Check if it's an AI challenge by looking at the source
-      final isAiChallenge = widget.sentenceManager.selectedSource == 'AI';
-      _progressService.completeExercise(
-          practiceType: practiceType, isAiChallenge: isAiChallenge);
+      await _progressService.completeExercise(
+        practiceType: practiceType,
+        prompt: currentSentence,
+        wordCount: wordCount,
+        elapsedSeconds: elapsedSeconds,
+      );
 
       // Play correct sound and haptic feedback
       await _feedbackService.playCorrectSound();
@@ -90,10 +97,20 @@ class _PracticeContentState extends State<PracticeContent> {
       if (mounted) {
         setState(() {
           _isCheckButtonEnabled = false;
-          _feedback = "Correct! Great job.";
+          _feedback = _buildCompletionMessage();
         });
       }
-    } else if (mounted) {
+    } else {
+      await _progressService.recordAnswerAttempt(
+        false,
+        practiceType: widget.title.contains('Text') ? 'text' : 'audio',
+        prompt: currentSentence,
+        wordCount: wordCount,
+        elapsedSeconds: elapsedSeconds,
+      );
+
+      if (!mounted) return;
+
       // Play wrong sound and haptic feedback
       await _feedbackService.playWrongSound();
 
@@ -104,41 +121,6 @@ class _PracticeContentState extends State<PracticeContent> {
   }
 
   Future<void> _fetchRandomSentence() async {
-    // Check if AI challenge is available when AI source is selected
-    if (widget.sentenceManager.selectedSource == 'AI') {
-      bool isAiAvailable = true;
-      if (widget.title.contains('Text')) {
-        isAiAvailable = _progressService.isTextAiChallengeAvailableToday();
-      } else if (widget.title.contains('Audio')) {
-        isAiAvailable = _progressService.isAudioAiChallengeAvailableToday();
-      }
-
-      if (!isAiAvailable) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-            _feedback =
-                "You've already completed your daily AI challenge. Please try again tomorrow or switch to Books mode.";
-          });
-        }
-        return;
-      }
-    }
-
-    // Check if Books audio challenge is available when in audio mode with Books source
-    if (widget.title.contains('Audio') &&
-        widget.sentenceManager.selectedSource == 'Books' &&
-        !_progressService.isBooksAudioChallengeAvailableToday()) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _feedback =
-              "You've already completed your daily Books audio challenge. Please try again tomorrow or switch to AI mode.";
-        });
-      }
-      return;
-    }
-
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -151,6 +133,7 @@ class _PracticeContentState extends State<PracticeContent> {
         _currentBookTitle = "";
         _currentBookAuthor = "";
         _currentBookId = "";
+        _sessionStartedAt = DateTime.now();
       });
     }
 
@@ -172,6 +155,7 @@ class _PracticeContentState extends State<PracticeContent> {
               _currentBookTitle = "";
               _currentBookAuthor = "";
               _currentBookId = "";
+              _sessionStartedAt = DateTime.now();
             }
           });
         }
@@ -193,6 +177,34 @@ class _PracticeContentState extends State<PracticeContent> {
     );
   }
 
+  String _buildCompletionMessage() {
+    final startedAt = _sessionStartedAt;
+    if (startedAt == null) {
+      return "Correct! Great job.";
+    }
+
+    final elapsedSeconds = _elapsedSeconds();
+    final wordCount = _countWords(widget.sentenceManager.currentSentence);
+
+    return "Correct! $wordCount words matched in ${elapsedSeconds}s.";
+  }
+
+  int _elapsedSeconds() {
+    final startedAt = _sessionStartedAt;
+    if (startedAt == null) {
+      return 1;
+    }
+
+    return DateTime.now().difference(startedAt).inSeconds.clamp(1, 999);
+  }
+
+  int _countWords(String sentence) {
+    return sentence
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .length;
+  }
+
   void _navigateToBookDetail(String bookId) {
     if (bookId.isNotEmpty) {
       GoRouter.of(context).push('/book/$bookId');
@@ -201,63 +213,27 @@ class _PracticeContentState extends State<PracticeContent> {
 
   Widget _buildSourceSelector(
       String selectedSource, Function(String) onSourceChanged) {
-    // Check if AI is available based on challenge type
-    final bool isAiAvailable = widget.title.contains('Text')
-        ? _progressService.isTextAiChallengeAvailableToday()
-        : _progressService.isAudioAiChallengeAvailableToday();
-    // Check if Books audio is available
-    final bool isBooksAudioAvailable =
-        _progressService.isBooksAudioChallengeAvailableToday();
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ChoiceChip(
-          label: const Text('Books'),
-          selected: selectedSource == 'Books',
+          label: const Text('Library'),
+          selected: selectedSource == 'Library',
           onSelected: (selected) {
             if (selected) {
-              // Check if Books audio challenge is available when in audio mode
-              if (widget.title.contains('Audio') && !isBooksAudioAvailable) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                        'You\'ve already completed your daily Books audio challenge. Please try again tomorrow.'),
-                    duration: Duration(seconds: 3),
-                  ),
-                );
-                return;
-              }
-              onSourceChanged('Books');
+              onSourceChanged('Library');
             }
           },
-          // Disable the chip if Books audio is not available in audio mode
-          disabledColor:
-              widget.title.contains('Audio') && !isBooksAudioAvailable
-                  ? Colors.grey.shade300
-                  : null,
         ),
         const SizedBox(width: 16),
         ChoiceChip(
-          label: const Text('AI'),
-          selected: selectedSource == 'AI',
+          label: const Text('Generated'),
+          selected: selectedSource == 'Generated',
           onSelected: (selected) {
-            if (selected && isAiAvailable) {
-              onSourceChanged('AI');
-            } else if (selected && !isAiAvailable) {
-              // Show message when trying to select AI when not available
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'You\'ve already completed your daily ${widget.title.contains('Text') ? 'text' : 'audio'} AI challenge. Please try again tomorrow.',
-                  ),
-                  duration: const Duration(seconds: 3),
-                ),
-              );
+            if (selected) {
+              onSourceChanged('Generated');
             }
           },
-          // Disable the chip if AI is not available
-          disabledColor: !isAiAvailable ? Colors.grey.shade300 : null,
         ),
       ],
     );
@@ -271,19 +247,16 @@ class _PracticeContentState extends State<PracticeContent> {
     Function(String) onTap,
     String selectedSource,
   ) {
-    if (selectedSource != 'Books' || title.isEmpty) {
+    if (selectedSource != 'Library' || title.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return GestureDetector(
-      onTap: () => onTap(bookId),
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        margin: const EdgeInsets.only(bottom: 16.0),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: AppSurface(
+        onTap: () => onTap(bookId),
+        padding: const EdgeInsets.all(12.0),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: Row(
           children: [
             const Icon(Icons.book),
@@ -349,7 +322,6 @@ class _PracticeContentState extends State<PracticeContent> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: widget.leading,
         actions: widget.appBarActions,
       ),
@@ -406,22 +378,6 @@ class _PracticeContentState extends State<PracticeContent> {
                                                 .onSurfaceVariant,
                                           ),
                                     ),
-                                    if (widget.sentenceManager.selectedSource ==
-                                        'Books') ...[
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'This may take a few seconds...',
-                                        textAlign: TextAlign.center,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                            ),
-                                      ),
-                                    ],
                                   ],
                                 ),
                               ),

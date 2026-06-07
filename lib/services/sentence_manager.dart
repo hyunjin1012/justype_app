@@ -2,18 +2,18 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../services/practice_service.dart';
-import '../services/gutenberg_service.dart';
+import '../services/local_library_service.dart';
 
 class SentenceManager {
   final PracticeService _practiceService = PracticeService();
-  final GutenbergService _gutenbergService = GutenbergService();
-  String _booksSentence = "";
-  String _aiSentence = "This is a random sentence from AI.";
+  final LocalLibraryService _libraryService = LocalLibraryService();
+  String _librarySentence = "";
+  String _generatedSentence = "Reliable practice starts with one sentence.";
   String _currentSentence = "";
   String _bookTitle = "";
   String _bookAuthor = "";
   String _currentBookId = "";
-  String _selectedSource = 'Books';
+  String _selectedSource = 'Library';
   bool _isLoading = false;
 
   // Getters
@@ -37,41 +37,40 @@ class SentenceManager {
   }) async {
     // Only fetch if we need to (force refresh or empty content)
     if (forceRefresh ||
-        (_selectedSource == 'Books' && _booksSentence.isEmpty) ||
-        (_selectedSource == 'AI' && _aiSentence.isEmpty)) {
+        (_selectedSource == 'Library' && _librarySentence.isEmpty) ||
+        (_selectedSource == 'Generated' && _generatedSentence.isEmpty)) {
       _isLoading = true;
       if (onLoadingChanged != null) {
         onLoadingChanged(true);
       }
 
       try {
-        if (_selectedSource == 'Books') {
-          // Use the shared method from GutenbergService
-          final result = await _gutenbergService.getProcessedSentence();
-          _booksSentence = result['sentence'] ?? "";
+        if (_selectedSource == 'Library') {
+          final result = await _libraryService.getProcessedSentence();
+          _librarySentence = result['sentence'] ?? "";
           _bookTitle = result['title'] ?? "";
           _bookAuthor = result['author'] ?? "";
           _currentBookId = result['bookId'] ?? "";
         } else {
-          // For AI, use the dedicated AI content method
-          final result = await _practiceService.fetchAIContent();
-          _aiSentence = result['content'];
+          final result = await _practiceService.fetchGeneratedContent();
+          _generatedSentence = result['content'];
           _bookTitle = result['bookTitle'];
           _bookAuthor = result['bookAuthor'];
           _currentBookId = result['currentBookId'];
         }
 
-        _currentSentence =
-            _selectedSource == 'Books' ? _booksSentence : _aiSentence;
+        _currentSentence = _selectedSource == 'Library'
+            ? _librarySentence
+            : _generatedSentence;
       } catch (e) {
         debugPrint('Error fetching content: $e');
         // Set fallback content
-        if (_selectedSource == 'AI') {
-          _aiSentence = "The quick brown fox jumps over the lazy dog.";
-          _bookTitle = "AI Generated";
-          _bookAuthor = "AI";
+        if (_selectedSource == 'Generated') {
+          _generatedSentence = "Reliable practice starts with one sentence.";
+          _bookTitle = "Generated Practice";
+          _bookAuthor = "Local sentence engine";
           _currentBookId = "";
-          _currentSentence = _aiSentence;
+          _currentSentence = _generatedSentence;
         }
       } finally {
         _isLoading = false;
@@ -85,7 +84,7 @@ class SentenceManager {
     } else {
       // Just switch to the existing content
       _currentSentence =
-          _selectedSource == 'Books' ? _booksSentence : _aiSentence;
+          _selectedSource == 'Library' ? _librarySentence : _generatedSentence;
 
       if (onContentUpdated != null) {
         onContentUpdated();

@@ -1,10 +1,10 @@
 import '../models/book.dart';
 import 'sentence_manager.dart';
-import 'gutenberg_service.dart';
+import 'local_library_service.dart';
 import 'dart:math';
 
 class BookSentenceManager extends SentenceManager {
-  final GutenbergService _gutenbergService = GutenbergService();
+  final LocalLibraryService _libraryService = LocalLibraryService();
   String _currentSentence = "";
   String _bookId = "";
   String _bookTitle = "";
@@ -42,7 +42,7 @@ class BookSentenceManager extends SentenceManager {
     if (_sentences.isEmpty && _bookId.isNotEmpty) {
       // Only fetch from the service if we don't have sentences but have a book ID
       final result =
-          await _gutenbergService.getProcessedSentence(bookId: _bookId);
+          await _libraryService.getProcessedSentence(bookId: _bookId);
       _currentSentence =
           result['sentence'] ?? "No suitable sentences found in this book.";
     } else if (_sentences.isNotEmpty) {

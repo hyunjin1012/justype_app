@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'ai_service.dart';
+import 'generated_sentence_service.dart';
 
 class PracticeService extends ChangeNotifier {
   int _totalExercises = 0;
-  final AIService _aiService = AIService();
+  final GeneratedSentenceService _generatedSentenceService =
+      GeneratedSentenceService();
 
-  // Renamed method to clarify it's for AI content only
-  Future<Map<String, dynamic>> fetchAIContent() async {
-    return await _aiService.generateSentence();
+  Future<Map<String, dynamic>> fetchGeneratedContent() async {
+    return await _generatedSentenceService.generateSentence();
   }
 
   // Shared method to check answers

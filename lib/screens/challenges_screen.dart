@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/progress_service.dart';
+import '../widgets/app_surface.dart';
 import 'package:provider/provider.dart';
 
 class ChallengesScreen extends StatefulWidget {
@@ -43,72 +44,88 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     final textChallenges = _progressService.getTextChallenges();
     final audioChallenges = _progressService.getAudioChallenges();
     final translationChallenges = _progressService.getTranslationChallenges();
-    final isTextAiAvailable =
-        _progressService.isTextAiChallengeAvailableToday();
-    final isAudioAiAvailable =
-        _progressService.isAudioAiChallengeAvailableToday();
-    final isBooksAudioAvailable =
-        _progressService.isBooksAudioChallengeAvailableToday();
+    final weakPromptCount = _progressService.getWeakPrompts().length;
 
     final List<Map<String, dynamic>> challenges = [
       {
         'title': 'Text Challenge',
-        'description': 'Type the text you see on screen',
+        'description': 'Reproduce clean prompts with keyboard or mic',
         'icon': Icons.menu_book,
         'color': Colors.blue.shade100,
         'route': '/challenges/text',
         'progress': textChallenges,
-        'total': 50, // Example total
-        'subtitle': 'Type what you see',
+        'total': 25,
+        'subtitle': 'Precision practice',
         'modes': [
           {
-            'name': 'Books',
+            'name': 'Library',
             'available': true,
             'limit': 'Unlimited',
           },
           {
-            'name': 'AI',
-            'available': isTextAiAvailable,
-            'limit': 'Once per day',
+            'name': 'Generated',
+            'available': true,
+            'limit': 'Unlimited',
           },
         ],
       },
       {
         'title': 'Audio Challenge',
-        'description': 'Type what you hear',
+        'description': 'Listen first, then match the sentence',
         'icon': Icons.hearing,
         'color': Colors.green.shade100,
         'route': '/challenges/audio',
         'progress': audioChallenges,
-        'total': 50, // Example total
-        'subtitle': 'Listen and type',
+        'total': 25,
+        'subtitle': 'Listening recall',
         'modes': [
           {
-            'name': 'Books',
-            'available': isBooksAudioAvailable,
-            'limit': 'Once per day',
+            'name': 'Library',
+            'available': true,
+            'limit': 'Unlimited',
           },
           {
-            'name': 'AI',
-            'available': isAudioAiAvailable,
-            'limit': 'Once per day',
+            'name': 'Generated',
+            'available': true,
+            'limit': 'Unlimited',
           },
         ],
       },
       {
         'title': 'Speech Translation',
-        'description': 'Speak and type the translation',
+        'description': 'Shadow local phrase packs into English',
         'icon': Icons.translate,
         'color': Colors.orange.shade100,
         'route': '/challenges/translate',
         'progress': translationChallenges,
-        'total': 50, // Example total
-        'subtitle': 'Speak and type',
+        'total': 25,
+        'subtitle': 'Bilingual shadowing',
         'modes': [
           {
             'name': 'Translation',
-            'available': _progressService.isSpeechTranslationAvailableToday(),
-            'limit': 'Once per day',
+            'available': true,
+            'limit': 'Unlimited',
+          },
+        ],
+      },
+      {
+        'title': 'Weak Drills',
+        'description': 'Review prompts you missed in any mode',
+        'icon': Icons.psychology,
+        'color': Colors.purple.shade100,
+        'route': '/challenges/weak',
+        'progress': weakPromptCount,
+        'total': weakPromptCount == 0 ? 1 : weakPromptCount,
+        'subtitle': 'Focused review',
+        'lockedMessage':
+            'No weak prompts yet. Miss an answer in another mode to build this drill.',
+        'modes': [
+          {
+            'name': 'Review Queue',
+            'available': weakPromptCount > 0,
+            'limit': weakPromptCount == 0
+                ? 'No prompts yet'
+                : '$weakPromptCount waiting',
           },
         ],
       },
@@ -117,7 +134,6 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Challenges'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -133,7 +149,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ready to Type?',
+                      'Ready to Practice?',
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -144,7 +160,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Choose a challenge and start typing. Track your progress and unlock achievements as you go.',
+                      'Offline drills for typing, dictation, listening recall, and translation shadowing.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
@@ -162,12 +178,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Your Progress',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
+                  const SectionTitle(title: 'Your Progress'),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -188,6 +199,28 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      _buildStatCard(
+                        context,
+                        'Accuracy',
+                        _progressService.getAnswerAttempts() == 0
+                            ? '--'
+                            : '${_progressService.getAccuracyPercentage().round()}%',
+                        Icons.track_changes,
+                        Colors.indigo,
+                      ),
+                      const SizedBox(width: 16),
+                      _buildStatCard(
+                        context,
+                        'Attempts',
+                        '${_progressService.getAnswerAttempts()}',
+                        Icons.fact_check,
+                        Colors.teal,
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -198,12 +231,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Choose Your Challenge',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
+                  const SectionTitle(title: 'Choose Your Challenge'),
                   const SizedBox(height: 16),
                   ListView.builder(
                     shrinkWrap: true,
@@ -211,124 +239,133 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                     itemCount: challenges.length,
                     itemBuilder: (context, index) {
                       final challenge = challenges[index];
+                      final modes = challenge['modes'] as List<dynamic>;
+                      final isLocked =
+                          modes.every((mode) => !mode['available']);
+                      final Color accentColor = challenge['color'] as Color;
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            // Check if all modes are unavailable
-                            final allModesUnavailable = challenge['modes']
-                                .every((mode) => !mode['available']);
-                            if (!allModesUnavailable) {
-                              GoRouter.of(context).go(challenge['route']);
-                            }
-                          },
-                          child: Card(
-                            elevation: 2,
-                            color: challenge['color'],
-                            // Add opacity when all modes are unavailable
-                            child: Opacity(
-                              opacity: challenge['modes']
-                                      .every((mode) => !mode['available'])
-                                  ? 0.5
-                                  : 1.0,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Opacity(
+                          opacity: isLocked ? 0.56 : 1.0,
+                          child: AppSurface(
+                            onTap: isLocked
+                                ? null
+                                : () =>
+                                    GoRouter.of(context).go(challenge['route']),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
                                   children: [
-                                    Row(
+                                    Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            accentColor.withValues(alpha: 0.7),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        challenge['icon'],
+                                        size: 24,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            challenge['title'],
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                          Text(
+                                            challenge['subtitle'],
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.chevron_right,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  challenge['description'],
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 12),
+                                ...modes.map<Widget>((mode) {
+                                  final isAvailable = mode['available'] as bool;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Row(
                                       children: [
                                         Icon(
-                                          challenge['icon'],
-                                          size: 28,
-                                          color: Theme.of(context).brightness ==
-                                                  Brightness.dark
-                                              ? Colors.black87
-                                              : null,
+                                          isAvailable
+                                              ? Icons.check_circle
+                                              : Icons.schedule,
+                                          size: 16,
+                                          color: isAvailable
+                                              ? Colors.green
+                                              : Colors.orange,
                                         ),
-                                        const SizedBox(width: 12),
+                                        const SizedBox(width: 8),
                                         Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                challenge['title'],
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18,
+                                          child: Text(
+                                            '${mode['name']}: ${mode['limit']}',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
                                                   color: Theme.of(context)
-                                                              .brightness ==
-                                                          Brightness.dark
-                                                      ? Colors.black87
-                                                      : null,
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
                                                 ),
-                                              ),
-                                              Text(
-                                                challenge['subtitle'],
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Theme.of(context)
-                                                              .brightness ==
-                                                          Brightness.dark
-                                                      ? Colors.black87
-                                                      : Colors.black54,
-                                                ),
-                                              ),
-                                            ],
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 16),
-                                    // Show modes and their availability
-                                    ...challenge['modes'].map<Widget>((mode) {
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 8.0),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              mode['available']
-                                                  ? Icons.check_circle
-                                                  : Icons.timer,
-                                              size: 16,
-                                              color: mode['available']
-                                                  ? Colors.green
-                                                  : Colors.orange,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              '${mode['name']}: ${mode['limit']}',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: mode['available']
-                                                    ? Colors.black87
-                                                    : Colors.black54,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                                    // Add message when all modes are unavailable
-                                    if (challenge['modes']
-                                        .every((mode) => !mode['available']))
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 8.0),
-                                        child: Text(
-                                          'All modes used for today. Try again tomorrow!',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.red.shade700,
+                                  );
+                                }).toList(),
+                                if (isLocked)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      challenge['lockedMessage'] ??
+                                          'This challenge is unavailable right now.',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .error,
                                             fontStyle: FontStyle.italic,
                                           ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),
@@ -352,31 +389,27 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     Color color,
   ) {
     return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: color),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
+      child: AppSurface(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ],
         ),
       ),
     );

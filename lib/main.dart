@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'router/app_router.dart';
 import 'package:provider/provider.dart';
 import 'services/theme_service.dart';
 import 'services/progress_service.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,13 +15,6 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  try {
-    // Load environment variables from root directory
-    await dotenv.load(fileName: ".env");
-  } catch (e) {
-    // Continue running the app even if .env loading fails
-  }
 
   // Check if first launch to show onboarding
   final prefs = await SharedPreferences.getInstance();
@@ -48,9 +41,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late final GoRouter _appRouter;
+
   @override
   void initState() {
     super.initState();
+    _appRouter = AppRouter.createRouter(widget.showOnboarding);
   }
 
   @override
@@ -62,7 +58,7 @@ class _MyAppState extends State<MyApp> {
           theme: themeService.getThemeData(),
           darkTheme: themeService.darkTheme,
           themeMode: themeService.themeMode,
-          routerConfig: AppRouter.router,
+          routerConfig: _appRouter,
           debugShowCheckedModeBanner: false,
         );
       },

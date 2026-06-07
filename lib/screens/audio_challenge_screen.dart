@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/practice_content.dart';
-import '../widgets/practice_input_area.dart';
+import '../widgets/speech_input_area.dart';
 import '../services/combined_tts_service.dart';
 import '../widgets/visibility_toggle.dart';
 import '../widgets/sentence_display_card.dart';
@@ -76,13 +76,13 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
           ],
         );
       },
-      // Use the shared input area widget with button state
+      // Use the speech input area widget instead of typing
       inputArea: (controller, checkAnswer, feedback, isCheckButtonEnabled) =>
-          PracticeInputArea(
+          SpeechInputArea(
         controller: controller,
         onCheck: checkAnswer,
         feedback: feedback,
-        labelText: 'Type what you hear',
+        labelText: 'Type or speak what you hear',
         isCheckButtonEnabled: isCheckButtonEnabled,
       ),
       onRefresh: () {

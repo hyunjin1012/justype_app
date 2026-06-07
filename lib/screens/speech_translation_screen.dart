@@ -3,9 +3,10 @@ import '../services/speech_translation_service.dart';
 import '../services/practice_service.dart';
 import '../services/progress_service.dart';
 import '../services/feedback_service.dart';
-import '../widgets/practice_input_area.dart';
+import '../widgets/speech_input_area.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/enhanced_feedback.dart';
+import '../widgets/app_surface.dart';
 import 'package:go_router/go_router.dart';
 
 class SpeechTranslationScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   final FeedbackService _feedbackService = FeedbackService();
   final TextEditingController _textController = TextEditingController();
 
+  String _sourcePrompt = '';
   String _recognizedText = '';
   String _translatedText = '';
   String _feedback = '';
@@ -32,8 +34,11 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   bool _isInitialized = false;
   bool _isListening = false;
   bool _isProcessing = false;
-  String _selectedLanguage = 'en';
+  String _selectedLanguage = 'es';
+  String _selectedScenario = 'All';
+  List<String> _scenarios = ['All'];
   String _errorMessage = '';
+  DateTime? _sessionStartedAt;
 
   final Map<String, String> _languages = {
     'en': 'English',
@@ -59,17 +64,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
   }
 
   void _checkAvailability() {
-    if (!_progressService.isSpeechTranslationAvailableToday()) {
-      setState(() {
-        _errorMessage = '''
-You've already completed your daily speech translation challenge. Please try again tomorrow.
-
-This helps you maintain a consistent practice routine and prevents overuse of the translation service.''';
-        _isLoading = false;
-      });
-    } else {
-      _initializeSpeechService();
-    }
+    _initializeSpeechService();
   }
 
   Future<void> _initializeSpeechService() async {
@@ -88,8 +83,8 @@ This helps you maintain a consistent practice routine and prevents overuse of th
       if (isAvailable) {
         setState(() {
           _isInitialized = true;
-          _isLoading = false;
         });
+        await _loadTranslationPrompt();
       } else {
         final error = _speechService.error ?? 'Unknown error occurred';
         setState(() {
@@ -118,6 +113,45 @@ Please ensure:
 3. Your device supports speech recognition
 
 Tap the refresh button to try again.''';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadTranslationPrompt() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _sourcePrompt = '';
+      _recognizedText = '';
+      _translatedText = '';
+      _textController.clear();
+      _feedback = '';
+      _isCheckButtonEnabled = false;
+      _isRecordButtonEnabled = true;
+      _sessionStartedAt = DateTime.now();
+    });
+
+    try {
+      final scenarios = await _speechService.getScenarios();
+      await _speechService.preparePrompt();
+
+      if (!mounted) return;
+
+      setState(() {
+        _scenarios = scenarios;
+        if (!_scenarios.contains(_selectedScenario)) {
+          _selectedScenario = 'All';
+        }
+        _sourcePrompt = _speechService.sourcePromptText;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _errorMessage = 'Unable to load a local translation prompt: $e';
         _isLoading = false;
       });
     }
@@ -174,22 +208,38 @@ Tap the refresh button to try again.''';
     }
   }
 
-  void _checkAnswer() {
+  void _checkAnswer() async {
     final userInput = _textController.text;
     if (userInput.isEmpty || _translatedText.isEmpty) return;
 
     final isCorrect = _practiceService.checkAnswer(userInput, _translatedText);
+    final wordCount = _countWords(_translatedText);
+    final elapsedSeconds = _elapsedSeconds();
 
     if (isCorrect) {
-      _feedbackService.playCorrectSound();
-      _progressService.completeExercise(practiceType: 'translation');
+      await _feedbackService.playCorrectSound();
+      await _progressService.completeExercise(
+        practiceType: 'translation',
+        prompt: _translatedText,
+        wordCount: wordCount,
+        elapsedSeconds: elapsedSeconds,
+      );
+      if (!mounted) return;
       setState(() {
-        _feedback = "Correct! Great job.";
+        _feedback = _buildCompletionMessage(_translatedText);
         _isCheckButtonEnabled = false;
         _isRecordButtonEnabled = false;
       });
     } else {
-      _feedbackService.playWrongSound();
+      await _progressService.recordAnswerAttempt(
+        false,
+        practiceType: 'translation',
+        prompt: _translatedText,
+        wordCount: wordCount,
+        elapsedSeconds: elapsedSeconds,
+      );
+      await _feedbackService.playWrongSound();
+      if (!mounted) return;
       setState(() {
         _feedback = "Not quite right. Try again or record a new sentence.";
         _isCheckButtonEnabled = true;
@@ -198,40 +248,63 @@ Tap the refresh button to try again.''';
     }
   }
 
-  void _clearState() async {
-    // Check if speech translation is available before clearing state
-    if (!_progressService.isSpeechTranslationAvailableToday()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'You\'ve already completed your daily speech translation challenge. Please try again tomorrow.'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
+  String _buildCompletionMessage(String sentence) {
+    final startedAt = _sessionStartedAt;
+    if (startedAt == null) {
+      return "Correct! Great job.";
     }
 
-    setState(() {
-      _recognizedText = '';
-      _translatedText = '';
-      _textController.clear();
-      _feedback = '';
-      _isCheckButtonEnabled = false;
-      _isRecordButtonEnabled = true;
-    });
+    final elapsedSeconds = _elapsedSeconds();
+    final wordCount = _countWords(sentence);
 
-    // Play load sound when starting a new translation
+    return "Correct! $wordCount words matched in ${elapsedSeconds}s.";
+  }
+
+  int _elapsedSeconds() {
+    final startedAt = _sessionStartedAt;
+    if (startedAt == null) {
+      return 1;
+    }
+
+    return DateTime.now().difference(startedAt).inSeconds.clamp(1, 999);
+  }
+
+  int _countWords(String sentence) {
+    return sentence
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .length;
+  }
+
+  void _clearState() async {
     await _feedbackService.playLoadSound();
+    await _loadTranslationPrompt();
   }
 
   void _onLanguageChanged(String? value) {
     if (value != null) {
       setState(() {
         _selectedLanguage = value;
+        _selectedScenario = 'All';
+        _sourcePrompt = '';
         _recognizedText = '';
         _translatedText = '';
       });
       _speechService.setLanguages(value, 'en');
+      _loadTranslationPrompt();
+    }
+  }
+
+  void _onScenarioChanged(String? value) {
+    if (value != null) {
+      setState(() {
+        _selectedScenario = value;
+        _sourcePrompt = '';
+        _recognizedText = '';
+        _translatedText = '';
+      });
+      _speechService.setScenario(value);
+      _loadTranslationPrompt();
     }
   }
 
@@ -276,8 +349,7 @@ Tap the refresh button to try again.''';
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Speech Translation'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Translation Practice'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => GoRouter.of(context).go('/challenges'),
@@ -291,69 +363,116 @@ Tap the refresh button to try again.''';
               child: Column(
                 children: [
                   if (_errorMessage.isNotEmpty)
-                    Card(
-                      color: Colors.red.shade50,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.error_outline, color: Colors.red),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _errorMessage,
-                                style: const TextStyle(color: Colors.red),
+                    AppSurface(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color:
+                                Theme.of(context).colorScheme.onErrorContainer,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage,
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onErrorContainer,
                               ),
                             ),
-                            if (_progressService
-                                .isSpeechTranslationAvailableToday())
-                              IconButton(
-                                icon: const Icon(Icons.refresh),
-                                onPressed: _initializeSpeechService,
-                              ),
-                          ],
-                        ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: _initializeSpeechService,
+                          ),
+                        ],
                       ),
                     ),
                   const SizedBox(height: 16),
 
                   // Language selection
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Select Your Language',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                  AppSurface(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Source Language',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          initialValue: _selectedLanguage,
+                          items: _languages.entries.map((entry) {
+                            return DropdownMenuItem(
+                              value: entry.key,
+                              child: Text(entry.value),
+                            );
+                          }).toList(),
+                          onChanged: _isLoading ? null : _onLanguageChanged,
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          DropdownButtonFormField<String>(
-                            value: _selectedLanguage,
-                            items: _languages.entries.map((entry) {
-                              return DropdownMenuItem(
-                                value: entry.key,
-                                child: Text(entry.value),
-                              );
-                            }).toList(),
-                            onChanged: _isLoading ? null : _onLanguageChanged,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Scenario',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          initialValue: _selectedScenario,
+                          items: _scenarios.map((scenario) {
+                            return DropdownMenuItem(
+                              value: scenario,
+                              child: Text(scenario),
+                            );
+                          }).toList(),
+                          onChanged: _isLoading ? null : _onScenarioChanged,
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  if (_sourcePrompt.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: AppSurface(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Source Prompt',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(_sourcePrompt),
+                          ],
+                        ),
+                      ),
+                    ),
 
                   // Record button
                   ElevatedButton.icon(
@@ -363,8 +482,9 @@ Tap the refresh button to try again.''';
                             ? _stopListening
                             : _startListening,
                     icon: Icon(_isListening ? Icons.stop : Icons.mic),
-                    label: Text(
-                        _isListening ? 'Stop Recording' : 'Start Recording'),
+                    label: Text(_isListening
+                        ? 'Stop Recording'
+                        : 'Record Source Prompt'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
@@ -405,25 +525,22 @@ Tap the refresh button to try again.''';
                   if (_recognizedText.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Recognized Text:',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(_recognizedText),
-                            ],
-                          ),
+                      child: AppSurface(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'You Said',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(_recognizedText),
+                          ],
                         ),
                       ),
                     ),
@@ -442,16 +559,16 @@ Tap the refresh button to try again.''';
             ),
           ),
 
-          // Input area
+          // Input area and feedback - stays at bottom
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                PracticeInputArea(
+                SpeechInputArea(
                   controller: _textController,
                   onCheck: _checkAnswer,
                   feedback: _feedback,
-                  labelText: 'Type the translated sentence',
+                  labelText: 'Type or speak the translated sentence',
                   isCheckButtonEnabled:
                       _isCheckButtonEnabled && _translatedText.isNotEmpty,
                 ),
@@ -480,14 +597,12 @@ Tap the refresh button to try again.''';
           ),
         ],
       ),
-      floatingActionButton: _progressService.isSpeechTranslationAvailableToday()
-          ? FloatingActionButton.extended(
-              onPressed: _clearState,
-              tooltip: 'New Translation',
-              icon: const Icon(Icons.refresh),
-              label: const Text('New'),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _clearState,
+        tooltip: 'New Prompt',
+        icon: const Icon(Icons.refresh),
+        label: const Text('New'),
+      ),
     );
   }
 }

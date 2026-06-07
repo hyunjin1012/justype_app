@@ -17,23 +17,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Map<String, dynamic>> _pages = [
     {
       'title': 'Welcome to JusType',
-      'description': 'Have fun with typing challenges and improve your skills',
-      'image': 'assets/images/onboarding_welcome.png',
-      'color': Colors.blue.shade50,
+      'description':
+          'Build a daily rhythm with offline text, listening, and translation practice.',
+      'icon': Icons.offline_bolt,
+      'color': Colors.blue,
     },
     {
-      'title': 'Text Challenges',
+      'title': 'Practice Your Way',
       'description':
-          'Type sentences from classic books and level up your typing speed',
-      'image': 'assets/images/onboarding_reading.png',
-      'color': Colors.green.shade50,
+          'Type from the keyboard, dictate with the microphone, or shadow what you hear.',
+      'icon': Icons.keyboard_voice,
+      'color': Colors.teal,
     },
     {
-      'title': 'Practice Listening',
+      'title': 'Track Real Progress',
       'description':
-          'Listen to sentences and type what you hear to improve your listening skills',
-      'image': 'assets/images/onboarding_listening.png',
-      'color': Colors.orange.shade50,
+          'Follow sessions, accuracy, streaks, and achievements as your routine grows.',
+      'icon': Icons.insights,
+      'color': Colors.orange,
     },
   ];
 
@@ -51,6 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('first_launch', false);
     await prefs.setBool('onboarding_complete', true);
     if (mounted) {
       GoRouter.of(context).go('/home');
@@ -72,7 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   return _buildPage(
                     title: _pages[index]['title'],
                     description: _pages[index]['description'],
-                    image: _pages[index]['image'],
+                    icon: _pages[index]['icon'],
                     color: _pages[index]['color'],
                   );
                 },
@@ -127,18 +129,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildPage({
     required String title,
     required String description,
-    required String image,
+    required IconData icon,
     required Color color,
   }) {
     return Container(
-      color: color,
       padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(
-            image,
-            height: 200,
+          Container(
+            width: 128,
+            height: 128,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 64,
+              color: color,
+            ),
           ),
           const SizedBox(height: 32),
           Text(

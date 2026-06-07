@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/books_response.dart';
-import '../services/gutenberg_service.dart';
+import '../services/local_library_service.dart';
+import '../widgets/app_surface.dart';
 
 class BookListScreen extends StatefulWidget {
   const BookListScreen({super.key});
@@ -11,7 +12,7 @@ class BookListScreen extends StatefulWidget {
 }
 
 class _BookListScreenState extends State<BookListScreen> {
-  final GutenbergService _gutenbergService = GutenbergService();
+  final LocalLibraryService _libraryService = LocalLibraryService();
   BooksResponse? _booksResponse;
   bool _isLoading = true;
   int _currentPage = 1;
@@ -49,8 +50,8 @@ class _BookListScreenState extends State<BookListScreen> {
 
     try {
       final booksResponse = _currentSearchQuery.isEmpty
-          ? await _gutenbergService.fetchBooks(page: _currentPage)
-          : await _gutenbergService.searchBooks(_currentSearchQuery,
+          ? await _libraryService.fetchBooks(page: _currentPage)
+          : await _libraryService.searchBooks(_currentSearchQuery,
               page: _currentPage);
 
       setState(() {
@@ -81,8 +82,8 @@ class _BookListScreenState extends State<BookListScreen> {
     try {
       final nextPage = _currentPage + 1;
       final moreBooksResponse = _currentSearchQuery.isEmpty
-          ? await _gutenbergService.fetchBooks(page: nextPage)
-          : await _gutenbergService.searchBooks(_currentSearchQuery,
+          ? await _libraryService.fetchBooks(page: nextPage)
+          : await _libraryService.searchBooks(_currentSearchQuery,
               page: nextPage);
 
       if (moreBooksResponse.results.isNotEmpty) {
@@ -137,12 +138,15 @@ class _BookListScreenState extends State<BookListScreen> {
         title: _isSearching
             ? TextField(
                 controller: _searchController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search books...',
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 autofocus: true,
                 onSubmitted: (query) {
                   _performSearch(query);
@@ -152,10 +156,10 @@ class _BookListScreenState extends State<BookListScreen> {
                 },
               )
             : const Text('Book Collection'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
+            tooltip: _isSearching ? 'Close Search' : 'Search Books',
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;
@@ -171,27 +175,6 @@ class _BookListScreenState extends State<BookListScreen> {
               });
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('About'),
-                  content: const Text(
-                    'This app displays books from Project Gutenberg, a library of over 60,000 free eBooks. '
-                    'Project Gutenberg offers free eBooks of classic literature that have expired copyright protection.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
         ],
       ),
       body: _isLoading && _booksResponse == null
@@ -201,7 +184,7 @@ class _BookListScreenState extends State<BookListScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Loading books... This might take a few seconds.'),
+                  Text('Loading local library...'),
                 ],
               ),
             )
@@ -274,65 +257,64 @@ class _BookListScreenState extends State<BookListScreen> {
                             }
 
                             final book = _booksResponse!.results[index];
-                            return GestureDetector(
-                              onTap: () {
-                                // Navigate to book detail screen
-                                context.push('/book/${book.id}');
-                              },
-                              child: Card(
-                                elevation: 4,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: book.formats.imagejpeg != null
-                                          ? Image.network(
-                                              book.formats.imagejpeg!,
-                                              fit: BoxFit.cover,
-                                              width: double.infinity,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return const Center(
-                                                  child: Icon(Icons.book,
-                                                      size: 64),
-                                                );
-                                              },
-                                            )
-                                          : const Center(
-                                              child: Icon(Icons.book, size: 64),
-                                            ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            book.title,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            book.authors.isNotEmpty
-                                                ? book.authors.first.name
-                                                : 'Unknown Author',
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 12,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
+                            return AppSurface(
+                              onTap: () => context.push('/book/${book.id}'),
+                              padding: EdgeInsets.zero,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      width: double.infinity,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer,
+                                      child: Icon(
+                                        Icons.menu_book,
+                                        size: 64,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          book.title,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          book.authors.isNotEmpty
+                                              ? book.authors.first.name
+                                              : 'Unknown Author',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
                           },

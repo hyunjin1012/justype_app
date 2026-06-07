@@ -2,6 +2,54 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 
+class PracticeSession {
+  final String practiceType;
+  final String prompt;
+  final bool isCorrect;
+  final int wordCount;
+  final int elapsedSeconds;
+  final int timestamp;
+
+  const PracticeSession({
+    required this.practiceType,
+    required this.prompt,
+    required this.isCorrect,
+    required this.wordCount,
+    required this.elapsedSeconds,
+    required this.timestamp,
+  });
+
+  int get wordsPerMinute {
+    if (!isCorrect || elapsedSeconds <= 0 || wordCount <= 0) {
+      return 0;
+    }
+
+    return ((wordCount / elapsedSeconds) * 60).round();
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'practiceType': practiceType,
+      'prompt': prompt,
+      'isCorrect': isCorrect,
+      'wordCount': wordCount,
+      'elapsedSeconds': elapsedSeconds,
+      'timestamp': timestamp,
+    };
+  }
+
+  factory PracticeSession.fromJson(Map<String, dynamic> json) {
+    return PracticeSession(
+      practiceType: json['practiceType'] as String? ?? 'general',
+      prompt: json['prompt'] as String? ?? '',
+      isCorrect: json['isCorrect'] as bool? ?? false,
+      wordCount: json['wordCount'] as int? ?? 0,
+      elapsedSeconds: json['elapsedSeconds'] as int? ?? 0,
+      timestamp: json['timestamp'] as int? ?? 0,
+    );
+  }
+}
+
 /// Service for tracking and managing user progress
 class ProgressService extends ChangeNotifier {
   // Singleton instance
@@ -21,6 +69,9 @@ class ProgressService extends ChangeNotifier {
   int _audioChallenges = 0;
   int _translationChallenges = 0;
   double _accuracyPercentage = 0.0;
+  int _answerAttempts = 0;
+  int _correctAnswers = 0;
+  int _bestWordsPerMinute = 0;
   int _currentStreak = 0;
   int _dailyGoal = 5; // Example daily goal
   List<String> _recentAchievements = []; // List to store recent achievements
@@ -30,15 +81,17 @@ class ProgressService extends ChangeNotifier {
   int _dailyExercises = 0;
   String _lastExerciseDate = '';
   String _lastAiChallengeDate =
-      ''; // Add new field for tracking last AI challenge
+      ''; // Legacy field for older saved progress data
   String _lastTextAiChallengeDate =
-      ''; // Add new field for tracking last text AI challenge
+      ''; // Legacy field for older saved progress data
   String _lastAudioAiChallengeDate =
-      ''; // Add new field for tracking last audio AI challenge
+      ''; // Legacy field for older saved progress data
   String _lastBooksAudioChallengeDate =
-      ''; // Add new field for tracking last Books audio challenge
+      ''; // Legacy field for older saved progress data
   Map<String, dynamic> _achievementData =
       {}; // Map of achievement ID to timestamp
+  List<PracticeSession> _sessionHistory = [];
+  List<String> _weakPrompts = [];
   String _lastSpeechTranslationDate =
       ''; // Add new field for tracking last speech translation
 
@@ -53,6 +106,9 @@ class ProgressService extends ChangeNotifier {
     'exercises_50': 'Completed 50 exercises!',
     'streak_3': 'Maintained a 3-day streak!',
     'streak_7': 'Maintained a 7-day streak!',
+    'accuracy_90': 'Reached 90% answer accuracy!',
+    'speed_30': 'Reached 30 words per minute!',
+    'weak_clear': 'Cleared every weak prompt!',
   };
 
   // Getter for achievement messages
@@ -68,6 +124,9 @@ class ProgressService extends ChangeNotifier {
     _audioChallenges = prefs.getInt('audioChallenges') ?? 0;
     _translationChallenges = prefs.getInt('translationChallenges') ?? 0;
     _accuracyPercentage = prefs.getDouble('accuracyPercentage') ?? 0.0;
+    _answerAttempts = prefs.getInt('answerAttempts') ?? 0;
+    _correctAnswers = prefs.getInt('correctAnswers') ?? 0;
+    _bestWordsPerMinute = prefs.getInt('bestWordsPerMinute') ?? 0;
     _currentStreak = prefs.getInt('currentStreak') ?? 0;
     _dailyGoal = prefs.getInt('dailyGoal') ?? 5;
     _dailyExercises = prefs.getInt('dailyExercises') ?? 0;
@@ -80,6 +139,7 @@ class ProgressService extends ChangeNotifier {
         prefs.getString('lastBooksAudioChallengeDate') ?? '';
     _lastSpeechTranslationDate =
         prefs.getString('lastSpeechTranslationDate') ?? '';
+    _weakPrompts = prefs.getStringList('weakPrompts') ?? [];
 
     // Load recent achievements if stored
     _recentAchievements = prefs.getStringList('recentAchievements') ?? [];
@@ -95,6 +155,17 @@ class ProgressService extends ChangeNotifier {
 
     // Load all achievements
     _allAchievements = prefs.getStringList('allAchievements') ?? [];
+
+    final sessionHistoryJson = prefs.getString('sessionHistory') ?? '[]';
+    try {
+      final decoded = json.decode(sessionHistoryJson) as List<dynamic>;
+      _sessionHistory = decoded
+          .map((item) =>
+              PracticeSession.fromJson(Map<String, dynamic>.from(item as Map)))
+          .toList();
+    } catch (e) {
+      _sessionHistory = [];
+    }
 
     // Ensure all achievements have timestamps
     for (final achievement in _allAchievements) {
@@ -119,6 +190,9 @@ class ProgressService extends ChangeNotifier {
     await prefs.setInt('audioChallenges', _audioChallenges);
     await prefs.setInt('translationChallenges', _translationChallenges);
     await prefs.setDouble('accuracyPercentage', _accuracyPercentage);
+    await prefs.setInt('answerAttempts', _answerAttempts);
+    await prefs.setInt('correctAnswers', _correctAnswers);
+    await prefs.setInt('bestWordsPerMinute', _bestWordsPerMinute);
     await prefs.setInt('currentStreak', _currentStreak);
     await prefs.setInt('dailyGoal', _dailyGoal);
     await prefs.setStringList('recentAchievements', _recentAchievements);
@@ -133,6 +207,11 @@ class ProgressService extends ChangeNotifier {
         'lastBooksAudioChallengeDate', _lastBooksAudioChallengeDate);
     await prefs.setString(
         'lastSpeechTranslationDate', _lastSpeechTranslationDate);
+    await prefs.setStringList('weakPrompts', _weakPrompts);
+    await prefs.setString(
+      'sessionHistory',
+      json.encode(_sessionHistory.map((session) => session.toJson()).toList()),
+    );
 
     // Save achievement data
     await prefs.setString('achievementData', json.encode(_achievementData));
@@ -146,11 +225,47 @@ class ProgressService extends ChangeNotifier {
     return _recentAchievements.isNotEmpty;
   }
 
-  // Example methods to update progress
-  Future<void> completeExercise(
-      {String practiceType = 'general', bool isAiChallenge = false}) async {
+  Future<void> recordAnswerAttempt(
+    bool isCorrect, {
+    String practiceType = 'general',
+    String prompt = '',
+    int wordCount = 0,
+    int elapsedSeconds = 0,
+  }) async {
+    _recordAnswerAttemptInMemory(isCorrect);
+    _recordSessionInMemory(
+      practiceType: practiceType,
+      prompt: prompt,
+      isCorrect: isCorrect,
+      wordCount: wordCount,
+      elapsedSeconds: elapsedSeconds,
+    );
+
+    if (!isCorrect && prompt.trim().isNotEmpty) {
+      _addWeakPrompt(prompt);
+    }
+
+    await saveProgress();
+  }
+
+  Future<void> completeExercise({
+    String practiceType = 'general',
+    String prompt = '',
+    int wordCount = 0,
+    int elapsedSeconds = 0,
+  }) async {
     // Check if we need to reset daily exercises (new day)
     _checkAndResetDailyExercises();
+
+    _recordAnswerAttemptInMemory(true);
+    _recordSessionInMemory(
+      practiceType: practiceType,
+      prompt: prompt,
+      isCorrect: true,
+      wordCount: wordCount,
+      elapsedSeconds: elapsedSeconds,
+    );
+    _removeWeakPrompt(prompt);
 
     _totalExercises++;
     _dailyExercises++;
@@ -158,11 +273,6 @@ class ProgressService extends ChangeNotifier {
     // Track specific exercise types
     if (practiceType == 'text') {
       _textChallenges++;
-
-      // If it's an AI challenge, update the last text AI challenge date
-      if (isAiChallenge) {
-        await updateLastTextAiChallengeDate();
-      }
 
       // Check for text-related achievements
       if (_textChallenges == 10) {
@@ -172,14 +282,6 @@ class ProgressService extends ChangeNotifier {
       }
     } else if (practiceType == 'audio') {
       _audioChallenges++;
-
-      // If it's an AI challenge, update the last audio AI challenge date
-      if (isAiChallenge) {
-        await updateLastAudioAiChallengeDate();
-      } else {
-        // If it's a Books audio challenge, update the last Books audio challenge date
-        await updateLastBooksAudioChallengeDate();
-      }
 
       // Check for audio-related achievements
       if (_audioChallenges == 10) {
@@ -206,7 +308,7 @@ class ProgressService extends ChangeNotifier {
     }
 
     // Update streak logic
-    _updateStreak();
+    await _updateStreak();
 
     // Update last exercise date
     _lastExerciseDate = DateTime.now().toString().split(' ')[0];
@@ -215,52 +317,38 @@ class ProgressService extends ChangeNotifier {
   }
 
   // Update the streak counter
-  void _updateStreak() {
-    // Get the current date
-    // final today = DateTime.now().day;
+  Future<void> _updateStreak() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastPracticeDay = prefs.getInt('lastPracticeDay') ?? 0;
+    final lastPracticeMonth = prefs.getInt('lastPracticeMonth') ?? 0;
+    final lastPracticeYear = prefs.getInt('lastPracticeYear') ?? 0;
 
-    // Get the last practice date from SharedPreferences
-    SharedPreferences.getInstance().then((prefs) {
-      final lastPracticeDay = prefs.getInt('lastPracticeDay') ?? 0;
-      final lastPracticeMonth = prefs.getInt('lastPracticeMonth') ?? 0;
-      final lastPracticeYear = prefs.getInt('lastPracticeYear') ?? 0;
+    final currentDay = DateTime.now().day;
+    final currentMonth = DateTime.now().month;
+    final currentYear = DateTime.now().year;
 
-      final currentDay = DateTime.now().day;
-      final currentMonth = DateTime.now().month;
-      final currentYear = DateTime.now().year;
+    if (lastPracticeDay == 0) {
+      _currentStreak = 1;
+    } else if (lastPracticeDay == currentDay &&
+        lastPracticeMonth == currentMonth &&
+        lastPracticeYear == currentYear) {
+      // Streak remains the same.
+    } else if (_isConsecutiveDay(
+        lastPracticeDay, lastPracticeMonth, lastPracticeYear)) {
+      _currentStreak++;
+    } else {
+      _currentStreak = 1;
+    }
 
-      // If this is the first practice ever
-      if (lastPracticeDay == 0) {
-        _currentStreak = 1;
-      }
-      // If practiced today already, don't change streak
-      else if (lastPracticeDay == currentDay &&
-          lastPracticeMonth == currentMonth &&
-          lastPracticeYear == currentYear) {
-        // Streak remains the same
-      }
-      // If practiced yesterday, increment streak
-      else if (_isConsecutiveDay(
-          lastPracticeDay, lastPracticeMonth, lastPracticeYear)) {
-        _currentStreak++;
-      }
-      // If missed a day, reset streak
-      else {
-        _currentStreak = 1;
-      }
+    await prefs.setInt('lastPracticeDay', currentDay);
+    await prefs.setInt('lastPracticeMonth', currentMonth);
+    await prefs.setInt('lastPracticeYear', currentYear);
 
-      // Save the current date as the last practice date
-      prefs.setInt('lastPracticeDay', currentDay);
-      prefs.setInt('lastPracticeMonth', currentMonth);
-      prefs.setInt('lastPracticeYear', currentYear);
-
-      // Check for streak achievements
-      if (_currentStreak == 3) {
-        _addAchievement('streak_3');
-      } else if (_currentStreak == 7) {
-        _addAchievement('streak_7');
-      }
-    });
+    if (_currentStreak == 3) {
+      _addAchievement('streak_3');
+    } else if (_currentStreak == 7) {
+      _addAchievement('streak_7');
+    }
   }
 
   // Helper method to check if the last practice was yesterday
@@ -279,14 +367,20 @@ class ProgressService extends ChangeNotifier {
   int getAudioChallenges() => _audioChallenges;
   int getTranslationChallenges() => _translationChallenges;
   double getAccuracyPercentage() => _accuracyPercentage;
+  int getAnswerAttempts() => _answerAttempts;
+  int getCorrectAnswers() => _correctAnswers;
+  int getBestWordsPerMinute() => _bestWordsPerMinute;
   int getCurrentStreak() => _currentStreak;
   int getDailyGoal() => _dailyGoal;
   int getDailyExercises() => _dailyExercises;
 
   // Method to get the daily goal progress as a fraction
   double getDailyGoalProgress() {
-    // Assuming daily goal is the target number of exercises to complete
-    return _totalExercises / _dailyGoal; // Returns a value between 0 and 1
+    if (_dailyGoal == 0) {
+      return 0;
+    }
+
+    return _dailyExercises / _dailyGoal;
   }
 
   // Method to get recent achievements
@@ -302,6 +396,14 @@ class ProgressService extends ChangeNotifier {
     return _allAchievements;
   }
 
+  List<PracticeSession> getSessionHistory({int limit = 10}) {
+    return _sessionHistory.take(limit).toList();
+  }
+
+  List<String> getWeakPrompts() {
+    return List.unmodifiable(_weakPrompts);
+  }
+
   /// Resets all progress data to initial values
   Future<void> resetAllProgress() async {
     // Reset all tracked statistics to initial values
@@ -310,19 +412,24 @@ class ProgressService extends ChangeNotifier {
     _audioChallenges = 0;
     _translationChallenges = 0;
     _accuracyPercentage = 0.0;
+    _answerAttempts = 0;
+    _correctAnswers = 0;
+    _bestWordsPerMinute = 0;
     _currentStreak = 0;
     _dailyGoal = 5; // Reset to default value
     _recentAchievements = []; // Clear recent achievements
     _allAchievements = []; // Clear all achievements
     _dailyExercises = 0;
     _lastExerciseDate = '';
-    _lastAiChallengeDate = ''; // Reset last AI challenge date
-    _lastTextAiChallengeDate = ''; // Reset last text AI challenge date
-    _lastAudioAiChallengeDate = ''; // Reset last audio AI challenge date
-    _lastBooksAudioChallengeDate = ''; // Reset last Books audio challenge date
+    _lastAiChallengeDate = ''; // Reset legacy challenge date
+    _lastTextAiChallengeDate = ''; // Reset legacy challenge date
+    _lastAudioAiChallengeDate = ''; // Reset legacy challenge date
+    _lastBooksAudioChallengeDate = ''; // Reset legacy challenge date
     _lastSpeechTranslationDate = ''; // Reset last speech translation date
 
     _achievementData = {};
+    _sessionHistory = [];
+    _weakPrompts = [];
 
     // Clear data from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
@@ -331,6 +438,9 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('audioChallenges');
     await prefs.remove('translationChallenges');
     await prefs.remove('accuracyPercentage');
+    await prefs.remove('answerAttempts');
+    await prefs.remove('correctAnswers');
+    await prefs.remove('bestWordsPerMinute');
     await prefs.remove('currentStreak');
     await prefs.remove('dailyGoal');
     await prefs.remove('recentAchievements');
@@ -343,6 +453,8 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('lastBooksAudioChallengeDate');
     await prefs.remove('lastSpeechTranslationDate');
     await prefs.remove('achievementData');
+    await prefs.remove('sessionHistory');
+    await prefs.remove('weakPrompts');
 
     // Clear streak tracking data
     await prefs.remove('lastPracticeDay');
@@ -372,6 +484,77 @@ class ProgressService extends ChangeNotifier {
     }
   }
 
+  void _recordAnswerAttemptInMemory(bool isCorrect) {
+    _answerAttempts++;
+    if (isCorrect) {
+      _correctAnswers++;
+    }
+
+    _accuracyPercentage =
+        _answerAttempts == 0 ? 0 : (_correctAnswers / _answerAttempts) * 100;
+
+    if (_answerAttempts >= 10 && _accuracyPercentage >= 90) {
+      _addAchievement('accuracy_90');
+    }
+  }
+
+  void _recordSessionInMemory({
+    required String practiceType,
+    required String prompt,
+    required bool isCorrect,
+    required int wordCount,
+    required int elapsedSeconds,
+  }) {
+    final session = PracticeSession(
+      practiceType: practiceType,
+      prompt: prompt,
+      isCorrect: isCorrect,
+      wordCount: wordCount,
+      elapsedSeconds: elapsedSeconds,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    _sessionHistory.insert(0, session);
+    if (_sessionHistory.length > 40) {
+      _sessionHistory = _sessionHistory.take(40).toList();
+    }
+
+    if (session.wordsPerMinute > _bestWordsPerMinute) {
+      _bestWordsPerMinute = session.wordsPerMinute;
+      if (_bestWordsPerMinute >= 30) {
+        _addAchievement('speed_30');
+      }
+    }
+  }
+
+  void _addWeakPrompt(String prompt) {
+    final normalizedPrompt = prompt.trim();
+    if (normalizedPrompt.isEmpty) return;
+
+    _weakPrompts.removeWhere(
+      (existing) => existing.toLowerCase() == normalizedPrompt.toLowerCase(),
+    );
+    _weakPrompts.insert(0, normalizedPrompt);
+
+    if (_weakPrompts.length > 20) {
+      _weakPrompts = _weakPrompts.take(20).toList();
+    }
+  }
+
+  void _removeWeakPrompt(String prompt) {
+    final normalizedPrompt = prompt.trim().toLowerCase();
+    if (normalizedPrompt.isEmpty) return;
+
+    final hadWeakPrompts = _weakPrompts.isNotEmpty;
+    _weakPrompts.removeWhere(
+      (existing) => existing.trim().toLowerCase() == normalizedPrompt,
+    );
+
+    if (hadWeakPrompts && _weakPrompts.isEmpty) {
+      _addAchievement('weak_clear');
+    }
+  }
+
   // Helper method to add an achievement with timestamp
   void _addAchievement(String achievementId) {
     if (!_allAchievements.contains(achievementId)) {
@@ -386,55 +569,46 @@ class ProgressService extends ChangeNotifier {
     return _achievementData[achievementId] ?? 0;
   }
 
-  // Add method to check if AI challenge is available today
+  // Legacy compatibility methods. Local modes are always available.
   bool isAiChallengeAvailableToday() {
-    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
-    return _lastAiChallengeDate != today;
+    return true;
   }
 
-  // Add method to check if Books audio challenge is available today
   bool isBooksAudioChallengeAvailableToday() {
-    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
-    return _lastBooksAudioChallengeDate != today;
+    return true;
   }
 
-  // Add method to check if speech translation is available today
   bool isSpeechTranslationAvailableToday() {
-    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
-    return _lastSpeechTranslationDate != today;
+    return true;
   }
 
-  // Add method to check if text AI challenge is available today
   bool isTextAiChallengeAvailableToday() {
-    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
-    return _lastTextAiChallengeDate != today;
+    return true;
   }
 
-  // Add method to check if audio AI challenge is available today
   bool isAudioAiChallengeAvailableToday() {
-    final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
-    return _lastAudioAiChallengeDate != today;
+    return true;
   }
 
-  // Add method to update last AI challenge date
+  // Legacy update methods kept so old call sites and saved data stay harmless.
   Future<void> updateLastAiChallengeDate() async {
     _lastAiChallengeDate = DateTime.now().toString().split(' ')[0];
     await saveProgress();
   }
 
-  // Add method to update last text AI challenge date
+  // Legacy update method for older saved progress data
   Future<void> updateLastTextAiChallengeDate() async {
     _lastTextAiChallengeDate = DateTime.now().toString().split(' ')[0];
     await saveProgress();
   }
 
-  // Add method to update last audio AI challenge date
+  // Legacy update method for older saved progress data
   Future<void> updateLastAudioAiChallengeDate() async {
     _lastAudioAiChallengeDate = DateTime.now().toString().split(' ')[0];
     await saveProgress();
   }
 
-  // Add method to update last Books audio challenge date
+  // Legacy update method for older saved progress data
   Future<void> updateLastBooksAudioChallengeDate() async {
     _lastBooksAudioChallengeDate = DateTime.now().toString().split(' ')[0];
     await saveProgress();

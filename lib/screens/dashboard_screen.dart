@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/achievement_banner.dart';
+import '../widgets/app_surface.dart';
 import '../services/progress_service.dart';
 import '../services/theme_service.dart';
 import 'package:provider/provider.dart';
@@ -81,7 +82,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Progress'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           // Add reset button in the app bar
           IconButton(
@@ -113,35 +113,61 @@ class _DashboardScreenState extends State<DashboardScreen>
 
             const SizedBox(height: 24),
 
+            _buildSkillOverview(),
+
+            const SizedBox(height: 24),
+
             // Progress stats
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Your Stats',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildStatRow('Today\'s Sessions',
-                        '${_progressService.getDailyExercises()}'),
-                    _buildStatRow('Total Sessions',
-                        '${_progressService.getTotalExercises()}'),
-                    _buildStatRow('Text Sessions',
-                        '${_progressService.getTextChallenges()}'),
-                    _buildStatRow('Audio Sessions',
-                        '${_progressService.getAudioChallenges()}'),
-                    _buildStatRow('Translation Sessions',
-                        '${_progressService.getTranslationChallenges()}'),
-                    _buildStatRow('Current Streak',
-                        '${_progressService.getCurrentStreak()} ${_progressService.getCurrentStreak() == 1 ? 'day' : 'days'}'),
-                    _buildStatRow('Daily Goal',
-                        '${_progressService.getDailyGoal()} sessions'),
-                  ],
-                ),
+            AppSurface(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Your Stats',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildStatRow(
+                    'Today\'s Sessions',
+                    '${_progressService.getDailyExercises()}',
+                  ),
+                  _buildStatRow(
+                    'Total Sessions',
+                    '${_progressService.getTotalExercises()}',
+                  ),
+                  _buildStatRow(
+                    'Answer Accuracy',
+                    _progressService.getAnswerAttempts() == 0
+                        ? '--'
+                        : '${_progressService.getAccuracyPercentage().round()}%',
+                  ),
+                  _buildStatRow(
+                    'Answer Attempts',
+                    '${_progressService.getAnswerAttempts()}',
+                  ),
+                  _buildStatRow(
+                    'Text Sessions',
+                    '${_progressService.getTextChallenges()}',
+                  ),
+                  _buildStatRow(
+                    'Audio Sessions',
+                    '${_progressService.getAudioChallenges()}',
+                  ),
+                  _buildStatRow(
+                    'Translation Sessions',
+                    '${_progressService.getTranslationChallenges()}',
+                  ),
+                  _buildStatRow(
+                    'Current Streak',
+                    '${_progressService.getCurrentStreak()} ${_progressService.getCurrentStreak() == 1 ? 'day' : 'days'}',
+                  ),
+                  _buildStatRow(
+                    'Daily Goal',
+                    '${_progressService.getDailyGoal()} sessions',
+                  ),
+                ],
               ),
             ),
 
@@ -150,8 +176,80 @@ class _DashboardScreenState extends State<DashboardScreen>
             // Daily goal progress
             _buildDailyGoalProgress(),
 
+            const SizedBox(height: 24),
+
+            _buildSessionHistory(),
+
+            const SizedBox(height: 24),
+
             // Recent achievements
             _buildAllAchievements(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkillOverview() {
+    final attempts = _progressService.getAnswerAttempts();
+    final correct = _progressService.getCorrectAnswers();
+    final accuracy = _progressService.getAccuracyPercentage();
+
+    return Row(
+      children: [
+        _buildOverviewCard(
+          title: 'Accuracy',
+          value: attempts == 0 ? '--' : '${accuracy.round()}%',
+          detail: '$correct of $attempts correct',
+          icon: Icons.track_changes,
+          color: Colors.indigo,
+        ),
+        const SizedBox(width: 12),
+        _buildOverviewCard(
+          title: 'Best Speed',
+          value: '${_progressService.getBestWordsPerMinute()}',
+          detail: 'words per minute',
+          icon: Icons.local_fire_department,
+          color: Colors.deepOrange,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOverviewCard({
+    required String title,
+    required String value,
+    required String detail,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              detail,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
           ],
         ),
       ),
@@ -180,166 +278,263 @@ class _DashboardScreenState extends State<DashboardScreen>
     final progress = dailyExercises / dailyGoal;
     final themeService = Provider.of<ThemeService>(context);
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Today\'s Goal',
-                  style: Theme.of(context).textTheme.titleLarge,
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Today\'s Goal',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: progress >= 1.0
+                      ? themeService.accentColor.withValues(alpha: 0.1)
+                      : Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
+                child: Text(
+                  '$dailyExercises/$dailyGoal sessions',
+                  style: TextStyle(
                     color: progress >= 1.0
-                        ? themeService.accentColor.withOpacity(0.1)
-                        : Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+                        ? themeService.accentColor
+                        : Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: Text(
-                    '$dailyExercises/$dailyGoal sessions',
-                    style: TextStyle(
-                      color: progress >= 1.0
-                          ? themeService.accentColor
-                          : Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Stack(
+              children: [
+                LinearProgressIndicator(
+                  value: progress > 1.0 ? 1.0 : progress,
+                  minHeight: 20,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    progress >= 1.0
+                        ? themeService.accentColor
+                        : Theme.of(context).primaryColor,
+                  ),
+                ),
+                if (progress > 0)
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${(progress * 100).toInt()}%',
+                        style: TextStyle(
+                          color: progress > 0.5 ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (progress >= 1.0)
+            Row(
+              children: [
+                const Icon(Icons.emoji_events, color: Colors.amber),
+                const SizedBox(width: 8),
+                Text(
+                  'Daily goal completed! Great job!',
+                  style: TextStyle(
+                    color: themeService.accentColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Icon(Icons.directions_run,
+                    color: Theme.of(context).primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  'Keep going! You\'re doing great!',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Stack(
-                children: [
-                  LinearProgressIndicator(
-                    value: progress > 1.0 ? 1.0 : progress,
-                    minHeight: 20,
-                    backgroundColor: Colors.grey.shade200,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      progress >= 1.0
-                          ? themeService.accentColor
-                          : Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  if (progress > 0)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${(progress * 100).toInt()}%',
-                          style: TextStyle(
-                            color: progress > 0.5 ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (progress >= 1.0)
-              Row(
-                children: [
-                  const Icon(Icons.emoji_events, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Daily goal completed! Great job!',
-                    style: TextStyle(
-                      color: themeService.accentColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              )
-            else
-              Row(
-                children: [
-                  Icon(Icons.directions_run,
-                      color: Theme.of(context).primaryColor),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Keep going! You\'re doing great!',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-          ],
-        ),
+        ],
       ),
     );
+  }
+
+  Widget _buildSessionHistory() {
+    final sessions = _progressService.getSessionHistory(limit: 8);
+
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.history, color: Colors.indigo, size: 28),
+              const SizedBox(width: 8),
+              Text(
+                'Recent Sessions',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (sessions.isEmpty)
+            Center(
+              child: Column(
+                children: [
+                  const Icon(Icons.history_toggle_off,
+                      size: 48, color: Colors.grey),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No sessions yet. Complete a prompt to start tracking.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey.shade700),
+                  ),
+                ],
+              ),
+            )
+          else
+            ...sessions.map((session) {
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  session.isCorrect ? Icons.check_circle : Icons.error,
+                  color: session.isCorrect ? Colors.green : Colors.red,
+                ),
+                title: Text(
+                  _formatPracticeType(session.practiceType),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  session.prompt.isEmpty
+                      ? _formatSessionDetail(session)
+                      : '${_formatSessionDetail(session)} • ${session.prompt}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Text(
+                  session.wordsPerMinute == 0
+                      ? _formatSessionAge(session.timestamp)
+                      : '${session.wordsPerMinute} WPM',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
+  String _formatPracticeType(String practiceType) {
+    switch (practiceType) {
+      case 'text':
+        return 'Text Practice';
+      case 'audio':
+        return 'Listening Practice';
+      case 'translation':
+        return 'Translation Practice';
+      case 'weak':
+        return 'Weak Drill';
+      default:
+        return 'Practice';
+    }
+  }
+
+  String _formatSessionDetail(PracticeSession session) {
+    final result = session.isCorrect ? 'Correct' : 'Missed';
+    final duration =
+        session.elapsedSeconds <= 0 ? '--' : '${session.elapsedSeconds}s';
+    final words = session.wordCount <= 0 ? '--' : '${session.wordCount} words';
+    return '$result • $words • $duration';
+  }
+
+  String _formatSessionAge(int timestamp) {
+    if (timestamp == 0) {
+      return '';
+    }
+
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    final difference = DateTime.now().difference(date);
+
+    if (difference.inMinutes < 1) {
+      return 'Now';
+    }
+    if (difference.inHours < 1) {
+      return '${difference.inMinutes}m';
+    }
+    if (difference.inDays < 1) {
+      return '${difference.inHours}h';
+    }
+
+    return '${difference.inDays}d';
   }
 
   Widget _buildAllAchievements() {
     final achievements = _progressService.getAllAchievements();
     final achievementMessages = _progressService.achievementMessages;
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.emoji_events, color: Colors.amber, size: 28),
-                const SizedBox(width: 8),
-                Text(
-                  'Achievements',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (achievements.isEmpty)
-              Center(
-                child: Column(
-                  children: [
-                    const Icon(Icons.hourglass_empty,
-                        size: 48, color: Colors.grey),
-                    const SizedBox(height: 8),
-                    Text(
-                      'No achievements yet. Start typing today!',
-                      style: TextStyle(color: Colors.grey.shade700),
-                    ),
-                  ],
-                ),
-              )
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: achievements.length,
-                itemBuilder: (context, index) {
-                  final achievementId = achievements[index];
-                  final achievementMessage =
-                      achievementMessages[achievementId] ?? achievementId;
-                  return Card(
-                    elevation: 1,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    shape: RoundedRectangleBorder(
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.emoji_events, color: Colors.amber, size: 28),
+              const SizedBox(width: 8),
+              Text(
+                'Achievements',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (achievements.isEmpty)
+            Center(
+              child: Column(
+                children: [
+                  const Icon(Icons.hourglass_empty,
+                      size: 48, color: Colors.grey),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No achievements yet. Start typing today!',
+                    style: TextStyle(color: Colors.grey.shade700),
+                  ),
+                ],
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: achievements.length,
+              itemBuilder: (context, index) {
+                final achievementId = achievements[index];
+                final achievementMessage =
+                    achievementMessages[achievementId] ?? achievementId;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _getAchievementColor(achievementId)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    color: _getAchievementColor(achievementId).withOpacity(0.1),
                     child: ListTile(
                       leading: Icon(
                         _getAchievementIcon(achievementId),
@@ -357,11 +552,11 @@ class _DashboardScreenState extends State<DashboardScreen>
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
-          ],
-        ),
+                  ),
+                );
+              },
+            ),
+        ],
       ),
     );
   }

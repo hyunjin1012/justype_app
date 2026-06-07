@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/book.dart';
-import '../services/gutenberg_service.dart';
+import '../services/local_library_service.dart';
+import '../widgets/app_surface.dart';
 import '../widgets/book_practice_modal.dart';
 
 class BookDetailScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class BookDetailScreen extends StatefulWidget {
 }
 
 class _BookDetailScreenState extends State<BookDetailScreen> {
-  final GutenbergService _gutenbergService = GutenbergService();
+  final LocalLibraryService _libraryService = LocalLibraryService();
   Book? _book;
   bool _isLoading = true;
   String? _errorMessage;
@@ -43,7 +44,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     });
 
     try {
-      final book = await _gutenbergService.fetchBook(widget.bookId);
+      final book = await _libraryService.fetchBook(widget.bookId);
       setState(() {
         _book = book;
         _isLoading = false;
@@ -98,7 +99,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           onPressed: () => GoRouter.of(context).pop(),
         ),
         title: Text(_book?.title ?? 'Book Details'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
             icon: const Icon(Icons.text_decrease),
@@ -169,38 +169,39 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                 .textTheme
                                 .titleMedium
                                 ?.copyWith(
-                                  color: Colors.grey[700],
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                           ),
                           const SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
-                                child: ElevatedButton.icon(
+                                child: FilledButton.icon(
                                   onPressed: () => _showPracticeModal(context),
                                   icon: const Icon(Icons.keyboard),
                                   label: const Text('Start Typing'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).colorScheme.primary,
-                                    foregroundColor:
-                                        Theme.of(context).colorScheme.onPrimary,
+                                  style: FilledButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
+                                      vertical: 12,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const Divider(height: 24),
+                          const SizedBox(height: 16),
                           Expanded(
-                            child: SingleChildScrollView(
-                              controller: _scrollController,
-                              child: Text(
-                                _book!.content,
-                                style: TextStyle(
-                                  fontSize: _fontSize,
-                                  height: 1.5,
+                            child: AppSurface(
+                              child: SingleChildScrollView(
+                                controller: _scrollController,
+                                child: Text(
+                                  _book!.content,
+                                  style: TextStyle(
+                                    fontSize: _fontSize,
+                                    height: 1.5,
+                                  ),
                                 ),
                               ),
                             ),
