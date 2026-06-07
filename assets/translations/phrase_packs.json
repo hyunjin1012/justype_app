@@ -11,6 +11,31 @@
     {
       "source": "A steady routine makes practice easier to repeat.",
       "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "I would like a coffee without sugar, please.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "I can call after seven if you still want to talk.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "I am sorry I answered so late.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "I need a minute to think before I answer clearly.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Can you help me find the entrance.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "es": [
@@ -55,6 +80,31 @@
       "scenario": "Daily Life",
       "source": "Voy a preparar la cena despues de terminar mi practica.",
       "target": "I will make dinner after I finish my practice."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Quiero un cafe sin azucar, por favor.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Puedo llamar despues de las siete si todavia quieres hablar.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Siento haber respondido tan tarde.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Necesito un minuto para pensar antes de responder con claridad.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Puede ayudarme a encontrar la entrada.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "fr": [
@@ -69,6 +119,31 @@
     {
       "source": "Une routine stable rend la pratique plus facile a repeter.",
       "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Je voudrais un cafe sans sucre, s il vous plait.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Je peux appeler apres sept heures si tu veux encore parler.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Je suis desole d avoir repondu si tard.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "J ai besoin d une minute pour reflechir avant de repondre clairement.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Pouvez vous m aider a trouver l entree.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "de": [
@@ -83,6 +158,31 @@
     {
       "source": "Eine feste Routine macht das Uben leichter zu wiederholen.",
       "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Ich mochte bitte einen Kaffee ohne Zucker.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Ich kann nach sieben Uhr anrufen, wenn du noch reden willst.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Es tut mir leid, dass ich so spat geantwortet habe.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Ich brauche eine Minute, um klar zu antworten.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Konnen Sie mir helfen, den Eingang zu finden.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "it": [
@@ -97,6 +197,31 @@
     {
       "source": "Una routine costante rende la pratica piu facile da ripetere.",
       "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Vorrei un caffe senza zucchero, per favore.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Posso chiamare dopo le sette se vuoi ancora parlare.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Mi dispiace di aver risposto cosi tardi.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Ho bisogno di un minuto per pensare prima di rispondere chiaramente.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Puo aiutarmi a trovare l ingresso.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "ja": [
@@ -111,6 +236,31 @@
     {
       "source": "Anteishita shukan wa renshu o kurikaeshi yasuku shimasu.",
       "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Satou nashi no koohii o onegaishimasu.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Mada hanashitai nara shichiji no ato ni denwa dekimasu.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Henshin ga osokunatte sumimasen.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Hakkiri kotaeru mae ni kangaeru jikan ga ichibun hitsuyou desu.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Iriguchi o mitsukeru no o tetsudatte kuremasu ka.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "zh": [
@@ -125,6 +275,31 @@
     {
       "source": "Wending de xiguan rang lianxi geng rongyi chongfu.",
       "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Qing gei wo yi bei bu jia tang de kafei.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Ruguo ni hai xiang liao, wo keyi qi dian hou da dianhua.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Hen bao qian wo hui fu wan le.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Wo xuyao yi fenzhong xiang qingchu zai huida.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Ni neng bang wo zhao dao rukou ma.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "ru": [
@@ -139,6 +314,31 @@
     {
       "source": "Ustoychivaya rutina delaet praktiku prosche dlya povtoreniya.",
       "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Mne pozhaluysta kofe bez sakhara.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Ya mogu pozvonit posle semi, esli ty vse eshche khochesh pogovorit.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Prostite chto ya tak pozdno otvetil.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Mne nuzhna minuta chtoby podumat i jasno otvetit.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Vy mozhete pomoch mne nayti vhod.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "ar": [
@@ -153,6 +353,31 @@
     {
       "source": "Al rotina al thabita tajal al mumarasa ashal lil tikrar.",
       "target": "A steady routine makes practice easier to repeat."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Ureed qahwa bila sukkar min fadlik.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Yumkinuni al ittisal baad al sabia idha kunta turid al kalam.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Ana aasif li raddi al mutaakhir.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Ahtaju ila daqiqa li afakkir qabla an ujeeb bi wuduh.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Hal yumkinuk musa adati fi ijad al madkhal.",
+      "target": "Can you help me find the entrance."
     }
   ],
   "ko": [
@@ -187,6 +412,31 @@
       "scenario": "Daily Life",
       "source": "Yeonseubeul kkeunnaego jeonyeok eul junbi hal geoyeyo.",
       "target": "I will make dinner after I finish my practice."
+    },
+    {
+      "scenario": "Cafe",
+      "source": "Seoltang eomneun keopi han jan juseyo.",
+      "target": "I would like a coffee without sugar, please."
+    },
+    {
+      "scenario": "Small Talk",
+      "source": "Ajik yaegi hago sipeumyeon ilgop si ihu e jeonhwa hal su itseoyo.",
+      "target": "I can call after seven if you still want to talk."
+    },
+    {
+      "scenario": "Apology",
+      "source": "Neuje dapaeseo joesonghamnida.",
+      "target": "I am sorry I answered so late."
+    },
+    {
+      "scenario": "Interview",
+      "source": "Bunmyeonghage daedaphagi jeon e saenggakhal sigani jamkkan piryohaeyo.",
+      "target": "I need a minute to think before I answer clearly."
+    },
+    {
+      "scenario": "Travel",
+      "source": "Ipgu chatneun geoseul dowa jusil su innayo.",
+      "target": "Can you help me find the entrance."
     }
   ]
 }

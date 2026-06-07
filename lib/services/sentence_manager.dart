@@ -138,6 +138,8 @@ class SentenceManager {
       String processed = sentence.replaceAll('###PERIOD###', '.');
       // Normalize whitespace
       processed = processed.replaceAll(RegExp(r'\s+'), ' ').trim();
+      processed =
+          processed.replaceFirst(RegExp(r'^[A-Za-z][A-Za-z ]{0,32}:\s*'), '');
       return processed;
     }).toList();
 

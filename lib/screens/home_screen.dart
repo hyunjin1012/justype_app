@@ -453,29 +453,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildBookCard(BuildContext context, int index) {
     final List<Map<String, dynamic>> recommendedBooks = [
       {
-        'id': '1001',
-        'title': 'Clarity Notes',
-        'author': 'JusType Library',
+        'id': '1009',
+        'title': 'After Midnight',
+        'author': 'JusType Originals',
       },
       {
-        'id': '1002',
-        'title': 'Workshop Ledger',
-        'author': 'JusType Library',
+        'id': '1010',
+        'title': 'Train Platform',
+        'author': 'JusType Originals',
       },
       {
-        'id': '1003',
-        'title': 'City Sketches',
-        'author': 'JusType Library',
+        'id': '1011',
+        'title': 'Cafe Replies',
+        'author': 'JusType Originals',
       },
       {
-        'id': '1004',
-        'title': 'Kitchen Practice',
-        'author': 'JusType Library',
+        'id': '1015',
+        'title': 'Tiny Mystery',
+        'author': 'JusType Originals',
       },
       {
-        'id': '1005',
-        'title': 'Studio Log',
-        'author': 'JusType Library',
+        'id': '1019',
+        'title': 'Classic Verse',
+        'author': 'Public Domain Classics',
       },
     ];
 

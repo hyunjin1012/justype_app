@@ -52,6 +52,8 @@ class LocalLibraryService {
       title: book.title,
       author: book.author,
       content: book.content,
+      subjects: book.subjects,
+      displayStyle: book.displayStyle,
     );
   }
 
@@ -113,6 +115,7 @@ class LocalLibraryService {
         author: data['author'] as String,
         subjects: List<String>.from(data['subjects'] as List<dynamic>),
         content: data['content'] as String,
+        displayStyle: data['displayStyle'] as String? ?? 'prose',
       );
     }).toList();
 
@@ -195,7 +198,8 @@ class LocalLibraryService {
         .map((sentence) => sentence
             .replaceAll('###PERIOD###', '.')
             .replaceAll(RegExp(r'\s+'), ' ')
-            .trim())
+            .trim()
+            .replaceFirst(RegExp(r'^[A-Za-z][A-Za-z ]{0,32}:\s*'), ''))
         .where((sentence) {
       if (sentence.length < 20 || sentence.length > 200) {
         return false;
@@ -218,6 +222,7 @@ class _LocalBookRecord {
   final String author;
   final List<String> subjects;
   final String content;
+  final String displayStyle;
 
   const _LocalBookRecord({
     required this.id,
@@ -225,6 +230,7 @@ class _LocalBookRecord {
     required this.author,
     required this.subjects,
     required this.content,
+    required this.displayStyle,
   });
 }
 

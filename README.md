@@ -9,7 +9,7 @@ JusType is strongest as a lightweight offline shadowing trainer: users can type 
 Implemented product layers:
 
 - Weak-prompt drills based on missed answers.
-- Scenario phrase packs for translation practice, including travel, classroom, interview, and daily-life prompts.
+- Scenario phrase packs for translation practice, including travel, cafe, small talk, apology, classroom, interview, and daily-life prompts.
 - Session history with accuracy, elapsed time, word count, and personal best WPM.
 - App-wide positioning around offline practice, keyboard plus microphone input, and privacy-friendly local content.
 
@@ -30,6 +30,10 @@ The core practice flows do not depend on OpenAI, ElevenLabs, Gutendex, Project G
 - Audio playback uses platform text-to-speech through `flutter_tts`.
 
 The app still uses device/platform capabilities such as speech recognition and local TTS, but it no longer makes external API calls for its core content.
+
+## Content policy
+
+Practice content should be original to JusType, licensed for app use, or safely public domain. Do not add modern song lyrics, copyrighted dialogue, quotes from current books, or other protected text unless the rights are cleared. For a lyrics-like feel, use original rhythm packs or verified public-domain classics instead.
 
 ## Development
 
