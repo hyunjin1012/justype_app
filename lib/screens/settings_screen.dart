@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../services/theme_service.dart';
 import '../services/progress_service.dart';
 import '../services/app_preferences.dart';
+import '../services/purchase_service.dart';
+import '../services/saved_prompt_service.dart';
 import '../widgets/app_surface.dart';
+import '../widgets/plus_purchase_sheet.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -89,6 +93,87 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
+          _buildSectionHeader(context, 'JusType Plus'),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Consumer2<PurchaseService, SavedPromptService>(
+              builder: (context, purchaseService, savedPromptService, child) {
+                return AppSurface(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(
+                          purchaseService.isPlusUnlocked
+                              ? 'JusType Plus Active'
+                              : 'Unlock JusType Plus',
+                        ),
+                        subtitle: Text(
+                          purchaseService.isPlusUnlocked
+                              ? 'Saved prompts and custom goals are unlocked'
+                              : purchaseService.plusPrice.isEmpty
+                                  ? 'One-time upgrade for saved prompts'
+                                  : 'One-time upgrade • ${purchaseService.plusPrice}',
+                        ),
+                        leading: Icon(
+                          Icons.workspace_premium,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        trailing: purchaseService.isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Icon(
+                                purchaseService.isPlusUnlocked
+                                    ? Icons.check_circle
+                                    : Icons.chevron_right,
+                              ),
+                        onTap: _showPlusSheet,
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        title: const Text('Daily Goal'),
+                        subtitle: Text(
+                          purchaseService.isPlusUnlocked
+                              ? '${_progressService.getDailyGoal()} sessions per day'
+                              : 'Unlock Plus to customize your goal',
+                        ),
+                        leading: const Icon(Icons.flag),
+                        trailing: purchaseService.isPlusUnlocked
+                            ? const Icon(Icons.chevron_right)
+                            : const Icon(Icons.lock),
+                        onTap: purchaseService.isPlusUnlocked
+                            ? _showDailyGoalPicker
+                            : _showPlusSheet,
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        title: const Text('Saved Prompts'),
+                        subtitle: Text(
+                          purchaseService.isPlusUnlocked
+                              ? savedPromptService.savedPromptCount == 0
+                                  ? 'No prompts saved yet'
+                                  : '${savedPromptService.savedPromptCount} saved prompts'
+                              : 'Unlock Plus to save and replay prompts',
+                        ),
+                        leading: const Icon(Icons.bookmark),
+                        trailing: purchaseService.isPlusUnlocked
+                            ? const Icon(Icons.chevron_right)
+                            : const Icon(Icons.lock),
+                        onTap: purchaseService.isPlusUnlocked
+                            ? () => GoRouter.of(context).go('/challenges/saved')
+                            : _showPlusSheet,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
           _buildSectionHeader(context, 'Privacy & Data'),
           Padding(
             padding:
@@ -100,7 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const ListTile(
                     title: Text('Offline Practice'),
                     subtitle: Text(
-                      'Library, generated prompts, phrase packs, and progress stay on this device.',
+                      'Library, generated prompts, saved prompts, and progress stay on this device.',
                     ),
                     leading: Icon(Icons.offline_pin),
                   ),
@@ -168,7 +253,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           const SizedBox(height: 16),
                           const Text(
-                            'An offline-first practice app for text precision, listening recall, and conversation phrase practice.',
+                            'An offline-first practice app for text precision, listening recall, and saved-prompt practice.',
                           ),
                         ],
                       );
@@ -255,6 +340,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
               foregroundColor: Colors.red,
             ),
             child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPlusSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => const PlusPurchaseSheet(),
+    );
+  }
+
+  void _showDailyGoalPicker() {
+    final currentGoal = _progressService.getDailyGoal();
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Daily Goal'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final goal in [3, 5, 10, 15])
+              ListTile(
+                title: Text('$goal sessions per day'),
+                trailing: currentGoal == goal
+                    ? const Icon(Icons.check_circle)
+                    : const SizedBox.shrink(),
+                onTap: () async {
+                  await _progressService.setDailyGoal(goal);
+
+                  if (!mounted || !context.mounted) return;
+
+                  Navigator.of(context).pop();
+                  setState(() {});
+                },
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
           ),
         ],
       ),

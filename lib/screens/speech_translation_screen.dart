@@ -8,6 +8,7 @@ import '../services/speech_translation_service.dart';
 import '../widgets/app_surface.dart';
 import '../widgets/enhanced_feedback.dart';
 import '../widgets/practice_session_scaffold.dart';
+import '../widgets/save_prompt_action.dart';
 import '../widgets/speech_input_area.dart';
 
 class SpeechTranslationScreen extends StatefulWidget {
@@ -136,7 +137,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
       await _feedbackService.playWrongSound();
       if (!mounted) return;
       setState(() {
-        _feedback = 'Not quite right. Try this phrase once more.';
+        _feedback = 'Not quite right. Try this translation once more.';
         _isCheckButtonEnabled = true;
       });
     }
@@ -223,6 +224,14 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
     );
   }
 
+  String get _saveSourceLabel {
+    final language = _languages[_selectedLanguage] ?? 'Translation';
+    final scenario =
+        _selectedScenario == 'All' ? 'Translate to English' : _selectedScenario;
+
+    return '$scenario: $language to English';
+  }
+
   @override
   void dispose() {
     _phraseService.dispose();
@@ -236,11 +245,17 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
     final theme = Theme.of(context);
 
     return PracticeSessionScaffold(
-      title: 'Phrase Practice',
+      title: 'Translate to English',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => GoRouter.of(context).go('/challenges'),
       ),
+      actions: [
+        SavePromptAction(
+          prompt: _isLoading ? '' : _targetPrompt,
+          sourceLabel: _saveSourceLabel,
+        ),
+      ],
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -289,7 +304,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
       inputArea: SpeechInputArea(
         controller: _textController,
         onCheck: _checkAnswer,
-        labelText: 'English phrase',
+        labelText: 'Type the English translation',
         isCheckButtonEnabled: _isCheckButtonEnabled && _targetPrompt.isNotEmpty,
       ),
       feedback: _feedback,
@@ -301,7 +316,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
             ),
       onShowDetails: _feedback.isEmpty ? null : _showEnhancedFeedback,
       onNext: _isLoading ? null : _nextPhrase,
-      nextLabel: 'New phrase',
+      nextLabel: 'New prompt',
     );
   }
 
@@ -314,7 +329,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Conversation Pack',
+                  'Translation Pack',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -374,7 +389,9 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _selectedScenario == 'All' ? 'Phrase' : _selectedScenario,
+            _selectedScenario == 'All'
+                ? 'Translate this to English'
+                : 'Translate this $_selectedScenario prompt to English',
             style: theme.textTheme.labelLarge?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w700,
@@ -404,7 +421,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
           ],
           const SizedBox(height: 12),
           Text(
-            'Practice the English response by typing or speaking it.',
+            'Read the prompt above, then type or speak its English meaning below.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -428,7 +445,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Type or speak the English version below.',
+              'Your answer should be the English translation.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

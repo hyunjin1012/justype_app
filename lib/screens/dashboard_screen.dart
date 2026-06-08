@@ -148,10 +148,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                     '${_progressService.getAudioChallenges()}',
                   ),
                   _buildStatRow(
-                    'Phrase Sessions',
-                    '${_progressService.getTranslationChallenges()}',
-                  ),
-                  _buildStatRow(
                     'Current Streak',
                     '${_progressService.getCurrentStreak()} ${_progressService.getCurrentStreak() == 1 ? 'day' : 'days'}',
                   ),
@@ -440,7 +436,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       case 'audio':
         return 'Listening Practice';
       case 'translation':
-        return 'Phrase Practice';
+        return 'Practice';
       case 'weak':
         return 'Weak Drill';
       default:

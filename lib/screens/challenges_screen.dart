@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../services/purchase_service.dart';
 import '../services/progress_service.dart';
+import '../services/saved_prompt_service.dart';
 import '../widgets/app_surface.dart';
+import '../widgets/plus_purchase_sheet.dart';
 import 'package:provider/provider.dart';
 
 class ChallengesScreen extends StatefulWidget {
@@ -43,8 +46,11 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
 
     final textChallenges = _progressService.getTextChallenges();
     final audioChallenges = _progressService.getAudioChallenges();
-    final translationChallenges = _progressService.getTranslationChallenges();
     final weakPromptCount = _progressService.getWeakPrompts().length;
+    final purchaseService = Provider.of<PurchaseService>(context);
+    final savedPromptService = Provider.of<SavedPromptService>(context);
+    final savedPromptCount = savedPromptService.savedPromptCount;
+    final isPlusUnlocked = purchaseService.isPlusUnlocked;
 
     final List<Map<String, dynamic>> challenges = [
       {
@@ -96,25 +102,6 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         ],
       },
       {
-        'title': 'Phrase Practice',
-        'description': 'Answer local conversation prompts in English',
-        'icon': Icons.translate,
-        'color': Colors.orange.shade100,
-        'route': '/challenges/translate',
-        'progress': translationChallenges,
-        'total': 25,
-        'subtitle': 'Scenario conversation',
-        'available': true,
-        'status': '$translationChallenges phrase sessions completed',
-        'modes': [
-          {
-            'name': 'Phrase Packs',
-            'available': true,
-            'limit': 'Unlimited',
-          },
-        ],
-      },
-      {
         'title': 'Weak Drills',
         'description': 'Review prompts you missed in any mode',
         'icon': Icons.psychology,
@@ -136,6 +123,36 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
             'limit': weakPromptCount == 0
                 ? 'No prompts yet'
                 : '$weakPromptCount waiting',
+          },
+        ],
+      },
+      {
+        'title': 'Saved Prompts',
+        'description': 'Replay prompts you bookmarked during practice',
+        'icon': Icons.bookmark,
+        'color': Colors.teal.shade100,
+        'route': '/challenges/saved',
+        'progress': savedPromptCount,
+        'total': savedPromptCount == 0 ? 1 : savedPromptCount,
+        'subtitle': 'Favorite replay',
+        'available': isPlusUnlocked,
+        'lockedAction': 'plus',
+        'status': isPlusUnlocked
+            ? savedPromptCount == 0
+                ? 'No saved prompts yet'
+                : '$savedPromptCount prompts saved'
+            : 'JusType Plus feature',
+        'lockedMessage':
+            'Unlock Plus to save interesting prompts and practice them again.',
+        'modes': [
+          {
+            'name': 'Saved Queue',
+            'available': isPlusUnlocked,
+            'limit': isPlusUnlocked
+                ? savedPromptCount == 0
+                    ? 'Ready to save'
+                    : '$savedPromptCount saved'
+                : 'Plus',
           },
         ],
       },
@@ -170,7 +187,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Offline drills for typing, dictation, listening recall, and conversation phrases.',
+                      'Offline drills for typing, dictation, listening recall, and saved-prompt review.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
@@ -197,6 +214,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                     itemBuilder: (context, index) {
                       final challenge = challenges[index];
                       final isLocked = challenge['available'] == false;
+                      final lockedAction = challenge['lockedAction'] as String?;
                       final Color accentColor = challenge['color'] as Color;
 
                       return Padding(
@@ -205,7 +223,9 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                           opacity: isLocked ? 0.56 : 1.0,
                           child: AppSurface(
                             onTap: isLocked
-                                ? null
+                                ? lockedAction == 'plus'
+                                    ? _showPlusSheet
+                                    : null
                                 : () =>
                                     GoRouter.of(context).go(challenge['route']),
                             child: Column(
@@ -274,7 +294,9 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                   children: [
                                     Icon(
                                       isLocked
-                                          ? Icons.schedule
+                                          ? lockedAction == 'plus'
+                                              ? Icons.lock
+                                              : Icons.schedule
                                           : Icons.check_circle,
                                       size: 16,
                                       color: isLocked
@@ -329,6 +351,15 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showPlusSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => const PlusPurchaseSheet(),
     );
   }
 }

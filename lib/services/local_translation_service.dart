@@ -61,7 +61,7 @@ class LocalTranslationService {
 
     if (unpracticedPrompts.isEmpty) {
       throw Exception(
-        'You have practiced every prompt in this phrase pack.',
+        'You have practiced every prompt in this translation pack.',
       );
     }
 

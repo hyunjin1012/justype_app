@@ -6,6 +6,7 @@ import '../services/practice_service.dart';
 import '../services/progress_service.dart';
 import '../widgets/enhanced_feedback.dart';
 import '../widgets/practice_session_scaffold.dart';
+import '../widgets/save_prompt_action.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/speech_input_area.dart';
 
@@ -227,6 +228,12 @@ class _WeakDrillScreenState extends State<WeakDrillScreen> {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => GoRouter.of(context).go('/challenges'),
       ),
+      actions: [
+        SavePromptAction(
+          prompt: prompt,
+          sourceLabel: 'Weak Drills',
+        ),
+      ],
       content: Column(
         children: [
           Row(

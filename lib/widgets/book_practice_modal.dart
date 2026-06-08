@@ -10,6 +10,7 @@ import '../services/progress_service.dart';
 import '../services/feedback_service.dart';
 import 'enhanced_feedback.dart';
 import 'practice_session_scaffold.dart';
+import 'save_prompt_action.dart';
 import '../widgets/speech_input_area.dart';
 
 class BookPracticeModal extends StatefulWidget {
@@ -238,6 +239,10 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       automaticallyImplyLeading: false,
       scrollController: widget.scrollController,
       actions: [
+        SavePromptAction(
+          prompt: _isLoading ? '' : _currentSentence,
+          sourceLabel: 'Library: ${widget.book.title}',
+        ),
         IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

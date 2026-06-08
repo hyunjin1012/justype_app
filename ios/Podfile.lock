@@ -7,6 +7,9 @@ PODS:
   - Flutter (1.0.0)
   - flutter_tts (0.0.1):
     - Flutter
+  - in_app_purchase_storekit (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -24,6 +27,7 @@ DEPENDENCIES:
   - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/ios`)
   - Flutter (from `Flutter`)
   - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
+  - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -41,6 +45,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_tts:
     :path: ".symlinks/plugins/flutter_tts/ios"
+  in_app_purchase_storekit:
+    :path: ".symlinks/plugins/in_app_purchase_storekit/darwin"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -56,11 +62,12 @@ SPEC CHECKSUMS:
   CwlCatchExceptionSupport: 54ccab8d8c78907b57f99717fb19d4cc3bce02dc
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_tts: b88dbc8655d3dc961bc4a796e4e16a4cc1795833
+  in_app_purchase_storekit: 22cca7d08eebca9babdf4d07d0baccb73325d3c8
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   speech_to_text: 3b313d98516d3d0406cea424782ec25470c59d19
 
-PODFILE CHECKSUM: 681bf989b1752c26661df140f63f5aad6922ddbb
+PODFILE CHECKSUM: 0a7d5b7d0e53420cb0284f7b2f171f93843b94d2
 
 COCOAPODS: 1.16.2

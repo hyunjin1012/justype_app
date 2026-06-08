@@ -6,6 +6,7 @@ import '../services/progress_service.dart';
 import 'app_surface.dart';
 import 'enhanced_feedback.dart';
 import 'practice_session_scaffold.dart';
+import 'save_prompt_action.dart';
 
 class PracticeContent extends StatefulWidget {
   final String title;
@@ -321,12 +322,27 @@ class _PracticeContentState extends State<PracticeContent> {
     );
   }
 
+  String get _saveSourceLabel {
+    if (widget.sentenceManager.selectedSource == 'Library' &&
+        _currentBookTitle.isNotEmpty) {
+      return 'Library: $_currentBookTitle';
+    }
+
+    return widget.title;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PracticeSessionScaffold(
       title: widget.title,
       leading: widget.leading,
-      actions: widget.appBarActions,
+      actions: [
+        if (widget.appBarActions != null) ...widget.appBarActions!,
+        SavePromptAction(
+          prompt: _isLoading ? '' : widget.sentenceManager.currentSentence,
+          sourceLabel: _saveSourceLabel,
+        ),
+      ],
       scrollController: widget.scrollController,
       content: Column(
         children: [

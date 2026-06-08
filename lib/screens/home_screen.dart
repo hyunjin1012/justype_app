@@ -4,7 +4,10 @@ import '../widgets/achievement_banner.dart';
 import '../widgets/app_surface.dart';
 import '../services/progress_service.dart';
 import 'package:provider/provider.dart';
+import '../services/purchase_service.dart';
+import '../services/saved_prompt_service.dart';
 import '../services/theme_service.dart';
+import '../widgets/plus_purchase_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,6 +94,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: _buildDailyGoalCard(context),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: _buildPlusCard(context),
+                    ),
+                    const SizedBox(height: 12),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: _buildSkillSnapshot(context),
@@ -216,6 +224,64 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildPlusCard(BuildContext context) {
+    return Consumer2<PurchaseService, SavedPromptService>(
+      builder: (context, purchaseService, savedPromptService, child) {
+        final theme = Theme.of(context);
+        final isPlusUnlocked = purchaseService.isPlusUnlocked;
+        final savedCount = savedPromptService.savedPromptCount;
+
+        return AppSurface(
+          onTap: isPlusUnlocked
+              ? () => GoRouter.of(context).go('/challenges/saved')
+              : () => _showPlusSheet(context),
+          color: isPlusUnlocked
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.45)
+              : theme.colorScheme.surfaceContainerHighest,
+          child: Row(
+            children: [
+              Icon(
+                isPlusUnlocked ? Icons.bookmark : Icons.workspace_premium,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isPlusUnlocked
+                          ? 'Saved prompts'
+                          : 'Save favorite prompts',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isPlusUnlocked
+                          ? savedCount == 0
+                              ? 'Bookmark prompts you want to replay.'
+                              : '$savedCount saved prompts ready to replay.'
+                          : 'Unlock Plus for saved prompts and custom goals.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildPracticeModeCards(BuildContext context) {
     final List<Map<String, dynamic>> practiceModes = [
       {
@@ -231,13 +297,6 @@ class _HomeScreenState extends State<HomeScreen> {
         'icon': Icons.hearing,
         'color': Colors.green.shade100,
         'route': '/challenges/audio',
-      },
-      {
-        'title': 'Phrases',
-        'description': 'Practice conversation packs by voice or text',
-        'icon': Icons.translate,
-        'color': Colors.orange.shade100,
-        'route': '/challenges/translate',
       },
       {
         'title': 'Weak Drills',
@@ -587,5 +646,14 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return palette[index % palette.length];
+  }
+
+  void _showPlusSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => const PlusPurchaseSheet(),
+    );
   }
 }

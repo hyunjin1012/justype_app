@@ -19,7 +19,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       'title': 'Welcome to JusType',
       'description':
-          'Build a daily rhythm with offline text, listening, and phrase practice.',
+          'Build a daily rhythm with offline text, listening, and saved-prompt practice.',
       'icon': Icons.offline_bolt,
       'color': Colors.blue,
     },

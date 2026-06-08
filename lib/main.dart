@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'router/app_router.dart';
 import 'package:provider/provider.dart';
 import 'services/app_preferences.dart';
+import 'services/purchase_service.dart';
+import 'services/saved_prompt_service.dart';
 import 'services/theme_service.dart';
 import 'services/progress_service.dart';
 
@@ -23,6 +25,10 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeService()),
         ChangeNotifierProvider(create: (_) => ProgressService()),
+        ChangeNotifierProvider(create: (_) => PurchaseService()..initialize()),
+        ChangeNotifierProvider(
+          create: (_) => SavedPromptService()..loadSavedPrompts(),
+        ),
       ],
       child: MyApp(showOnboarding: showOnboarding),
     ),

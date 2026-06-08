@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:justype/main.dart';
 import 'package:justype/services/app_preferences.dart';
 import 'package:justype/services/progress_service.dart';
+import 'package:justype/services/purchase_service.dart';
+import 'package:justype/services/saved_prompt_service.dart';
 import 'package:justype/services/theme_service.dart';
 
 void main() {
@@ -22,6 +24,8 @@ void main() {
         providers: [
           ChangeNotifierProvider(create: (_) => ThemeService()),
           ChangeNotifierProvider(create: (_) => ProgressService()),
+          ChangeNotifierProvider(create: (_) => PurchaseService()),
+          ChangeNotifierProvider(create: (_) => SavedPromptService()),
         ],
         child: const MyApp(showOnboarding: false),
       ),
@@ -40,6 +44,8 @@ void main() {
         providers: [
           ChangeNotifierProvider(create: (_) => ThemeService()),
           ChangeNotifierProvider(create: (_) => ProgressService()),
+          ChangeNotifierProvider(create: (_) => PurchaseService()),
+          ChangeNotifierProvider(create: (_) => SavedPromptService()),
         ],
         child: const MyApp(showOnboarding: true),
       ),
@@ -57,6 +63,8 @@ void main() {
         providers: [
           ChangeNotifierProvider(create: (_) => ThemeService()),
           ChangeNotifierProvider(create: (_) => ProgressService()),
+          ChangeNotifierProvider(create: (_) => PurchaseService()),
+          ChangeNotifierProvider(create: (_) => SavedPromptService()),
         ],
         child: const MyApp(showOnboarding: true),
       ),

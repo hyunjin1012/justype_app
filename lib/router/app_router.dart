@@ -8,8 +8,9 @@ import '../screens/dashboard_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/onboarding_screen.dart';
-import '../screens/speech_translation_screen.dart';
 import '../screens/weak_drill_screen.dart';
+import '../screens/saved_prompt_practice_screen.dart';
+import '../screens/saved_prompts_screen.dart';
 import '../screens/challenges_screen.dart';
 import '../services/theme_service.dart';
 import 'package:provider/provider.dart';
@@ -77,12 +78,20 @@ class AppRouter {
                   builder: (context, state) => const AudioChallengeScreen(),
                 ),
                 GoRoute(
-                  path: '/challenges/translate',
-                  builder: (context, state) => const SpeechTranslationScreen(),
-                ),
-                GoRoute(
                   path: '/challenges/weak',
                   builder: (context, state) => const WeakDrillScreen(),
+                ),
+                GoRoute(
+                  path: '/challenges/saved',
+                  builder: (context, state) => const SavedPromptsScreen(),
+                ),
+                GoRoute(
+                  path: '/challenges/saved/practice/:id',
+                  builder: (context, state) => SavedPromptPracticeScreen(
+                    promptId: Uri.decodeComponent(
+                      state.pathParameters['id'] ?? '',
+                    ),
+                  ),
                 ),
               ],
             ),
