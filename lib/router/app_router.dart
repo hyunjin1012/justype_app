@@ -10,8 +10,8 @@ import '../screens/settings_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/weak_drill_screen.dart';
 import '../screens/saved_prompt_practice_screen.dart';
+import '../screens/saved_prompt_review_screen.dart';
 import '../screens/saved_prompts_screen.dart';
-import '../screens/challenges_screen.dart';
 import '../services/theme_service.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +21,6 @@ class AppRouter {
   // Create static instances of screens to preserve their state
   static const homeScreen = HomeScreen();
   static const dashboardScreen = DashboardScreen();
-  static const challengesScreen = ChallengesScreen();
   static const booksScreen = BookListScreen();
 
   static GoRouter createRouter(bool showOnboarding) {
@@ -53,21 +52,9 @@ class AppRouter {
                   path: '/home',
                   builder: (context, state) => homeScreen,
                 ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/dashboard',
-                  builder: (context, state) => dashboardScreen,
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: [
                 GoRoute(
                   path: '/challenges',
-                  builder: (context, state) => challengesScreen,
+                  redirect: (context, state) => '/home',
                 ),
                 GoRoute(
                   path: '/challenges/text',
@@ -84,6 +71,10 @@ class AppRouter {
                 GoRoute(
                   path: '/challenges/saved',
                   builder: (context, state) => const SavedPromptsScreen(),
+                ),
+                GoRoute(
+                  path: '/challenges/saved/review',
+                  builder: (context, state) => const SavedPromptReviewScreen(),
                 ),
                 GoRoute(
                   path: '/challenges/saved/practice/:id',
@@ -109,17 +100,27 @@ class AppRouter {
                 ),
               ],
             ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/dashboard',
+                  builder: (context, state) => dashboardScreen,
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/settings',
+                  builder: (context, state) {
+                    return SettingsScreen(
+                      themeService: Provider.of<ThemeService>(context),
+                    );
+                  },
+                ),
+              ],
+            ),
           ],
-        ),
-
-        // Routes not part of the bottom navigation
-        GoRoute(
-          path: '/settings',
-          parentNavigatorKey: _rootNavigatorKey,
-          builder: (context, state) {
-            return SettingsScreen(
-                themeService: Provider.of<ThemeService>(context));
-          },
         ),
       ],
     );
@@ -152,16 +153,16 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Stats',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.games),
-            label: 'Challenges',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.library_books),
             label: 'Library',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.insights),
+            label: 'Progress',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
       ),

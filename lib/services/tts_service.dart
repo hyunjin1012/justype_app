@@ -7,17 +7,27 @@ class TtsService {
   bool _isSpeaking = false;
   Function? _onStateChangeCallback;
   Timer? _speechTimer;
-  double _speechRate = 0.5; // Default is already 0.5 for normal speed
+  double _speechRate = 0.43;
+  static const List<String> _preferredVoiceNames = [
+    'Samantha',
+    'Ava',
+    'Zoe',
+    'Susan',
+    'Allison',
+    'Evan',
+  ];
 
   // Getter for speaking state
   bool get isSpeaking => _isSpeaking;
 
   // Initialize TTS with default settings
   Future<void> initialize() async {
+    await _configureAudioSession();
     await _flutterTts.setLanguage("en-US");
     await _flutterTts.setSpeechRate(_speechRate);
     await _flutterTts.setVolume(1.0);
-    await _flutterTts.setPitch(1.0);
+    await _flutterTts.setPitch(0.96);
+    await _selectBestEnglishVoice();
 
     // Set up completion handler
     _flutterTts.setCompletionHandler(() {
@@ -52,6 +62,103 @@ class TtsService {
     });
   }
 
+  Future<void> _configureAudioSession() async {
+    try {
+      await _flutterTts.setSharedInstance(true);
+      await _flutterTts.setIosAudioCategory(
+        IosTextToSpeechAudioCategory.playback,
+        [
+          IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+          IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+          IosTextToSpeechAudioCategoryOptions.duckOthers,
+        ],
+        IosTextToSpeechAudioMode.spokenAudio,
+      );
+      await _flutterTts.awaitSpeakCompletion(false);
+    } catch (e) {
+      debugPrint("Unable to configure TTS audio session: $e");
+    }
+  }
+
+  Future<void> _selectBestEnglishVoice() async {
+    try {
+      final voicesResult = await _flutterTts.getVoices;
+      if (voicesResult is! List) return;
+
+      final voices = voicesResult
+          .whereType<Map>()
+          .map((voice) => voice.map(
+                (key, value) => MapEntry(
+                  key.toString(),
+                  value?.toString() ?? '',
+                ),
+              ))
+          .where((voice) {
+        final locale = voice['locale']?.toLowerCase() ?? '';
+        return locale == 'en-us' || locale.startsWith('en-');
+      }).toList();
+
+      if (voices.isEmpty) return;
+
+      voices.sort(
+          (first, second) => _voiceScore(second).compareTo(_voiceScore(first)));
+
+      final selectedVoice = voices.first;
+      final identifier = selectedVoice['identifier'];
+      if (identifier != null && identifier.isNotEmpty) {
+        await _flutterTts.setVoice({'identifier': identifier});
+        return;
+      }
+
+      final name = selectedVoice['name'];
+      final locale = selectedVoice['locale'];
+      if (name != null &&
+          name.isNotEmpty &&
+          locale != null &&
+          locale.isNotEmpty) {
+        await _flutterTts.setVoice({'name': name, 'locale': locale});
+      }
+    } catch (e) {
+      debugPrint("Unable to select TTS voice: $e");
+    }
+  }
+
+  int _voiceScore(Map<String, String> voice) {
+    final name = voice['name']?.toLowerCase() ?? '';
+    final locale = voice['locale']?.toLowerCase() ?? '';
+    final quality = voice['quality']?.toLowerCase() ?? '';
+    final identifier = voice['identifier']?.toLowerCase() ?? '';
+
+    var score = 0;
+
+    if (locale == 'en-us') {
+      score += 80;
+    } else if (locale.startsWith('en-')) {
+      score += 40;
+    }
+
+    if (quality.contains('premium')) {
+      score += 80;
+    } else if (quality.contains('enhanced')) {
+      score += 60;
+    }
+
+    if (identifier.contains('premium')) {
+      score += 40;
+    } else if (identifier.contains('enhanced')) {
+      score += 30;
+    }
+
+    for (var index = 0; index < _preferredVoiceNames.length; index++) {
+      if (name == _preferredVoiceNames[index].toLowerCase()) {
+        score += 30 - index;
+        break;
+      }
+    }
+
+    return score;
+  }
+
   // Helper method to safely call the callback
   void _safeCallback() {
     if (_onStateChangeCallback != null) {
@@ -80,14 +187,14 @@ class TtsService {
     _isSpeaking = true;
     _safeCallback();
 
-    await _flutterTts.speak(text);
+    await _flutterTts.speak(_prepareSpeechText(text));
 
     // Start a timer as a fallback to detect when speech might be complete
-    _startSpeechTimer(text, onStateChange);
+    _startSpeechTimer(text);
   }
 
   // Start a timer to detect when speech might be complete
-  void _startSpeechTimer(String text, Function? onStateChange) {
+  void _startSpeechTimer(String text) {
     _cancelSpeechTimer(); // Cancel any existing timer
 
     // Estimate speech duration (roughly 1 second per 5 words at normal speed)
@@ -99,6 +206,13 @@ class TtsService {
       _isSpeaking = false;
       _safeCallback();
     });
+  }
+
+  String _prepareSpeechText(String text) {
+    return text.trim().replaceAll(RegExp(r'\s+'), ' ').replaceAllMapped(
+          RegExp(r'([.!?])\s+'),
+          (match) => '${match.group(1)}  ',
+        );
   }
 
   // Cancel the speech timer
@@ -130,7 +244,7 @@ class TtsService {
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(isSpeaking ? Icons.stop : Icons.volume_up),
-      label: Text(isSpeaking ? 'Stop' : 'Listen'),
+      label: Text(isSpeaking ? 'Stop' : 'Play'),
       style: ElevatedButton.styleFrom(
         backgroundColor: isSpeaking
             ? Colors.red.shade100

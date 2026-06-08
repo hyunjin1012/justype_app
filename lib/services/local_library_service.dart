@@ -78,7 +78,7 @@ class LocalLibraryService {
 
     return {
       'sentence': candidate?.sentence ??
-          'You have practiced every local library prompt. Try Generated for a fresh sentence.',
+          'You have practiced every local library prompt. Try Generated for a fresh prompt.',
       'title': candidate?.title ?? 'Library Complete',
       'author': candidate?.author ?? 'JusType',
       'bookId': candidate?.bookId ?? '',

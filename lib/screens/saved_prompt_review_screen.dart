@@ -11,24 +11,18 @@ import '../widgets/app_surface.dart';
 import '../widgets/enhanced_feedback.dart';
 import '../widgets/plus_purchase_sheet.dart';
 import '../widgets/practice_session_scaffold.dart';
-import '../widgets/save_prompt_action.dart';
 import '../widgets/sentence_display_card.dart';
 import '../widgets/speech_input_area.dart';
 
-class SavedPromptPracticeScreen extends StatefulWidget {
-  final String promptId;
-
-  const SavedPromptPracticeScreen({
-    super.key,
-    required this.promptId,
-  });
+class SavedPromptReviewScreen extends StatefulWidget {
+  const SavedPromptReviewScreen({super.key});
 
   @override
-  State<SavedPromptPracticeScreen> createState() =>
-      _SavedPromptPracticeScreenState();
+  State<SavedPromptReviewScreen> createState() =>
+      _SavedPromptReviewScreenState();
 }
 
-class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
+class _SavedPromptReviewScreenState extends State<SavedPromptReviewScreen> {
   final TextEditingController _textController = TextEditingController();
   final PracticeService _practiceService = PracticeService();
   final ProgressService _progressService = ProgressService();
@@ -36,8 +30,11 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
 
   bool _isLoading = true;
   bool _isCheckButtonEnabled = true;
+  bool _isComplete = false;
   String _feedback = '';
+  int _currentIndex = 0;
   DateTime? _sessionStartedAt;
+  final Set<String> _masteredPromptIds = {};
 
   @override
   void initState() {
@@ -59,8 +56,9 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
     });
   }
 
-  Future<void> _checkAnswer(String prompt) async {
+  Future<void> _checkAnswer(SavedPrompt savedPrompt) async {
     final userInput = _textController.text;
+    final prompt = savedPrompt.prompt;
     if (userInput.isEmpty || prompt.isEmpty) return;
 
     final isCorrect = _practiceService.checkAnswer(userInput, prompt);
@@ -79,6 +77,7 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
       if (!mounted) return;
 
       setState(() {
+        _masteredPromptIds.add(savedPrompt.id);
         _feedback = 'Correct! $wordCount words matched in ${elapsedSeconds}s.';
         _isCheckButtonEnabled = false;
       });
@@ -95,19 +94,40 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
       if (!mounted) return;
 
       setState(() {
-        _feedback = 'Not quite right. Try this saved prompt once more.';
+        _feedback = 'Not quite right. Try this prompt once more.';
         _isCheckButtonEnabled = true;
       });
     }
   }
 
-  void _resetSession() {
+  void _goToNextPrompt(int promptCount) {
+    if (_currentIndex >= promptCount - 1) {
+      setState(() {
+        _isComplete = true;
+      });
+      return;
+    }
+
     setState(() {
-      _textController.clear();
-      _feedback = '';
-      _isCheckButtonEnabled = true;
-      _sessionStartedAt = DateTime.now();
+      _currentIndex++;
+      _resetPromptState();
     });
+  }
+
+  void _reviewAgain() {
+    setState(() {
+      _currentIndex = 0;
+      _isComplete = false;
+      _masteredPromptIds.clear();
+      _resetPromptState();
+    });
+  }
+
+  void _resetPromptState() {
+    _textController.clear();
+    _feedback = '';
+    _isCheckButtonEnabled = true;
+    _sessionStartedAt = DateTime.now();
   }
 
   void _showEnhancedFeedback(String prompt) {
@@ -176,47 +196,55 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
           return _buildLockedScreen(context);
         }
 
-        final savedPrompt = savedPromptService.promptById(widget.promptId);
-        if (savedPrompt == null) {
-          return _buildMissingPromptScreen(context);
+        final prompts = savedPromptService.savedPrompts;
+        if (prompts.isEmpty) {
+          return _buildEmptyScreen(context);
         }
 
+        if (_isComplete) {
+          return _buildCompleteScreen(context, prompts.length);
+        }
+
+        final safeIndex = _currentIndex.clamp(0, prompts.length - 1);
+        final savedPrompt = prompts[safeIndex];
         final prompt = savedPrompt.prompt;
+        final progressText = '${safeIndex + 1} of ${prompts.length}';
 
         return PracticeSessionScaffold(
-          title: 'Saved Prompt',
+          title: 'Review Queue',
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => GoRouter.of(context).go('/challenges/saved'),
           ),
-          actions: [
-            SavePromptAction(
-              prompt: prompt,
-              sourceLabel: savedPrompt.sourceLabel,
-            ),
-          ],
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AppSurface(
-                color:
-                    Theme.of(context).colorScheme.primaryContainer.withValues(
-                          alpha: 0.45,
-                        ),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.45),
                 child: Row(
                   children: [
                     Icon(
-                      Icons.bookmark,
+                      Icons.view_list,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        savedPrompt.sourceLabel,
+                        progressText,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                       ),
+                    ),
+                    Text(
+                      savedPrompt.sourceLabel,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ],
                 ),
@@ -230,32 +258,34 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
           ),
           inputArea: SpeechInputArea(
             controller: _textController,
-            onCheck: () => _checkAnswer(prompt),
-            labelText: 'Type or speak this saved prompt',
+            onCheck: () => _checkAnswer(savedPrompt),
+            labelText: 'Type or speak this prompt',
             isCheckButtonEnabled: _isCheckButtonEnabled,
           ),
           feedback: _feedback,
           isFeedbackCorrect: _feedback.isEmpty
               ? null
-              : _practiceService.checkAnswer(_textController.text, prompt),
+              : _practiceService.checkAnswer(
+                  _textController.text,
+                  prompt,
+                ),
           onShowDetails:
               _feedback.isEmpty ? null : () => _showEnhancedFeedback(prompt),
-          onNext: _resetSession,
-          nextLabel: 'Try again',
+          onNext: () => _goToNextPrompt(prompts.length),
+          nextLabel:
+              safeIndex >= prompts.length - 1 ? 'Finish review' : 'Next prompt',
         );
       },
     );
   }
 
   Widget _buildLockedScreen(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Saved Prompt'),
+        title: const Text('Review Queue'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => GoRouter.of(context).go('/home'),
+          onPressed: () => GoRouter.of(context).go('/challenges/saved'),
         ),
       ),
       body: Center(
@@ -266,24 +296,24 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.bookmarks_outlined,
+                  Icons.view_list,
                   size: 48,
-                  color: theme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Saved prompts are Plus',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  'Review Queue is Plus',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Unlock Plus to save and replay favorite prompts.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  'Unlock Plus to practice saved and custom prompts as a queue.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -303,10 +333,10 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
     );
   }
 
-  Widget _buildMissingPromptScreen(BuildContext context) {
+  Widget _buildEmptyScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Saved Prompt'),
+        title: const Text('Review Queue'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => GoRouter.of(context).go('/challenges/saved'),
@@ -318,22 +348,87 @@ class _SavedPromptPracticeScreenState extends State<SavedPromptPracticeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.bookmark_remove_outlined, size: 56),
+              const Icon(Icons.bookmark_add_outlined, size: 56),
               const SizedBox(height: 16),
               Text(
-                'This prompt is no longer saved',
+                'No prompts to review',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              OutlinedButton.icon(
-                onPressed: () => GoRouter.of(context).go('/challenges/saved'),
-                icon: const Icon(Icons.arrow_back),
-                label: const Text('Back to Saved Prompts'),
+              const SizedBox(height: 8),
+              Text(
+                'Save or add prompts first, then come back to review them.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                textAlign: TextAlign.center,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompleteScreen(BuildContext context, int promptCount) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Review Complete'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => GoRouter.of(context).go('/challenges/saved'),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: AppSurface(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  size: 52,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Review complete',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${_masteredPromptIds.length} of $promptCount prompts matched.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _reviewAgain,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Review Again'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () =>
+                        GoRouter.of(context).go('/challenges/saved'),
+                    child: const Text('Back to Saved Prompts'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

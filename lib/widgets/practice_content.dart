@@ -57,7 +57,7 @@ class _PracticeContentState extends State<PracticeContent> {
     super.initState();
     // Initialize feedback service
     _feedbackService.initialize();
-    // Fetch a random sentence when the screen loads
+    // Fetch a random prompt when the screen loads.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchRandomSentence();
     });
@@ -82,8 +82,7 @@ class _PracticeContentState extends State<PracticeContent> {
     final elapsedSeconds = _elapsedSeconds();
 
     if (isCorrect) {
-      // Save progress based on practice type
-      final practiceType = widget.title.contains('Text') ? 'text' : 'audio';
+      final practiceType = _practiceType;
       await _progressService.completeExercise(
         practiceType: practiceType,
         prompt: currentSentence,
@@ -104,7 +103,7 @@ class _PracticeContentState extends State<PracticeContent> {
     } else {
       await _progressService.recordAnswerAttempt(
         false,
-        practiceType: widget.title.contains('Text') ? 'text' : 'audio',
+        practiceType: _practiceType,
         prompt: currentSentence,
         wordCount: wordCount,
         elapsedSeconds: elapsedSeconds,
@@ -118,20 +117,21 @@ class _PracticeContentState extends State<PracticeContent> {
       if (!mounted) return;
 
       setState(() {
-        _feedback = "Not quite right. Try again or get a new sentence.";
+        _feedback = "Not quite right. Try again or get a new prompt.";
       });
     }
   }
 
   Future<void> _fetchRandomSentence() async {
+    widget.onRefresh();
+
     if (mounted) {
       setState(() {
         _isLoading = true;
         _feedback = "";
         _isCheckButtonEnabled =
-            true; // Reset button state when fetching new sentence
-        _loadingMessage =
-            "Loading ${widget.sentenceManager.selectedSource} content...";
+            true; // Reset button state when fetching a new prompt.
+        _loadingMessage = _loadingPromptMessage;
         // Clear current book information
         _currentBookTitle = "";
         _currentBookAuthor = "";
@@ -152,8 +152,7 @@ class _PracticeContentState extends State<PracticeContent> {
           setState(() {
             _isLoading = isLoading;
             if (isLoading) {
-              _loadingMessage =
-                  "Loading ${widget.sentenceManager.selectedSource} content...";
+              _loadingMessage = _loadingPromptMessage;
               // Clear current book information
               _currentBookTitle = "";
               _currentBookAuthor = "";
@@ -208,6 +207,15 @@ class _PracticeContentState extends State<PracticeContent> {
         .split(RegExp(r'\s+'))
         .where((word) => word.isNotEmpty)
         .length;
+  }
+
+  String get _practiceType {
+    return widget.title == 'Dictation' ? 'audio' : 'text';
+  }
+
+  String get _loadingPromptMessage {
+    final source = widget.sentenceManager.selectedSource.toLowerCase();
+    return 'Loading $source prompts...';
   }
 
   void _navigateToBookDetail(String bookId) {
@@ -366,7 +374,7 @@ class _PracticeContentState extends State<PracticeContent> {
               _navigateToBookDetail,
               widget.sentenceManager.selectedSource,
             ),
-          // Loading indicator or sentence display
+          // Loading indicator or prompt display
           _isLoading
               ? Center(
                   child: Padding(
@@ -405,7 +413,7 @@ class _PracticeContentState extends State<PracticeContent> {
           : widget.sentenceManager.checkAnswer(_textController.text),
       onShowDetails: _feedback.isEmpty ? null : _showEnhancedFeedback,
       onNext: _isLoading ? null : _fetchRandomSentence,
-      nextLabel: 'New sentence',
+      nextLabel: 'New prompt',
     );
   }
 }

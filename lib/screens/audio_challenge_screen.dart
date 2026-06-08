@@ -52,7 +52,7 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
   @override
   Widget build(BuildContext context) {
     return PracticeContent(
-      title: 'Audio Challenge',
+      title: 'Dictation',
       sentenceManager: _sentenceManager,
       // Define how to display the sentence (with speak button and visibility toggle)
       sentenceDisplay: (sentence) {
@@ -81,11 +81,11 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
           SpeechInputArea(
         controller: controller,
         onCheck: checkAnswer,
-        labelText: 'Type or speak what you hear',
+        labelText: 'Type or speak the prompt you hear',
         isCheckButtonEnabled: isCheckButtonEnabled,
       ),
       onRefresh: () {
-        // Stop speaking if a new sentence is fetched
+        // Stop speaking if a new prompt is fetched.
         _ttsService.stop();
         // Reset visibility
         setState(() {
@@ -94,7 +94,7 @@ class _AudioChallengeScreenState extends State<AudioChallengeScreen> {
       },
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => GoRouter.of(context).go('/challenges'),
+        onPressed: () => GoRouter.of(context).go('/home'),
       ),
     );
   }

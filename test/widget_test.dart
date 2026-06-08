@@ -34,8 +34,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Home'), findsWidgets);
-    expect(find.text('Challenges'), findsWidgets);
     expect(find.text('Library'), findsWidgets);
+    expect(find.text('Progress'), findsWidgets);
+    expect(find.text('Settings'), findsWidgets);
   });
 
   testWidgets('JusType renders onboarding when requested', (tester) async {

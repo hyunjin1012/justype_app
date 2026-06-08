@@ -140,11 +140,11 @@ class _DashboardScreenState extends State<DashboardScreen>
                     '${_progressService.getAnswerAttempts()}',
                   ),
                   _buildStatRow(
-                    'Text Sessions',
+                    'Typing Sessions',
                     '${_progressService.getTextChallenges()}',
                   ),
                   _buildStatRow(
-                    'Audio Sessions',
+                    'Dictation Sessions',
                     '${_progressService.getAudioChallenges()}',
                   ),
                   _buildStatRow(
@@ -432,9 +432,9 @@ class _DashboardScreenState extends State<DashboardScreen>
   String _formatPracticeType(String practiceType) {
     switch (practiceType) {
       case 'text':
-        return 'Text Practice';
+        return 'Typing';
       case 'audio':
-        return 'Listening Practice';
+        return 'Dictation';
       case 'translation':
         return 'Practice';
       case 'weak':
@@ -558,7 +558,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     } else if (achievementId.contains('text')) {
       return Icons.menu_book;
     } else if (achievementId.contains('audio')) {
-      return Icons.hearing;
+      return Icons.record_voice_over;
     } else if (achievementId.contains('translation')) {
       return Icons.translate;
     }

@@ -64,104 +64,102 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Get achievements to display
     final achievements = _progressService.getAchievements();
     final bool showAchievementBanner = _progressService.hasRecentAchievements();
 
-    return Consumer<ThemeService>(
-      builder: (context, themeService, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('JusType'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () => GoRouter.of(context).push('/settings'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('JusType'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadProgress,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildStartPracticeCard(context),
+              const SizedBox(height: 12),
+              _buildDailyGoalCard(context),
+              const SizedBox(height: 12),
+              _buildSkillSnapshot(context),
+              if (showAchievementBanner && achievements.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                AchievementBanner(
+                  title: 'New Achievement!',
+                  description: achievements.last,
+                  icon: 'assets/animations/achievement.json',
+                  backgroundColor: Colors.amber.shade100,
+                  textColor: Colors.brown,
+                  onDismiss: () {
+                    _progressService.clearRecentAchievements();
+                    setState(() {});
+                  },
+                ),
+              ],
+              const SizedBox(height: 20),
+              const SectionTitle(title: 'More Practice'),
+              const SizedBox(height: 12),
+              _buildPracticeModeCards(context),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStartPracticeCard(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AppSurface(
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.keyboard,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Ready for a session?',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ],
           ),
-          body: RefreshIndicator(
-            onRefresh: _loadProgress,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Daily goal progress
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildDailyGoalCard(context),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: _buildPlusCard(context),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: _buildSkillSnapshot(context),
-                    ),
-
-                    // Show achievement banner if there are recent achievements
-                    if (showAchievementBanner && achievements.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: AchievementBanner(
-                          title: 'New Achievement!',
-                          description: achievements.last,
-                          icon: 'assets/animations/achievement.json',
-                          backgroundColor: Colors.amber.shade100,
-                          textColor: Colors.brown,
-                          onDismiss: () {
-                            // Clear recent achievements when dismissed
-                            _progressService.clearRecentAchievements();
-                            setState(() {});
-                          },
-                        ),
-                      ),
-
-                    // Practice modes section
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                      child: SectionTitle(title: 'Today\'s Practice'),
-                    ),
-
-                    // Practice mode cards
-                    _buildPracticeModeCards(context),
-
-                    // Recommended books section
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                      child: SectionTitle(
-                        title: 'Explore Stories',
-                        actionLabel: 'View All',
-                        onAction: () => GoRouter.of(context).go('/books'),
-                      ),
-                    ),
-
-                    // Recommended books carousel
-                    SizedBox(
-                      height: 224,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: 5, // Example count
-                        itemBuilder: (context, index) {
-                          return _buildBookCard(context, index);
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
+          const SizedBox(height: 8),
+          Text(
+            'Typing, dictation, and saved-prompt practice in short offline sessions.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-        );
-      },
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => GoRouter.of(context).go('/challenges/text'),
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Start Typing'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () => GoRouter.of(context).go('/challenges/audio'),
+                child: const Text('Dictation'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -224,211 +222,169 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPlusCard(BuildContext context) {
+  Widget _buildPracticeModeCards(BuildContext context) {
+    final weakPromptCount = _progressService.getWeakPrompts().length;
+
     return Consumer2<PurchaseService, SavedPromptService>(
       builder: (context, purchaseService, savedPromptService, child) {
-        final theme = Theme.of(context);
-        final isPlusUnlocked = purchaseService.isPlusUnlocked;
-        final savedCount = savedPromptService.savedPromptCount;
-
-        return AppSurface(
-          onTap: isPlusUnlocked
-              ? () => GoRouter.of(context).go('/challenges/saved')
-              : () => _showPlusSheet(context),
-          color: isPlusUnlocked
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.45)
-              : theme.colorScheme.surfaceContainerHighest,
-          child: Row(
-            children: [
-              Icon(
-                isPlusUnlocked ? Icons.bookmark : Icons.workspace_premium,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isPlusUnlocked
-                          ? 'Saved prompts'
-                          : 'Save favorite prompts',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isPlusUnlocked
-                          ? savedCount == 0
-                              ? 'Bookmark prompts you want to replay.'
-                              : '$savedCount saved prompts ready to replay.'
-                          : 'Unlock Plus for saved prompts and custom goals.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant,
+        return Column(
+          children: [
+            _buildPracticeRow(
+              context,
+              title: 'Library',
+              description: 'Browse offline prompt packs',
+              icon: Icons.library_books,
+              color: Colors.teal,
+              route: '/books',
+            ),
+            if (weakPromptCount > 0) ...[
+              const SizedBox(height: 12),
+              _buildPracticeRow(
+                context,
+                title: 'Weak Drills',
+                description: '$weakPromptCount missed prompts waiting',
+                icon: Icons.psychology,
+                color: Colors.purple,
+                route: '/challenges/weak',
               ),
             ],
-          ),
+            const SizedBox(height: 12),
+            _buildSavedPromptsRow(
+              context,
+              purchaseService: purchaseService,
+              savedPromptService: savedPromptService,
+            ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildPracticeModeCards(BuildContext context) {
-    final List<Map<String, dynamic>> practiceModes = [
-      {
-        'title': 'Text',
-        'description': 'Read, type, or dictate precise sentences',
-        'icon': Icons.keyboard,
-        'color': Colors.blue.shade100,
-        'route': '/challenges/text',
-      },
-      {
-        'title': 'Listening',
-        'description': 'Hear a line and reproduce it accurately',
-        'icon': Icons.hearing,
-        'color': Colors.green.shade100,
-        'route': '/challenges/audio',
-      },
-      {
-        'title': 'Weak Drills',
-        'description': _progressService.getWeakPrompts().isEmpty
-            ? 'Missed prompts will collect here'
-            : 'Review ${_progressService.getWeakPrompts().length} missed prompts',
-        'icon': Icons.psychology,
-        'color': Colors.purple.shade100,
-        'route': '/challenges/weak',
-      },
-    ];
-
-    final Map<String, dynamic> libraryMode = {
-      'title': 'Library',
-      'description': 'Browse bundled offline practice passages',
-      'icon': Icons.library_books,
-      'color': Colors.teal.shade100,
-      'route': '/books',
-    };
-
-    return Column(
-      children: [
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 1.32,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: practiceModes.length,
-          itemBuilder: (context, index) {
-            final mode = practiceModes[index];
-            return AppSurface(
-              onTap: () => GoRouter.of(context).go(mode['route']),
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: (mode['color'] as Color).withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      mode['icon'],
-                      size: 21,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    mode['title'],
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    mode['description'],
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: AppSurface(
-            onTap: () => GoRouter.of(context).go(libraryMode['route']),
-            padding: const EdgeInsets.all(14),
-            child: Row(
+  Widget _buildPracticeRow(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required IconData icon,
+    required Color color,
+    required String route,
+  }) {
+    return AppSurface(
+      onTap: () => GoRouter.of(context).go(route),
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          _buildModeIcon(context, icon: icon, color: color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color:
-                        (libraryMode['color'] as Color).withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    libraryMode['icon'],
-                    size: 22,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        libraryMode['title'],
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        libraryMode['description'],
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+          Icon(
+            Icons.chevron_right,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSavedPromptsRow(
+    BuildContext context, {
+    required PurchaseService purchaseService,
+    required SavedPromptService savedPromptService,
+  }) {
+    final isPlusUnlocked = purchaseService.isPlusUnlocked;
+    final savedCount = savedPromptService.savedPromptCount;
+    final description = isPlusUnlocked
+        ? savedCount == 0
+            ? 'Add custom prompts or save favorites'
+            : '$savedCount prompts ready to review'
+        : 'Custom prompts and review queue';
+    final iconColor = isPlusUnlocked
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return AppSurface(
+      onTap: isPlusUnlocked
+          ? () => GoRouter.of(context).go('/challenges/saved')
+          : () => _showPlusSheet(context),
+      padding: const EdgeInsets.all(14),
+      color: isPlusUnlocked
+          ? Theme.of(context)
+              .colorScheme
+              .primaryContainer
+              .withValues(alpha: 0.35)
+          : null,
+      child: Row(
+        children: [
+          _buildModeIcon(
+            context,
+            icon: isPlusUnlocked ? Icons.bookmark : Icons.bookmark_border,
+            color: iconColor,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Saved Prompts',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            isPlusUnlocked ? Icons.chevron_right : Icons.lock_outline,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModeIcon(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(
+        icon,
+        size: 22,
+        color: color,
+      ),
     );
   }
 
@@ -507,145 +463,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildBookCard(BuildContext context, int index) {
-    final List<Map<String, dynamic>> recommendedBooks = [
-      {
-        'id': '1020',
-        'title': 'Missed Train',
-        'author': 'JusType Originals',
-        'subject': 'Travel',
-        'icon': Icons.train,
-      },
-      {
-        'id': '1025',
-        'title': 'Cafe Argument',
-        'author': 'JusType Originals',
-        'subject': 'Conversation',
-        'icon': Icons.chat_bubble_outline,
-      },
-      {
-        'id': '1030',
-        'title': 'Morning Brief',
-        'author': 'JusType Originals',
-        'subject': 'Work',
-        'icon': Icons.work_outline,
-      },
-      {
-        'id': '1037',
-        'title': 'Phone Call',
-        'author': 'JusType Originals',
-        'subject': 'Family',
-        'icon': Icons.call_outlined,
-      },
-      {
-        'id': '1058',
-        'title': 'Elevator Pitch',
-        'author': 'JusType Originals',
-        'subject': 'Confidence',
-        'icon': Icons.record_voice_over,
-      },
-    ];
-
-    // If index is out of bounds, return an empty container
-    if (index >= recommendedBooks.length) {
-      return Container();
-    }
-
-    final book = recommendedBooks[index];
-
-    return GestureDetector(
-      onTap: () {
-        // Navigate to book detail screen
-        GoRouter.of(context).push('/book/${book['id']}');
-      },
-      child: Container(
-        width: 132,
-        margin: const EdgeInsets.only(right: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Book cover
-            Container(
-              height: 136,
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _homeCoverColor(context, index),
-                borderRadius: BorderRadius.circular(8.0),
-                border: Border.all(
-                  color: Theme.of(context).dividerTheme.color ??
-                      Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surface
-                          .withValues(alpha: 0.82),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      book['icon'],
-                      size: 22,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    book['subject'],
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Book title
-            Text(
-              book['title'],
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            // Book author
-            Text(
-              book['author'],
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _homeCoverColor(BuildContext context, int index) {
-    final theme = Theme.of(context);
-    final palette = [
-      theme.colorScheme.tertiaryContainer,
-      theme.colorScheme.secondaryContainer,
-      theme.colorScheme.primaryContainer,
-      theme.colorScheme.surfaceContainerHighest,
-      theme.colorScheme.errorContainer,
-    ];
-
-    return palette[index % palette.length];
   }
 
   void _showPlusSheet(BuildContext context) {

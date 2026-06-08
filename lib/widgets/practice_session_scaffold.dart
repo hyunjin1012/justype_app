@@ -15,6 +15,7 @@ class PracticeSessionScaffold extends StatelessWidget {
   final VoidCallback? onShowDetails;
   final VoidCallback? onNext;
   final String nextLabel;
+  final String promptHint;
 
   const PracticeSessionScaffold({
     super.key,
@@ -32,6 +33,7 @@ class PracticeSessionScaffold extends StatelessWidget {
     this.onShowDetails,
     this.onNext,
     this.nextLabel = 'New prompt',
+    this.promptHint = 'Match the prompt exactly.',
   });
 
   @override
@@ -57,6 +59,10 @@ class PracticeSessionScaffold extends StatelessWidget {
               padding: bottomPadding,
               child: Column(
                 children: [
+                  if (promptHint.trim().isNotEmpty) ...[
+                    _buildPromptHint(context),
+                    const SizedBox(height: 8),
+                  ],
                   inputArea,
                   if (onNext != null) ...[
                     const SizedBox(height: 8),
@@ -104,5 +110,28 @@ class PracticeSessionScaffold extends StatelessWidget {
     }
 
     return isFeedbackCorrect! ? colorScheme.primary : colorScheme.error;
+  }
+
+  Widget _buildPromptHint(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Icon(
+          Icons.info_outline,
+          size: 16,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            promptHint,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ),
+      ],
+    );
   }
 }

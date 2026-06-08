@@ -29,9 +29,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>JusType needs access to your microphone to record your speech for translation and practice.</string>
+	<string>JusType needs microphone access when you choose to speak a practice prompt.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>JusType needs access to speech recognition to translate your speech into text for practice and learning.</string>
+	<string>JusType uses speech recognition to turn your spoken practice answer into text.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

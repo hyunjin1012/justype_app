@@ -98,10 +98,10 @@ class ProgressService extends ChangeNotifier {
 
   // Map of achievement IDs to their descriptive messages
   final Map<String, String> _achievementMessages = {
-    'text_10': 'Completed 10 text challenges!',
-    'text_20': 'Completed 20 text challenges!',
-    'audio_10': 'Completed 10 audio challenges!',
-    'translation_10': 'Completed 10 translation sessions!',
+    'text_10': 'Completed 10 typing sessions!',
+    'text_20': 'Completed 20 typing sessions!',
+    'audio_10': 'Completed 10 dictation sessions!',
+    'translation_10': 'Completed 10 practice sessions!',
     'exercises_5': 'Completed 5 exercises!',
     'exercises_10': 'Completed 10 exercises!',
     'exercises_50': 'Completed 50 exercises!',

@@ -20,7 +20,7 @@ void main() {
     );
     await service.savePrompt(
       prompt: 'bring a sweater because the restaurant is always cold',
-      sourceLabel: 'Text Challenge',
+      sourceLabel: 'Typing',
     );
 
     expect(service.savedPromptCount, 1);
@@ -50,11 +50,11 @@ void main() {
 
     final saved = await service.togglePrompt(
       prompt: 'The plan is fine, but the timing needs work.',
-      sourceLabel: 'Text Challenge',
+      sourceLabel: 'Typing',
     );
     final removed = await service.togglePrompt(
       prompt: 'The plan is fine, but the timing needs work.',
-      sourceLabel: 'Text Challenge',
+      sourceLabel: 'Typing',
     );
 
     expect(saved, isTrue);

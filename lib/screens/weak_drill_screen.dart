@@ -182,7 +182,7 @@ class _WeakDrillScreenState extends State<WeakDrillScreen> {
           title: const Text('Weak Drills'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => GoRouter.of(context).go('/challenges'),
+            onPressed: () => GoRouter.of(context).go('/home'),
           ),
         ),
         body: _isLoading
@@ -211,9 +211,9 @@ class _WeakDrillScreenState extends State<WeakDrillScreen> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
-                        onPressed: () => GoRouter.of(context).go('/challenges'),
+                        onPressed: () => GoRouter.of(context).go('/home'),
                         icon: const Icon(Icons.arrow_back),
-                        label: const Text('Back to Challenges'),
+                        label: const Text('Back to Home'),
                       ),
                     ],
                   ),
@@ -226,7 +226,7 @@ class _WeakDrillScreenState extends State<WeakDrillScreen> {
       title: 'Weak Drills',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => GoRouter.of(context).go('/challenges'),
+        onPressed: () => GoRouter.of(context).go('/home'),
       ),
       actions: [
         SavePromptAction(

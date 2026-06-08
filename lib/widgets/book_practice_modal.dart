@@ -75,6 +75,8 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
   }
 
   void _toggleMode() {
+    _ttsService.stop();
+
     setState(() {
       _isListeningMode = !_isListeningMode;
       // Reset visibility when switching to listening mode
@@ -150,14 +152,17 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
       if (!mounted) return;
 
       setState(() {
-        _feedback = "Not quite right. Try again or get a new sentence.";
+        _feedback = "Not quite right. Try again or get a new prompt.";
       });
     }
   }
 
   Future<void> _getNextSentence() async {
+    _ttsService.stop();
+
     setState(() {
       _isLoading = true;
+      _isTextVisible = !_isListeningMode;
       _textController.clear();
       _feedback = "";
     });
@@ -305,7 +310,7 @@ class _BookPracticeModalState extends State<BookPracticeModal> {
             ),
       onShowDetails: _feedback.isEmpty ? null : _showEnhancedFeedback,
       onNext: _isLoading ? null : _getNextSentence,
-      nextLabel: 'New sentence',
+      nextLabel: 'New prompt',
     );
   }
 }

@@ -18,7 +18,7 @@ class _TextChallengeScreenState extends State<TextChallengeScreen> {
   @override
   Widget build(BuildContext context) {
     return PracticeContent(
-      title: 'Text Challenge',
+      title: 'Typing',
       sentenceManager: _sentenceManager,
       // Use the reusable SentenceDisplayCard widget
       sentenceDisplay: (sentence) => SentenceDisplayCard(
@@ -30,7 +30,7 @@ class _TextChallengeScreenState extends State<TextChallengeScreen> {
           SpeechInputArea(
         controller: controller,
         onCheck: checkAnswer,
-        labelText: 'Type or speak the sentence above',
+        labelText: 'Type or speak the prompt above',
         isCheckButtonEnabled: isCheckButtonEnabled,
       ),
       onRefresh: () {
@@ -38,7 +38,7 @@ class _TextChallengeScreenState extends State<TextChallengeScreen> {
       },
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => GoRouter.of(context).go('/challenges'),
+        onPressed: () => GoRouter.of(context).go('/home'),
       ),
     );
   }

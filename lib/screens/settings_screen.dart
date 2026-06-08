@@ -111,9 +111,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         subtitle: Text(
                           purchaseService.isPlusUnlocked
-                              ? 'Saved prompts and custom goals are unlocked'
+                              ? 'Custom prompts, review queue, and goals are unlocked'
                               : purchaseService.plusPrice.isEmpty
-                                  ? 'One-time upgrade for saved prompts'
+                                  ? 'One-time upgrade for custom practice'
                                   : 'One-time upgrade • ${purchaseService.plusPrice}',
                         ),
                         leading: Icon(
@@ -156,9 +156,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         subtitle: Text(
                           purchaseService.isPlusUnlocked
                               ? savedPromptService.savedPromptCount == 0
-                                  ? 'No prompts saved yet'
-                                  : '${savedPromptService.savedPromptCount} saved prompts'
-                              : 'Unlock Plus to save and replay prompts',
+                                  ? 'Add custom prompts or save favorites'
+                                  : '${savedPromptService.savedPromptCount} prompts saved for review'
+                              : 'Unlock Plus for custom prompts and review queue',
                         ),
                         leading: const Icon(Icons.bookmark),
                         trailing: purchaseService.isPlusUnlocked
@@ -253,7 +253,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           const SizedBox(height: 16),
                           const Text(
-                            'An offline-first practice app for text precision, listening recall, and saved-prompt practice.',
+                            'An offline-first practice app for text precision, dictation, and saved-prompt practice.',
                           ),
                         ],
                       );
@@ -272,19 +272,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _colorOption(Colors.blue),
-        const SizedBox(width: 8),
-        _colorOption(Colors.green),
-        const SizedBox(width: 8),
-        _colorOption(Colors.purple),
-        const SizedBox(width: 8),
-        _colorOption(Colors.orange),
+        for (final color in ThemeService.accentColors) ...[
+          _colorOption(color),
+          if (color != ThemeService.accentColors.last) const SizedBox(width: 8),
+        ],
       ],
     );
   }
 
   Widget _colorOption(Color color) {
     final isSelected = widget.themeService.accentColor == color;
+    final borderColor = isSelected
+        ? Theme.of(context).colorScheme.onSurface
+        : Theme.of(context).colorScheme.outlineVariant;
 
     return GestureDetector(
       onTap: () {
@@ -293,18 +293,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         });
       },
       child: Container(
-        width: 24,
-        height: 24,
+        width: 28,
+        height: 28,
+        padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: color,
           shape: BoxShape.circle,
-          border: Border.all(
-            color: isSelected ? Colors.white : Colors.transparent,
-            width: 2,
+          border: Border.all(color: borderColor, width: isSelected ? 2 : 1),
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
           ),
-          boxShadow: isSelected
-              ? [BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 4)]
-              : null,
         ),
       ),
     );

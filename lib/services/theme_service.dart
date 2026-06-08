@@ -4,9 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ThemeService extends ChangeNotifier {
   static const String _themeModeKey = 'themeMode';
   static const String _accentColorKey = 'accentColor';
+  static const Color defaultAccentColor = Color(0xFF0F766E);
+  static const List<Color> accentColors = [
+    defaultAccentColor,
+    Colors.blue,
+    Colors.green,
+    Colors.purple,
+    Colors.orange,
+  ];
 
   ThemeMode _themeMode = ThemeMode.light;
-  Color _accentColor = const Color(0xFF0F766E);
+  Color _accentColor = defaultAccentColor;
 
   ThemeService() {
     _loadSettings();

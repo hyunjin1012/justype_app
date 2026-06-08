@@ -248,7 +248,7 @@ class _SpeechTranslationScreenState extends State<SpeechTranslationScreen> {
       title: 'Translate to English',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => GoRouter.of(context).go('/challenges'),
+        onPressed: () => GoRouter.of(context).go('/home'),
       ),
       actions: [
         SavePromptAction(

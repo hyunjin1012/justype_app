@@ -57,7 +57,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading book: $e'),
+            content: Text('Error loading library item: $e'),
             action: SnackBarAction(
               label: 'Retry',
               onPressed: _loadBook,
@@ -96,9 +96,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => GoRouter.of(context).pop(),
+          onPressed: () {
+            final router = GoRouter.of(context);
+            if (router.canPop()) {
+              router.pop();
+            } else {
+              router.go('/books');
+            }
+          },
         ),
-        title: Text(_book?.title ?? 'Book Details'),
+        title: Text(_book?.title ?? 'Library Item'),
         actions: [
           IconButton(
             icon: const Icon(Icons.text_decrease),
@@ -125,7 +132,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Loading book...'),
+                  Text('Loading library item...'),
                 ],
               ),
             )
@@ -147,7 +154,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   ),
                 )
               : _book == null
-                  ? const Center(child: Text('Book not available'))
+                  ? const Center(child: Text('Library item not available'))
                   : Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(

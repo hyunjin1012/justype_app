@@ -110,6 +110,8 @@ class SavedPromptService extends ChangeNotifier {
     required String prompt,
     required String sourceLabel,
   }) async {
+    await loadSavedPrompts();
+
     if (isSaved(prompt)) {
       await removePrompt(prompt);
       return false;
@@ -123,6 +125,8 @@ class SavedPromptService extends ChangeNotifier {
     required String prompt,
     required String sourceLabel,
   }) async {
+    await loadSavedPrompts();
+
     final trimmedPrompt = prompt.trim();
     if (trimmedPrompt.isEmpty) return;
 
@@ -146,10 +150,14 @@ class SavedPromptService extends ChangeNotifier {
   }
 
   Future<void> removePrompt(String prompt) async {
+    await loadSavedPrompts();
+
     await removePromptById(promptIdFor(prompt));
   }
 
   Future<void> removePromptById(String id) async {
+    await loadSavedPrompts();
+
     final previousLength = _savedPrompts.length;
     _savedPrompts = _savedPrompts
         .where((savedPrompt) => savedPrompt.id != id)

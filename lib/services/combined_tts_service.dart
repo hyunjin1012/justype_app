@@ -102,7 +102,7 @@ class CombinedTtsService {
       icon: Icon(_isLoading
           ? Icons.hourglass_empty
           : (isSpeaking ? Icons.stop : Icons.volume_up)),
-      label: Text(_isLoading ? 'Loading...' : (isSpeaking ? 'Stop' : 'Listen')),
+      label: Text(_isLoading ? 'Loading...' : (isSpeaking ? 'Stop' : 'Play')),
       style: ElevatedButton.styleFrom(
         backgroundColor: isSpeaking ? Colors.red.shade100 : colorScheme.primary,
         foregroundColor:

@@ -66,7 +66,8 @@ class _BookListScreenState extends State<BookListScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Unable to load books. Please try again.')),
+            content: Text('Unable to load the library. Please try again.'),
+          ),
         );
       }
     }
@@ -98,7 +99,7 @@ class _BookListScreenState extends State<BookListScreen> {
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No more books available.')),
+            const SnackBar(content: Text('No more library items available.')),
           );
         }
       }
@@ -110,12 +111,14 @@ class _BookListScreenState extends State<BookListScreen> {
       if (mounted) {
         if (e.toString().contains('404')) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No more books available.')),
+            const SnackBar(content: Text('No more library items available.')),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-                content: Text('Unable to load more books. Please try again.')),
+              content:
+                  Text('Unable to load more library items. Please try again.'),
+            ),
           );
         }
       }
@@ -139,7 +142,7 @@ class _BookListScreenState extends State<BookListScreen> {
             ? TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search books...',
+                  hintText: 'Search library...',
                   border: InputBorder.none,
                   hintStyle: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -155,11 +158,11 @@ class _BookListScreenState extends State<BookListScreen> {
                   });
                 },
               )
-            : const Text('Book Collection'),
+            : const Text('Practice Library'),
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
-            tooltip: _isSearching ? 'Close Search' : 'Search Books',
+            tooltip: _isSearching ? 'Close Search' : 'Search Library',
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;
@@ -184,7 +187,7 @@ class _BookListScreenState extends State<BookListScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Loading local library...'),
+                  Text('Loading practice library...'),
                 ],
               ),
             )
@@ -193,7 +196,7 @@ class _BookListScreenState extends State<BookListScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('No books available'),
+                      const Text('No library items available'),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
                         onPressed: _loadBooks,
