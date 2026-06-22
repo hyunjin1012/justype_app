@@ -170,12 +170,9 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
   }
 
   void _onTap(BuildContext context, int index) {
-    // Only navigate if the tab is not already selected
-    if (index != navigationShell.currentIndex) {
-      navigationShell.goBranch(
-        index,
-        // Don't set initialLocation to false to prevent rebuilding
-      );
-    }
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 }

@@ -39,6 +39,11 @@ class _SavedPromptsScreenState extends State<SavedPromptsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Back to Home',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _goBackHome,
+        ),
         title: const Text('Saved Prompts'),
         actions: [
           Consumer<PurchaseService>(
@@ -309,6 +314,15 @@ class _SavedPromptsScreenState extends State<SavedPromptsScreen> {
       isScrollControlled: true,
       builder: (context) => const PlusPurchaseSheet(),
     );
+  }
+
+  void _goBackHome() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+
+    GoRouter.of(context).go('/home');
   }
 }
 
