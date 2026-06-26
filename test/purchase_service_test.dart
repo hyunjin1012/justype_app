@@ -57,7 +57,7 @@ void main() {
     service.dispose();
   });
 
-  test('immediate owned purchase response does not unlock Plus', () async {
+  test('immediate StoreKit purchase response unlocks Plus', () async {
     final service = PurchaseService(inAppPurchase: InAppPurchase.instance);
 
     await service.initialize();
@@ -74,8 +74,8 @@ void main() {
     await Future<void>.delayed(Duration.zero);
 
     expect(service.purchasePending, isFalse);
-    expect(service.isPlusUnlocked, isFalse);
-    expect(service.statusMessage, contains('already owns'));
+    expect(service.isPlusUnlocked, isTrue);
+    expect(service.statusMessage, 'JusType Plus is unlocked.');
     expect(fakeStore.completeCount, 1);
 
     service.dispose();
@@ -83,10 +83,7 @@ void main() {
 
   test('StoreKit purchase unlocks Plus after the payment flow starts',
       () async {
-    final service = PurchaseService(
-      inAppPurchase: InAppPurchase.instance,
-      minimumPurchaseSheetDelay: Duration.zero,
-    );
+    final service = PurchaseService(inAppPurchase: InAppPurchase.instance);
 
     await service.initialize();
     await service.buyPlus();
@@ -109,10 +106,7 @@ void main() {
 
   test('StoreKit-confirmed Plus entitlement persists across launches',
       () async {
-    final service = PurchaseService(
-      inAppPurchase: InAppPurchase.instance,
-      minimumPurchaseSheetDelay: Duration.zero,
-    );
+    final service = PurchaseService(inAppPurchase: InAppPurchase.instance);
 
     await service.initialize();
     await service.buyPlus();

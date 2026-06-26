@@ -9,7 +9,6 @@ class PurchaseService extends ChangeNotifier {
   static const String _verifiedPlusEntitlementKey = 'plus_store_entitlement_v1';
 
   final InAppPurchase _inAppPurchase;
-  final Duration _minimumPurchaseSheetDelay;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   Timer? _storeRequestTimeout;
 
@@ -26,9 +25,7 @@ class PurchaseService extends ChangeNotifier {
 
   PurchaseService({
     InAppPurchase? inAppPurchase,
-    Duration minimumPurchaseSheetDelay = const Duration(seconds: 2),
-  })  : _inAppPurchase = inAppPurchase ?? InAppPurchase.instance,
-        _minimumPurchaseSheetDelay = minimumPurchaseSheetDelay;
+  }) : _inAppPurchase = inAppPurchase ?? InAppPurchase.instance;
 
   bool get isInitialized => _isInitialized;
   bool get isLoading => _isLoading;
@@ -214,10 +211,7 @@ class PurchaseService extends ChangeNotifier {
 
       if (purchaseDetails.status == PurchaseStatus.purchased ||
           purchaseDetails.status == PurchaseStatus.restored) {
-        if (_shouldTreatAsAlreadyOwned()) {
-          _statusMessage =
-              'This Apple ID already owns JusType Plus. Tap Restore Purchase to unlock it on this device.';
-        } else if (_storeRequestInProgress) {
+        if (_storeRequestInProgress) {
           await _unlockPlus();
           _statusMessage = 'JusType Plus is unlocked.';
         }
@@ -255,17 +249,6 @@ class PurchaseService extends ChangeNotifier {
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove(_verifiedPlusEntitlementKey);
     notifyListeners();
-  }
-
-  bool _shouldTreatAsAlreadyOwned() {
-    final startedAt = _purchaseRequestStartedAt;
-    if (!_storeRequestInProgress ||
-        _storeRequestType != _StoreRequestType.purchase ||
-        startedAt == null) {
-      return false;
-    }
-
-    return DateTime.now().difference(startedAt) < _minimumPurchaseSheetDelay;
   }
 
   @override
