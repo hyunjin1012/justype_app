@@ -24,13 +24,9 @@ class SpeechInputAreaState extends State<SpeechInputArea> {
   bool _isListening = false;
   bool _isInitialized = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeSpeech();
-  }
+  Future<bool> _initializeSpeech() async {
+    if (_isInitialized) return true;
 
-  Future<void> _initializeSpeech() async {
     final isInitialized = await _speech.initialize(
       onStatus: (status) {
         if (!mounted) return;
@@ -48,19 +44,18 @@ class SpeechInputAreaState extends State<SpeechInputArea> {
       },
     );
 
-    if (!mounted) return;
+    if (!mounted) return false;
 
     setState(() {
       _isInitialized = isInitialized;
     });
+
+    return isInitialized;
   }
 
   void _startListening() async {
-    if (!_isInitialized) {
-      await _initializeSpeech();
-    }
-
-    if (!_isInitialized) {
+    final isReady = await _initializeSpeech();
+    if (!isReady) {
       return;
     }
 
